@@ -2,6 +2,7 @@
 
 
 #include "PlayerCharacter.h"
+#include "StatsMasterClass.h"
 
 
 // Sets default values
@@ -34,6 +35,16 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera = CreateAbstractDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	FollowCamera->SetupAttachment(CameraArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	// Set Player base Stats
+	/*UStatsMasterClass* VitalityLvl;
+	UStatsMasterClass* StrenghtLvl;
+	UStatsMasterClass* IntelligenceLvl;
+	UStatsMasterClass* EnduranceLvl;
+
+	Health = 30;
+	UStatsMasterClass* FocusPoints;
+	UStatsMasterClass* Stamina;*/
 }
 
 
@@ -43,6 +54,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//Health = GetOwner()->FindComponentByClass<UStatsMasterClass>();
 }
 
 // Called every frame
@@ -50,6 +62,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	//is in combat check here//
 }
 
 // Called to bind functionality to input
