@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "StatsMasterClass.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -39,7 +40,15 @@ public:
 
 	void LookUpRate(float Rate);
 
+	//Player stats
+	/*UStatsMasterClass* VitalityLvl;
+	UStatsMasterClass* StrenghtLvl;
+	UStatsMasterClass* IntelligenceLvl;
+	UStatsMasterClass* EnduranceLvl;
 
+	UStatsMasterClass* Health;
+	UStatsMasterClass* FocusPoints;
+	UStatsMasterClass* Stamina;*/
 
 protected:
 	// Called when the game starts or when spawned
