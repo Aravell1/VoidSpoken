@@ -117,7 +117,7 @@ void UStatsMasterClass::IncreaseSTR(int _Str)
 {
 	if (RunePoints >= 1)
 	{
-		StrenghtLvl += _Str;
+		++StrenghtLvl;
 		--RunePoints;
 
 		//need clarification on damage increase
@@ -135,7 +135,7 @@ void UStatsMasterClass::IncreaseINT(int _Int)
 {
 	if (RunePoints >= 1)
 	{
-		IntelligenceLvl += _Int;
+		++IntelligenceLvl;
 		--RunePoints;
 
 		FocusPoints = (IntelligenceLvl * 2) + FocusPoints;
@@ -153,7 +153,7 @@ void UStatsMasterClass::IncreaseEND(int _End)
 {
 	if (RunePoints >= 1)
 	{
-		EnduranceLvl += _End;
+		++EnduranceLvl;
 		--RunePoints;
 
 		Stamina = (EnduranceLvl * 3) + Stamina;
