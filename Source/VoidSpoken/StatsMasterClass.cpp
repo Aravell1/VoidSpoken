@@ -11,6 +11,20 @@ UStatsMasterClass::UStatsMasterClass()
 	PrimaryComponentTick.bCanEverTick = true;
 
 
+	//Set base Stats Values
+
+	//Will
+	//Player base stats
+	VitalityLvl = 1;
+	StrenghtLvl = 1;
+	IntelligenceLvl = 1;
+	EnduranceLvl = 1;
+
+	Health = 30;
+	FocusPoints = 20;
+	Stamina = 50;
+	Damage;
+
 }
 
 
@@ -42,9 +56,8 @@ void UStatsMasterClass::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 /// 
 /// </summary>
 /// <param name="_HP"></param>
-void UStatsMasterClass::RegenHP(int _HP)
+void UStatsMasterClass::RegenHP(float _HP)
 {
-
 }
 
 /// <NAME>
@@ -52,9 +65,8 @@ void UStatsMasterClass::RegenHP(int _HP)
 /// ???
 /// </summary>
 /// <param name="_FP"></param>
-void UStatsMasterClass::RegenFP(int _FP)
+void UStatsMasterClass::RegenFP(float _FP)
 {
-
 }
 
 /// <NAME>
@@ -69,9 +81,8 @@ void UStatsMasterClass::RegenFP(int _FP)
 /// 
 /// </summary>
 /// <param name="_ST"></param>
-void UStatsMasterClass::RegenStamina(int _ST)
+void UStatsMasterClass::RegenStamina(float _ST)
 {
-
 }
 
 
@@ -84,17 +95,14 @@ void UStatsMasterClass::RegenStamina(int _ST)
 /// Level up Vitality by 1
 /// </summary>
 /// <param name="_Vit"></param>
-void UStatsMasterClass::IncreaseVIT()
+void UStatsMasterClass::IncreaseVIT(int _Vit)
 {
 	if (RunePoints >= 1)
 	{
 		++VitalityLvl;
 		--RunePoints;
-		UE_LOG(LogTemp, Warning, TEXT("VITALITY level is now %d"), VitalityLvl);
 
-		// Increase Player HP
-		MaxHealth = (VitalityLvl * 3) + Health;
-		UE_LOG(LogTemp, Warning, TEXT("Max Player Health: %d"), MaxHealth);
+		Health = (VitalityLvl * 3) + Health;
 	}
 }
 
@@ -105,16 +113,14 @@ void UStatsMasterClass::IncreaseVIT()
 /// Level up Strength by 1
 /// </summary>
 /// <param name="_Str"></param>
-void UStatsMasterClass::IncreaseSTR()
+void UStatsMasterClass::IncreaseSTR(int _Str)
 {
 	if (RunePoints >= 1)
 	{
 		++StrenghtLvl;
 		--RunePoints;
-		UE_LOG(LogTemp, Warning, TEXT("STRENGTH level is now %d"), StrenghtLvl);
 
 		//need clarification on damage increase
-		//UE_LOG(LogTemp, Warning, TEXT("Player base Damage: %d"), Damage);
 	}
 }
 
@@ -125,17 +131,14 @@ void UStatsMasterClass::IncreaseSTR()
 /// Level up Inteligence by 1
 /// </summary>
 /// <param name="_Int"></param>
-void UStatsMasterClass::IncreaseINT()
+void UStatsMasterClass::IncreaseINT(int _Int)
 {
 	if (RunePoints >= 1)
 	{
 		++IntelligenceLvl;
 		--RunePoints;
-		UE_LOG(LogTemp, Warning, TEXT("INTELLIGENCE level is now %d"), IntelligenceLvl);
 
-		// Increase Player Focus Points
-		MaxFocus = (IntelligenceLvl * 2) + FocusPoints;
-		UE_LOG(LogTemp, Warning, TEXT("Focus Points: %d"), FocusPoints);
+		FocusPoints = (IntelligenceLvl * 2) + FocusPoints;
 	}
 }
 
@@ -146,18 +149,14 @@ void UStatsMasterClass::IncreaseINT()
 /// Level up Endurence by 1
 /// </summary>
 /// <param name="_End"></param>
-void UStatsMasterClass::IncreaseEND()
+void UStatsMasterClass::IncreaseEND(int _End)
 {
 	if (RunePoints >= 1)
 	{
 		++EnduranceLvl;
 		--RunePoints;
-		UE_LOG(LogTemp, Warning, TEXT("ENDURANCE level is now %d"), EnduranceLvl);
-		
 
-		// Increase Player Stamina
-		MaxStamina = (EnduranceLvl * 3) + Stamina;
-		UE_LOG(LogTemp, Warning, TEXT("Player Stamina: %d"), FocusPoints);
+		Stamina = (EnduranceLvl * 3) + Stamina;
 	}
 }
 
@@ -216,13 +215,13 @@ void UStatsMasterClass::IncreaseEND()
 /// On use?
 /// </summary>
 /// <param name="_Les"></param>
-void UStatsMasterClass::Lesser()
+void UStatsMasterClass::Lesser(int _Les)
 {
 	//Subject to change
 
 	if (LesserRune >= 1)
 	{
-		++RunePoints;
+		RunePoints += _Les;
 	}
 }
 
@@ -236,16 +235,16 @@ void UStatsMasterClass::Lesser()
 /// On use?
 /// </summary>
 /// <param name="_Grt"></param>
-void UStatsMasterClass::Greater()
+void UStatsMasterClass::Greater(int _Grt)
 {
 	//Subject to change
 	//could use bool for instant lvl up?
 
 	if (GreaterRune >= 1)
 	{
-		++VitalityLvl;
-		++StrenghtLvl;
-		++IntelligenceLvl;
-		++EnduranceLvl;
+		VitalityLvl += _Grt;
+		StrenghtLvl += _Grt;
+		IntelligenceLvl += _Grt;
+		EnduranceLvl += _Grt;
 	}
 }

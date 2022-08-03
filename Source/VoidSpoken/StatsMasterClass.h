@@ -42,24 +42,18 @@ public:
 	UStatsMasterClass();
 
 	///Will
-	///Variables
+	///Variables for player
 	//Base stats
-	
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
 	int Health;
-	int MaxHealth;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
 	int FocusPoints;
-	int MaxFocus;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
 	int Stamina;
-	int MaxStamina;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
 	int Damage;
 	
+
 	//Player Stat Levels
 	int VitalityLvl;
 	int StrenghtLvl;
@@ -68,25 +62,25 @@ public:
 
 
 	//Runes
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
 	int RunePoints;
 	
 	int LesserRune;
 	int GreaterRune;
 
 	///Will
-	///Player Functions
+	//Player Functions
 
-	//Regen Functions (will be called every frame)
-	void RegenHP(int _HP);
-	void RegenFP(int _FP);
-	void RegenStamina(int _ST);
+	//Regen Functions
+	void RegenHP(float _HP);
+	void RegenFP(float _FP);
+	void RegenStamina(float _ST);
 	
 	//Level up functions
-	void IncreaseVIT();
-	void IncreaseSTR();
-	void IncreaseINT();
-	void IncreaseEND();
+	void IncreaseVIT(int _Vit);
+	void IncreaseSTR(int _Str);
+	void IncreaseINT(int _Int);
+	void IncreaseEND(int _End);
 
 	//Stats Modifiers
 	///may not need, keeping in case of change
@@ -97,8 +91,8 @@ public:
 
 	///Will
 	//Runes functions
-	void Lesser();
-	void Greater();
+	void Lesser(int _Les);
+	void Greater(int _Grt);
 
 
 protected:

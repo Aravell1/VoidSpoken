@@ -12,8 +12,6 @@
 #include "StatsMasterClass.h"
 #include "PlayerCharacter.generated.h"
 
-UStatsMasterClass PlayerStats;
-
 UCLASS()
 class VOIDSPOKEN_API APlayerCharacter : public ACharacter
 {
@@ -42,77 +40,15 @@ public:
 
 	void LookUpRate(float Rate);
 
-	/// Player stats
+	//Player stats
+	/*UStatsMasterClass* VitalityLvl;
+	UStatsMasterClass* StrenghtLvl;
+	UStatsMasterClass* IntelligenceLvl;
+	UStatsMasterClass* EnduranceLvl;
 
-	// Setting Player Stats to be used in BP
-
-	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnVitality()
-	{
-		return PlayerStats.VitalityLvl;
-	}
-
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnSTR()
-	{
-		return PlayerStats.StrenghtLvl;
-	}
-
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnIntelligence()
-	{
-		return PlayerStats.IntelligenceLvl;
-	}
-	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnEndurence()
-	{
-		return PlayerStats.EnduranceLvl;
-	}
-	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnHealth()
-	{
-		return PlayerStats.Health;
-	}
-
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnFocus()
-	{
-		return PlayerStats.FocusPoints;
-	}
-	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnStamina()
-	{
-		return PlayerStats.Stamina;
-	}
-	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnDamage()
-	{
-		return PlayerStats.Damage;
-	}
-	// Need clarification on base damage
-
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnMaxHealth()
-	{
-		return PlayerStats.MaxHealth;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		FFloat16 ReturnMaxFocus()
-	{
-		return PlayerStats.MaxFocus;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		FFloat16 ReturnMaxStamina()
-	{
-		return PlayerStats.MaxStamina;
-	}
+	UStatsMasterClass* Health;
+	UStatsMasterClass* FocusPoints;
+	UStatsMasterClass* Stamina;*/
 
 protected:
 	// Called when the game starts or when spawned
