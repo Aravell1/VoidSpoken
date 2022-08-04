@@ -40,24 +40,24 @@ APlayerCharacter::APlayerCharacter()
 	/// Set Player base Stats
 
 	// Set Player levels
-	PlayerStats.VitalityLvl = 1;
-	PlayerStats.StrenghtLvl = 1;
-	PlayerStats.IntelligenceLvl = 1;
-	PlayerStats.EnduranceLvl = 1;
+	//PlayerStats.VitalityLvl = 1;
+	//PlayerStats.StrenghtLvl = 1;
+	//PlayerStats.IntelligenceLvl = 1;
+	//PlayerStats.EnduranceLvl = 1;
 
-	// Set Player Base stats
-	PlayerStats.Health = 30;
-	PlayerStats.FocusPoints = 20;
-	PlayerStats.Stamina = 50;
-	PlayerStats.Damage; // Need clarification on base damage
+	//// Set Player Base stats
+	//PlayerStats.Health = 30;
+	//PlayerStats.FocusPoints = 20;
+	//PlayerStats.Stamina = 50;
+	//PlayerStats.Damage; // Need clarification on base damage
 
-	//Set Player Max Stats
-	PlayerStats.MaxHealth;
-	PlayerStats.MaxFocus;
-	PlayerStats.MaxStamina;
+	////Set Player Max Stats
+	//PlayerStats.MaxHealth;
+	//PlayerStats.MaxFocus;
+	//PlayerStats.MaxStamina;
 
-	// Set Player Rune Points
-	PlayerStats.RunePoints;
+	//// Set Player Rune Points
+	//PlayerStats.RunePoints;
 
 	//Set player State if in combat
 	bool InCombat = false;
