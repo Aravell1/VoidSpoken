@@ -9,10 +9,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "StatsMasterClass.h"
 #include "PlayerCharacter.generated.h"
 
-UStatsMasterClass PlayerStats;
 
 UCLASS()
 class VOIDSPOKEN_API APlayerCharacter : public ACharacter
@@ -22,13 +20,15 @@ class VOIDSPOKEN_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
+	
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		class USpringArmComponent* CameraArm;
+	class USpringArmComponent* CameraArm;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		class UCameraComponent* FollowCamera;
+	class UCameraComponent* FollowCamera;
 
+	
 	void MoveForward(float Axis);
 	void MoveRight(float Axis);
 
@@ -42,77 +42,52 @@ public:
 
 	void LookUpRate(float Rate);
 
+
 	/// Player stats
 
 	// Setting Player Stats to be used in BP
 
-	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnVitality()
-	{
-		return PlayerStats.VitalityLvl;
-	}
+	/// TEMP FIX UNTIL GET/SET FROM MAIN STATS CLASS WORKS PROPERLY ///
 
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnSTR()
-	{
-		return PlayerStats.StrenghtLvl;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float VitalityLvl;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float StrenghtLvl;
 
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnIntelligence()
-	{
-		return PlayerStats.IntelligenceLvl;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float IntelligenceLvl;
 	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnEndurence()
-	{
-		return PlayerStats.EnduranceLvl;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float EnduranceLvl;
 	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnHealth()
-	{
-		return PlayerStats.Health;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Health;
 
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnFocus()
-	{
-		return PlayerStats.FocusPoints;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float FocusPoints;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Stamina;
 	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnStamina()
-	{
-		return PlayerStats.Stamina;
-	}
-	
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnDamage()
-	{
-		return PlayerStats.Damage;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Damage;
 	// Need clarification on base damage
 
-	UFUNCTION(BlueprintCallable)
-	FFloat16 ReturnMaxHealth()
-	{
-		return PlayerStats.MaxHealth;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxHealth;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxFocus;
 
-	UFUNCTION(BlueprintCallable)
-		FFloat16 ReturnMaxFocus()
-	{
-		return PlayerStats.MaxFocus;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxStamina;
 
-	UFUNCTION(BlueprintCallable)
-		FFloat16 ReturnMaxStamina()
-	{
-		return PlayerStats.MaxStamina;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	int RunePoints;
+	
+	////////////////////////////////////////////////////////////////
+
 
 protected:
 	// Called when the game starts or when spawned
