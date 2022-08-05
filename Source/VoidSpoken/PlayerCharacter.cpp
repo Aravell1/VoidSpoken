@@ -2,7 +2,6 @@
 
 
 #include "PlayerCharacter.h"
-#include "StatsMasterClass.h"
 
 
 // Sets default values
@@ -39,25 +38,28 @@ APlayerCharacter::APlayerCharacter()
 	
 	/// Set Player base Stats
 
+	
+	/// TEMP FIX UNTIL GET/SET FROM MAIN STATS CLASS WORKS PROPERLY ///
+	
 	// Set Player levels
-	//PlayerStats.VitalityLvl = 1;
-	//PlayerStats.StrenghtLvl = 1;
-	//PlayerStats.IntelligenceLvl = 1;
-	//PlayerStats.EnduranceLvl = 1;
+	VitalityLvl = 1.0f;
+	StrenghtLvl = 1.0f;
+	IntelligenceLvl = 1.0f;
+	EnduranceLvl = 1.0f;
 
-	//// Set Player Base stats
-	//PlayerStats.Health = 30;
-	//PlayerStats.FocusPoints = 20;
-	//PlayerStats.Stamina = 50;
-	//PlayerStats.Damage; // Need clarification on base damage
+	// Set Player Base stats
+	Health = 30.0f;
+	FocusPoints = 20.0f;
+	Stamina = 50.0f;
+	Damage; // Need clarification on base damage
 
-	////Set Player Max Stats
-	//PlayerStats.MaxHealth;
-	//PlayerStats.MaxFocus;
-	//PlayerStats.MaxStamina;
+	//Set Player Max Stats
+	MaxHealth;
+	MaxFocus;
+	MaxStamina;
 
-	//// Set Player Rune Points
-	//PlayerStats.RunePoints;
+	// Set Player Rune Points
+	RunePoints;
 
 	//Set player State if in combat
 	bool InCombat = false;

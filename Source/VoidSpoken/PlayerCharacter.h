@@ -9,7 +9,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "StatsMasterClass.h"
 #include "PlayerCharacter.generated.h"
 
 
@@ -21,13 +20,15 @@ class VOIDSPOKEN_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
+	
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		class USpringArmComponent* CameraArm;
+	class USpringArmComponent* CameraArm;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		class UCameraComponent* FollowCamera;
+	class UCameraComponent* FollowCamera;
 
+	
 	void MoveForward(float Axis);
 	void MoveRight(float Axis);
 
@@ -41,8 +42,52 @@ public:
 
 	void LookUpRate(float Rate);
 
+
 	/// Player stats
-	//UStatsMasterClass PlayerStats;
+
+	// Setting Player Stats to be used in BP
+
+	/// TEMP FIX UNTIL GET/SET FROM MAIN STATS CLASS WORKS PROPERLY ///
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float VitalityLvl;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float StrenghtLvl;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float IntelligenceLvl;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float EnduranceLvl;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float FocusPoints;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Stamina;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Damage;
+	// Need clarification on base damage
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxHealth;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxFocus;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxStamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	int RunePoints;
+	
+	////////////////////////////////////////////////////////////////
+
 
 protected:
 	// Called when the game starts or when spawned
