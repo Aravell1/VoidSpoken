@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 
 
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -26,43 +27,39 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
 
 	// setup camera
-	CameraArm = CreateAbstractDefaultSubobject<USpringArmComponent>(TEXT("Camera arm"));
+	CameraArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera arm"));
 	CameraArm->SetupAttachment(RootComponent);
 	CameraArm->TargetArmLength = 300;
 	CameraArm->bUsePawnControlRotation = true;
 
-	FollowCamera = CreateAbstractDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	FollowCamera->SetupAttachment(CameraArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
 	
 	/// Set Player base Stats
-
+	PlayerStats = CreateDefaultSubobject<UStatsMasterClass>("STATS");
 	
-	/// TEMP FIX UNTIL GET/SET FROM MAIN STATS CLASS WORKS PROPERLY ///
-	
-	// Set Player levels
-	VitalityLvl = 1.0f;
-	StrenghtLvl = 1.0f;
-	IntelligenceLvl = 1.0f;
-	EnduranceLvl = 1.0f;
+	PlayerStats->Health = 30.0f;
+	PlayerStats->MaxHealth;
+	PlayerStats->FocusPoints = 20.0f;
+	PlayerStats->MaxFocus;
+	PlayerStats->Stamina = 50.0f;
+	PlayerStats->MaxStamina;
+	PlayerStats->Damage;
 
-	// Set Player Base stats
-	Health = 30.0f;
-	FocusPoints = 20.0f;
-	Stamina = 50.0f;
-	Damage; // Need clarification on base damage
+	PlayerStats->VitalityLvl = 1.0f;
+	PlayerStats->StrenghtLvl = 1.0f;
+	PlayerStats->IntelligenceLvl = 1.0f;
+	PlayerStats->EnduranceLvl = 1.0f;
 
-	//Set Player Max Stats
-	MaxHealth;
-	MaxFocus;
-	MaxStamina;
-
-	// Set Player Rune Points
-	RunePoints;
+	PlayerStats->IncreaseVIT();
+	PlayerStats->IncreaseSTR();
+	PlayerStats->IncreaseINT();
+	PlayerStats->IncreaseEND();
 
 	//Set player State if in combat
-	bool InCombat = false;
+	/*bool InCombat = false;*/
 }
 
 
@@ -72,7 +69,6 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	
 }
 
 // Called every frame
@@ -80,6 +76,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
 
 	//is in combat check here for stats regen calls//
 }
@@ -106,6 +103,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Moving the character
 	PlayerInputComponent->BindAxis("Move Forward/Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right/Left", this, &APlayerCharacter::MoveRight);
+
+	//Test inputs
+	
 }
 
 

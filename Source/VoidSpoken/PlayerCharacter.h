@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "StatsMasterClass.h"
 #include "PlayerCharacter.generated.h"
 
 
@@ -43,52 +44,6 @@ public:
 	void LookUpRate(float Rate);
 
 
-	/// Player stats
-
-	// Setting Player Stats to be used in BP
-
-	/// TEMP FIX UNTIL GET/SET FROM MAIN STATS CLASS WORKS PROPERLY ///
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float VitalityLvl;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float StrenghtLvl;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float IntelligenceLvl;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float EnduranceLvl;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float Health;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float FocusPoints;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float Stamina;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float Damage;
-	// Need clarification on base damage
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float MaxHealth;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float MaxFocus;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float MaxStamina;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	int RunePoints;
-	
-	////////////////////////////////////////////////////////////////
-
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -100,4 +55,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PLAYER STATS")
+	class UStatsMasterClass* PlayerStats;
 };

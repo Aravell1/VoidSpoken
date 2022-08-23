@@ -10,22 +10,6 @@ UStatsMasterClass::UStatsMasterClass()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-
-	Health = 30.0f;
-	MaxHealth;
-
-	FocusPoints = 20.0f;
-	MaxFocus;
-
-	Stamina = 50.0f;
-	MaxStamina;
-
-	Damage;
-
-	VitalityLvl = 1.0f;
-	StrenghtLvl = 1.0f;
-	IntelligenceLvl = 1.0f;
-	EnduranceLvl = 1.0f;
 }
 
 
