@@ -45,33 +45,40 @@ public:
 	///Variables
 	//Base stats
 	
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	int Health;
-	int MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Health;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxHealth;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	int FocusPoints;
-	int MaxFocus;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float FocusPoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxFocus;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	int Stamina;
-	int MaxStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Stamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxStamina;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	int Damage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Damage;
 	
-	//Player Stat Levels
-	int VitalityLvl;
-	int StrenghtLvl;
-	int IntelligenceLvl;
-	int EnduranceLvl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	float VitalityLvl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	float StrenghtLvl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	float IntelligenceLvl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	float EnduranceLvl;
 
 
 	//Runes
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RUNES")
 	int RunePoints;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
 	int LesserRune;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
 	int GreaterRune;
 
 	///Will

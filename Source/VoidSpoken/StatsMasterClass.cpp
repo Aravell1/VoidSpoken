@@ -10,7 +10,6 @@ UStatsMasterClass::UStatsMasterClass()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-
 }
 
 
@@ -90,11 +89,11 @@ void UStatsMasterClass::IncreaseVIT()
 	{
 		++VitalityLvl;
 		--RunePoints;
-		UE_LOG(LogTemp, Warning, TEXT("VITALITY level is now %d"), VitalityLvl);
+		UE_LOG(LogTemp, Warning, TEXT("VITALITY level is now %f"), VitalityLvl);
 
 		// Increase Player HP
-		MaxHealth = (VitalityLvl * 3) + Health;
-		UE_LOG(LogTemp, Warning, TEXT("Max Player Health: %d"), MaxHealth);
+		MaxHealth = (VitalityLvl * 3.0f) + Health;
+		UE_LOG(LogTemp, Warning, TEXT("Max Player Health: %f"), MaxHealth);
 	}
 }
 
@@ -111,7 +110,7 @@ void UStatsMasterClass::IncreaseSTR()
 	{
 		++StrenghtLvl;
 		--RunePoints;
-		UE_LOG(LogTemp, Warning, TEXT("STRENGTH level is now %d"), StrenghtLvl);
+		UE_LOG(LogTemp, Warning, TEXT("STRENGTH level is now %f"), StrenghtLvl);
 
 		//need clarification on damage increase
 		//UE_LOG(LogTemp, Warning, TEXT("Player base Damage: %d"), Damage);
@@ -131,10 +130,10 @@ void UStatsMasterClass::IncreaseINT()
 	{
 		++IntelligenceLvl;
 		--RunePoints;
-		UE_LOG(LogTemp, Warning, TEXT("INTELLIGENCE level is now %d"), IntelligenceLvl);
+		UE_LOG(LogTemp, Warning, TEXT("INTELLIGENCE level is now %f"), IntelligenceLvl);
 
 		// Increase Player Focus Points
-		MaxFocus = (IntelligenceLvl * 2) + FocusPoints;
+		MaxFocus = (IntelligenceLvl * 2.0f) + FocusPoints;
 		UE_LOG(LogTemp, Warning, TEXT("Focus Points: %d"), FocusPoints);
 	}
 }
@@ -152,12 +151,12 @@ void UStatsMasterClass::IncreaseEND()
 	{
 		++EnduranceLvl;
 		--RunePoints;
-		UE_LOG(LogTemp, Warning, TEXT("ENDURANCE level is now %d"), EnduranceLvl);
+		UE_LOG(LogTemp, Warning, TEXT("ENDURANCE level is now %f"), EnduranceLvl);
 		
 
 		// Increase Player Stamina
-		MaxStamina = (EnduranceLvl * 3) + Stamina;
-		UE_LOG(LogTemp, Warning, TEXT("Player Stamina: %d"), FocusPoints);
+		MaxStamina = (EnduranceLvl * 3.0f) + Stamina;
+		UE_LOG(LogTemp, Warning, TEXT("Player Stamina: %f"), FocusPoints);
 	}
 }
 
