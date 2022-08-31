@@ -10,21 +10,6 @@ UStatsMasterClass::UStatsMasterClass()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-
-	//Set base Stats Values
-
-	//Will
-	//Player base stats
-	VitalityLvl = 1;
-	StrenghtLvl = 1;
-	IntelligenceLvl = 1;
-	EnduranceLvl = 1;
-
-	Health = 30;
-	FocusPoints = 20;
-	Stamina = 50;
-	Damage;
-
 }
 
 
@@ -56,8 +41,9 @@ void UStatsMasterClass::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 /// 
 /// </summary>
 /// <param name="_HP"></param>
-void UStatsMasterClass::RegenHP(float _HP)
+void UStatsMasterClass::RegenHP(int _HP)
 {
+
 }
 
 /// <NAME>
@@ -65,8 +51,9 @@ void UStatsMasterClass::RegenHP(float _HP)
 /// ???
 /// </summary>
 /// <param name="_FP"></param>
-void UStatsMasterClass::RegenFP(float _FP)
+void UStatsMasterClass::RegenFP(int _FP)
 {
+
 }
 
 /// <NAME>
@@ -81,8 +68,9 @@ void UStatsMasterClass::RegenFP(float _FP)
 /// 
 /// </summary>
 /// <param name="_ST"></param>
-void UStatsMasterClass::RegenStamina(float _ST)
+void UStatsMasterClass::RegenStamina(int _ST)
 {
+
 }
 
 
@@ -95,14 +83,17 @@ void UStatsMasterClass::RegenStamina(float _ST)
 /// Level up Vitality by 1
 /// </summary>
 /// <param name="_Vit"></param>
-void UStatsMasterClass::IncreaseVIT(int _Vit)
+void UStatsMasterClass::IncreaseVIT()
 {
 	if (RunePoints >= 1)
 	{
 		++VitalityLvl;
 		--RunePoints;
+		UE_LOG(LogTemp, Warning, TEXT("VITALITY level is now %f"), VitalityLvl);
 
-		Health = (VitalityLvl * 3) + Health;
+		// Increase Player HP
+		MaxHealth = (VitalityLvl * 3.0f) + Health;
+		UE_LOG(LogTemp, Warning, TEXT("Max Player Health: %f"), MaxHealth);
 	}
 }
 
@@ -113,14 +104,16 @@ void UStatsMasterClass::IncreaseVIT(int _Vit)
 /// Level up Strength by 1
 /// </summary>
 /// <param name="_Str"></param>
-void UStatsMasterClass::IncreaseSTR(int _Str)
+void UStatsMasterClass::IncreaseSTR()
 {
 	if (RunePoints >= 1)
 	{
 		++StrenghtLvl;
 		--RunePoints;
+		UE_LOG(LogTemp, Warning, TEXT("STRENGTH level is now %f"), StrenghtLvl);
 
 		//need clarification on damage increase
+		//UE_LOG(LogTemp, Warning, TEXT("Player base Damage: %d"), Damage);
 	}
 }
 
@@ -131,14 +124,17 @@ void UStatsMasterClass::IncreaseSTR(int _Str)
 /// Level up Inteligence by 1
 /// </summary>
 /// <param name="_Int"></param>
-void UStatsMasterClass::IncreaseINT(int _Int)
+void UStatsMasterClass::IncreaseINT()
 {
 	if (RunePoints >= 1)
 	{
 		++IntelligenceLvl;
 		--RunePoints;
+		UE_LOG(LogTemp, Warning, TEXT("INTELLIGENCE level is now %f"), IntelligenceLvl);
 
-		FocusPoints = (IntelligenceLvl * 2) + FocusPoints;
+		// Increase Player Focus Points
+		MaxFocus = (IntelligenceLvl * 2.0f) + FocusPoints;
+		UE_LOG(LogTemp, Warning, TEXT("Focus Points: %d"), FocusPoints);
 	}
 }
 
@@ -149,14 +145,18 @@ void UStatsMasterClass::IncreaseINT(int _Int)
 /// Level up Endurence by 1
 /// </summary>
 /// <param name="_End"></param>
-void UStatsMasterClass::IncreaseEND(int _End)
+void UStatsMasterClass::IncreaseEND()
 {
 	if (RunePoints >= 1)
 	{
 		++EnduranceLvl;
 		--RunePoints;
+		UE_LOG(LogTemp, Warning, TEXT("ENDURANCE level is now %f"), EnduranceLvl);
+		
 
-		Stamina = (EnduranceLvl * 3) + Stamina;
+		// Increase Player Stamina
+		MaxStamina = (EnduranceLvl * 3.0f) + Stamina;
+		UE_LOG(LogTemp, Warning, TEXT("Player Stamina: %f"), FocusPoints);
 	}
 }
 
@@ -215,13 +215,13 @@ void UStatsMasterClass::IncreaseEND(int _End)
 /// On use?
 /// </summary>
 /// <param name="_Les"></param>
-void UStatsMasterClass::Lesser(int _Les)
+void UStatsMasterClass::Lesser()
 {
 	//Subject to change
 
 	if (LesserRune >= 1)
 	{
-		RunePoints += _Les;
+		++RunePoints;
 	}
 }
 
@@ -235,16 +235,16 @@ void UStatsMasterClass::Lesser(int _Les)
 /// On use?
 /// </summary>
 /// <param name="_Grt"></param>
-void UStatsMasterClass::Greater(int _Grt)
+void UStatsMasterClass::Greater()
 {
 	//Subject to change
 	//could use bool for instant lvl up?
 
 	if (GreaterRune >= 1)
 	{
-		VitalityLvl += _Grt;
-		StrenghtLvl += _Grt;
-		IntelligenceLvl += _Grt;
-		EnduranceLvl += _Grt;
+		++VitalityLvl;
+		++StrenghtLvl;
+		++IntelligenceLvl;
+		++EnduranceLvl;
 	}
 }

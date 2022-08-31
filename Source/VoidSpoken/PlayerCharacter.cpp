@@ -2,7 +2,7 @@
 
 
 #include "PlayerCharacter.h"
-#include "StatsMasterClass.h"
+
 
 
 // Sets default values
@@ -22,29 +22,44 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 600.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
-	GetCharacterMovement()->MaxWalkSpeed = 700.f;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->MaxWalkSpeed = 700.0f;
+	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
 
 	// setup camera
-	CameraArm = CreateAbstractDefaultSubobject<USpringArmComponent>(TEXT("Camera arm"));
+	CameraArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera arm"));
 	CameraArm->SetupAttachment(RootComponent);
 	CameraArm->TargetArmLength = 300;
 	CameraArm->bUsePawnControlRotation = true;
 
-	FollowCamera = CreateAbstractDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	FollowCamera->SetupAttachment(CameraArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	// Set Player base Stats
-	/*UStatsMasterClass* VitalityLvl;
-	UStatsMasterClass* StrenghtLvl;
-	UStatsMasterClass* IntelligenceLvl;
-	UStatsMasterClass* EnduranceLvl;
+	
+	/// Set Player base Stats
+	PlayerStats = CreateDefaultSubobject<UStatsMasterClass>("STATS");
+	
+	PlayerStats->Health = 30.0f;
+	PlayerStats->MaxHealth;
+	PlayerStats->FocusPoints = 20.0f;
+	PlayerStats->MaxFocus;
+	PlayerStats->Stamina = 50.0f;
+	PlayerStats->MaxStamina;
+	PlayerStats->Damage;
 
-	Health = 30;
-	UStatsMasterClass* FocusPoints;
-	UStatsMasterClass* Stamina;*/
+	PlayerStats->VitalityLvl = 1.0f;
+	PlayerStats->StrenghtLvl = 1.0f;
+	PlayerStats->IntelligenceLvl = 1.0f;
+	PlayerStats->EnduranceLvl = 1.0f;
+
+	PlayerStats->IncreaseVIT();
+	PlayerStats->IncreaseSTR();
+	PlayerStats->IncreaseINT();
+	PlayerStats->IncreaseEND();
+
+	//Set player State if in combat
+	/*bool InCombat = false;*/
 }
 
 
@@ -54,7 +69,6 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//Health = GetOwner()->FindComponentByClass<UStatsMasterClass>();
 }
 
 // Called every frame
@@ -62,8 +76,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
 
-	//is in combat check here//
+	//is in combat check here for stats regen calls//
 }
 
 // Called to bind functionality to input
@@ -71,23 +86,26 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	//Jumping
+	// Jumping
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &APlayerCharacter::StopJumping);
 
-	//Running
+	// Running
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &APlayerCharacter::RunStart);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &APlayerCharacter::RunStop);
 
-	//turning and moving camera
+	// Turning and moving camera
 	PlayerInputComponent->BindAxis("Turn / Mouse", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("Turn / Gamepad", this, &APlayerCharacter::TurnRate);
 	PlayerInputComponent->BindAxis("Look up/down Mouse", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Look up/down Gamepad", this, &APlayerCharacter::TurnRate);
 
-	//Moving the character
+	// Moving the character
 	PlayerInputComponent->BindAxis("Move Forward/Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right/Left", this, &APlayerCharacter::MoveRight);
+
+	//Test inputs
+	
 }
 
 
@@ -109,6 +127,7 @@ void APlayerCharacter::MoveForward(float Axis)
 	}
 }
 
+//Find Rotation
 void APlayerCharacter::MoveRight(float Axis)
 {
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -129,7 +148,7 @@ void APlayerCharacter::LookUpRate(float Rate)
 }
 
 
-// Sprint
+// Sprint **NEED TO CHANGE FOR A TOGGLE**
 void APlayerCharacter::RunStart()
 {
 	IsRunning = true;

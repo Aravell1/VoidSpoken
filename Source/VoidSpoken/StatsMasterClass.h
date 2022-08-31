@@ -42,45 +42,58 @@ public:
 	UStatsMasterClass();
 
 	///Will
-	///Variables for player
+	///Variables
 	//Base stats
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	int Health;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	int FocusPoints;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	int Stamina;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	int Damage;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Health;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxHealth;
 
-	//Player Stat Levels
-	int VitalityLvl;
-	int StrenghtLvl;
-	int IntelligenceLvl;
-	int EnduranceLvl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float FocusPoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxFocus;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Stamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float MaxStamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	float Damage;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	float VitalityLvl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	float StrenghtLvl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	float IntelligenceLvl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	float EnduranceLvl;
 
 
 	//Runes
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RUNES")
 	int RunePoints;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
 	int LesserRune;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
 	int GreaterRune;
 
 	///Will
-	//Player Functions
+	///Player Functions
 
-	//Regen Functions
-	void RegenHP(float _HP);
-	void RegenFP(float _FP);
-	void RegenStamina(float _ST);
+	//Regen Functions (will be called every frame)
+	void RegenHP(int _HP);
+	void RegenFP(int _FP);
+	void RegenStamina(int _ST);
 	
 	//Level up functions
-	void IncreaseVIT(int _Vit);
-	void IncreaseSTR(int _Str);
-	void IncreaseINT(int _Int);
-	void IncreaseEND(int _End);
+	void IncreaseVIT();
+	void IncreaseSTR();
+	void IncreaseINT();
+	void IncreaseEND();
 
 	//Stats Modifiers
 	///may not need, keeping in case of change
@@ -91,8 +104,8 @@ public:
 
 	///Will
 	//Runes functions
-	void Lesser(int _Les);
-	void Greater(int _Grt);
+	void Lesser();
+	void Greater();
 
 
 protected:
