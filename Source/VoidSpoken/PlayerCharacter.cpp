@@ -40,23 +40,6 @@ APlayerCharacter::APlayerCharacter()
 	/// Set Player base Stats
 	PlayerStats = CreateDefaultSubobject<UStatsMasterClass>("STATS");
 	
-	PlayerStats->Health = 30.0f;
-	PlayerStats->MaxHealth;
-	PlayerStats->FocusPoints = 20.0f;
-	PlayerStats->MaxFocus;
-	PlayerStats->Stamina = 50.0f;
-	PlayerStats->MaxStamina;
-	PlayerStats->Damage;
-
-	PlayerStats->VitalityLvl = 1.0f;
-	PlayerStats->StrenghtLvl = 1.0f;
-	PlayerStats->IntelligenceLvl = 1.0f;
-	PlayerStats->EnduranceLvl = 1.0f;
-
-	PlayerStats->IncreaseVIT();
-	PlayerStats->IncreaseSTR();
-	PlayerStats->IncreaseINT();
-	PlayerStats->IncreaseEND();
 
 	//Set player State if in combat
 	/*bool InCombat = false;*/
@@ -68,6 +51,9 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Checks Player levels to initialize stats
+	PlayerStats->InitializeMaxStats();
 	
 }
 
@@ -78,7 +64,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	
 
-	//is in combat check here for stats regen calls//
 }
 
 // Called to bind functionality to input

@@ -43,6 +43,7 @@ public:
 
 	void LookUpRate(float Rate);
 
+	
 
 protected:
 	// Called when the game starts or when spawned
@@ -55,6 +56,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PLAYER STATS")
+	UPROPERTY(BlueprintReadWrite, Category = "PLAYER STATS")
 	class UStatsMasterClass* PlayerStats;
 };
