@@ -48,31 +48,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
 	float Health;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float MaxHealth;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
 	float FocusPoints;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float MaxFocus;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
 	float Stamina;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float MaxStamina;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float Damage;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
-	float VitalityLvl;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
-	float StrenghtLvl;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
-	float IntelligenceLvl;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
-	float EnduranceLvl;
-
-
+	
 	//Runes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RUNES")
 	int RunePoints;
@@ -81,6 +61,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
 	int GreaterRune;
 
+	// Initialize Max HP, Stamina, Focus Points
+	void InitializeMaxStats();
+
 	///Will
 	///Player Functions
 
@@ -88,25 +71,44 @@ public:
 	void RegenHP(int _HP);
 	void RegenFP(int _FP);
 	void RegenStamina(int _ST);
+
+
+private:
 	
+	// Max Stats (initialized on Begin Play)
+	//UPROPERTY(BlueprintReadOnly, Category = "STATS")
+	float MaxHealth;
+	//UPROPERTY(BlueprintReadOnly, Category = "STATS")
+	float MaxFocus;
+	//UPROPERTY(BlueprintReadOnly, Category = "STATS")
+	float MaxStamina;
+
+	//Player Levels
+	//UPROPERTY(BlueprintReadOnly, Category = "LEVELS")
+	float VitalityLvl;
+	//UPROPERTY(BlueprintReadOnly, Category = "LEVELS")
+	float StrenghtLvl;
+	//UPROPERTY(BlueprintReadOnly, Category = "LEVELS")
+	float IntelligenceLvl;
+	//UPROPERTY(BlueprintReadOnly, Category = "LEVELS")
+	float EnduranceLvl;
+
 	//Level up functions
 	void IncreaseVIT();
 	void IncreaseSTR();
 	void IncreaseINT();
 	void IncreaseEND();
 
-	//Stats Modifiers
-	///may not need, keeping in case of change
-	/*void ModifyHP(float _Health);
-	void ModifyFP(float _Focus);
-	void ModifyStamina(float _Stamina);
-	void ModifyDamage(float _Damage);*/
-
-	///Will
 	//Runes functions
 	void Lesser();
 	void Greater();
 
+	// Set Max Stats
+	void SetMaxHP();
+	void SetMaxFocus();
+	void SetMaxStamina();
+
+	
 
 protected:
 	// Called when the game starts
