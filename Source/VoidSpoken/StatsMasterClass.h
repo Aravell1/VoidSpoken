@@ -61,8 +61,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
 	int GreaterRune;
 
-	// Initialize Max HP, Stamina, Focus Points
-	void InitializeMaxStats();
 
 	///Will
 	///Player Functions
@@ -73,24 +71,37 @@ public:
 	void RegenStamina(int _ST);
 
 
+	// Get Max Stats
+
+	UFUNCTION(BlueprintCallable)
+	float GetMaxHealth()
+	{
+		return MaxHealth;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	float GetMaxFocus()
+	{
+		return MaxFocus;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	float GetMaxStamina()
+	{
+		return MaxStamina;
+	}
+
 private:
 	
 	// Max Stats (initialized on Begin Play)
-	//UPROPERTY(BlueprintReadOnly, Category = "STATS")
 	float MaxHealth;
-	//UPROPERTY(BlueprintReadOnly, Category = "STATS")
 	float MaxFocus;
-	//UPROPERTY(BlueprintReadOnly, Category = "STATS")
 	float MaxStamina;
 
 	//Player Levels
-	//UPROPERTY(BlueprintReadOnly, Category = "LEVELS")
 	float VitalityLvl;
-	//UPROPERTY(BlueprintReadOnly, Category = "LEVELS")
 	float StrenghtLvl;
-	//UPROPERTY(BlueprintReadOnly, Category = "LEVELS")
 	float IntelligenceLvl;
-	//UPROPERTY(BlueprintReadOnly, Category = "LEVELS")
 	float EnduranceLvl;
 
 	//Level up functions
@@ -108,7 +119,9 @@ private:
 	void SetMaxFocus();
 	void SetMaxStamina();
 
-	
+	// Initialize Max HP, Stamina, Focus Points
+	void InitializeMaxStats();
+
 
 protected:
 	// Called when the game starts
