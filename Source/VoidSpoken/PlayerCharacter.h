@@ -10,6 +10,10 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "StatsMasterClass.h"
+
+///Combo System Includes
+#include "Public/BaseWeapon.h"
+
 #include "PlayerCharacter.generated.h"
 
 
@@ -58,4 +62,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "PLAYER STATS")
 	class UStatsMasterClass* PlayerStats;
+
+	/// Dev: YunYun
+	/// Adding Weapons to this class
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ABaseWeapon* EquippedWeapon;
 };
