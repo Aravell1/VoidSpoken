@@ -17,8 +17,8 @@ ABaseWeapon::ABaseWeapon()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	WeaponMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Mesh Component"));
+	WeaponCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Collision Box"));
 	WeaponMeshComponent->SetHiddenInGame(false, true);
-
 	RootComponent = WeaponMeshComponent;
 }
 
@@ -32,6 +32,16 @@ void ABaseWeapon::BeginPlay()
 void ABaseWeapon::PostInitializeComponents() {
 	Super::PostInitializeComponents();
 
+	WeaponCollisionBox->SetGenerateOverlapEvents(true);
+	WeaponCollisionBox->SetNotifyRigidBodyCollision(true);
+
+	FAttachmentTransformRules* TransformRules = new FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
+	WeaponCollisionBox->AttachToComponent(WeaponMeshComponent, *TransformRules, "Weapon Collision Box");
+
+	//Weapon Collision Delegates
+	WeaponCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ABaseWeapon::OnComponentBeginOverlap);
+	WeaponCollisionBox->OnComponentHit.AddDynamic(this, &ABaseWeapon::OnComponentHit);
+	WeaponCollisionBox->OnComponentEndOverlap.AddDynamic(this, &ABaseWeapon::OnComponentEndOverlap);
 }
 
 // Called every frame
@@ -81,7 +91,8 @@ void ABaseWeapon::Equip(ACharacter* EquippingCharacter) {
 }
 
 void ABaseWeapon::Attack() {
-	if (!AttackDelay) {
+	if (!AttackDelay && !IsAttacking) {
+		IsAttacking = true;
 		//Check the current index to make sure we do not reference something unwanted
 		if (CurrentComboIndex >= GetComboLength()) Reset();
 
@@ -92,29 +103,13 @@ void ABaseWeapon::Attack() {
 	}
 }
 
-void ABaseWeapon::DealDamage() {
-	/// Preinitialize Variables 
-	TArray<FHitResult> OutHits;
-	FVector ActorLocation = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-	FCollisionShape CollisionBox = FCollisionShape::MakeSphere(250.f);
-
-	//DrawDebugSphere(GetWorld(), ActorLocation, CollisionBox.GetSphereRadius(), 100, FColor::Purple, true);
-
-	bool IsHit = GetWorld()->SweepMultiByChannel(OutHits, ActorLocation, ActorLocation, FQuat::Identity, ECC_WorldStatic, CollisionBox);
-
-	if (IsHit) {
-		for (auto& Hit : OutHits) {
-			if (*Hit.GetActor()->GetName() != GetName() && *Hit.GetActor()->GetName() != EquippedCharacter->GetName()) {
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Hit Result: %s"), *Hit.GetActor()->GetName()));
-			}
-		}
-	}
-
+[[deprecated]] void ABaseWeapon::DealDamage() {
 
 }
 
 void ABaseWeapon::NextAttack() {
 	//Re-Enabling Actors movement after attacking
+	IsAttacking = false;
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_Walking);
 	CurrentComboIndex++;
 }
@@ -133,6 +128,7 @@ void ABaseWeapon::NextAttack() {
 
 void ABaseWeapon::Reset() {
 	SetAttackDelay(false);
+	IsAttacking = false;
 	EquippedCharacter->GetMesh()->AnimScriptInstance = DefaultAnimInstance;
 	CurrentComboIndex = 0;
 
@@ -144,4 +140,27 @@ void ABaseWeapon::Reset() {
 [[deprecated]] void ABaseWeapon::UniqueReset() {
 	GetWorldTimerManager().ClearTimer(UniqueAttackDelayTimer);
 	EquippedCharacter->GetMesh()->AnimScriptInstance = DefaultAnimInstance;
+}
+
+void ABaseWeapon::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (IsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Overlap Begin: " + OtherActor->GetName()));
+	}
+}
+
+void ABaseWeapon::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex)
+{
+	if (IsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Overlap End: " + OtherActor->GetName()));
+	}
+}
+
+void ABaseWeapon::OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
+	if (IsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Hit: " + OtherActor->GetName()));
+	}
 }

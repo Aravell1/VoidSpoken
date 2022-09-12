@@ -6,9 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/Character.h"
 #include "Animation/AnimSequence.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine.h"
+#include "Engine/EngineTypes.h"
 #include "BaseWeapon.generated.h"
 
 /*
@@ -153,6 +155,11 @@ protected:
 	///		-This will loop constantly when this runs through the whole Sequence Array
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		TArray<UAnimSequence*> ComboAnimationSequence = {};
+
+	/// This array will dictate how much of the Base Damage is accounted for
+	///		-Normalized Value (%)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		TArray<float> ComboAttackMultipliers = {};
 	
 	/// This keeps track of the current Attack to be executed.
 	///		-Cannot be edited by blueprints to prevent any unwanted behaviours
@@ -185,17 +192,24 @@ protected:
 	///		-Can be uninitialized, although not recommended
 	///		-Collision will be based off of this mesh (Simple Collision)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		class UStaticMeshComponent* WeaponMeshComponent;
+		class UStaticMeshComponent* WeaponMeshComponent = nullptr;
+	/// Collision of this Weapon
+	///		-This is a box that attaches to a socket on the mesh itself
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		class UBoxComponent* WeaponCollisionBox = nullptr;
 
 	/// Actors UAnimSequence or UAnimBlueprint after they've been reset (Bringing them to their default state)
 	UPROPERTY(BlueprintReadOnly)
-		class UAnimInstance* DefaultAnimInstance;
+		class UAnimInstance* DefaultAnimInstance = nullptr;
 	
 	///Equipped Actors movement component to be set disabled and re-enabled when attacking
 	UPROPERTY(BlueprintReadOnly)
-		class UCharacterMovementComponent* EquippedCharacterMovementComponent;
+		class UCharacterMovementComponent* EquippedCharacterMovementComponent = nullptr;
 
 	///Combo Booleans
+
+	///Boolean for when the attack started (prevent spamming attack inputs)
+	bool IsAttacking = false;
 
 	///Boolean Handler for NextAttack(), and to prevent the player attacking again
 	bool AttackDelay = false;
@@ -210,4 +224,15 @@ protected:
 
 	///This TimerHandler is to insure that after some time has passed, the function 
 	FTimerHandle UniqueAttackDelayTimer;
+
+	//Collision Delegates
+	UFUNCTION()
+		virtual void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+		virtual void OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex);
+
+	UFUNCTION()
+		virtual void OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit); 
+
 };
