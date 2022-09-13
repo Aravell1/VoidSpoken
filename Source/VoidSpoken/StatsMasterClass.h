@@ -73,23 +73,27 @@ public:
 
 	// Get Max Stats
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxHealth()
 	{
 		return MaxHealth;
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxFocus()
 	{
 		return MaxFocus;
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxStamina()
 	{
 		return MaxStamina;
 	}
+
+	// Initialize Max HP, Stamina, Focus Points
+		void InitializeMaxStats();
+
 
 private:
 	
@@ -119,9 +123,7 @@ private:
 	void SetMaxFocus();
 	void SetMaxStamina();
 
-	// Initialize Max HP, Stamina, Focus Points
-	void InitializeMaxStats();
-
+	
 
 protected:
 	// Called when the game starts

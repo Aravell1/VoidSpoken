@@ -175,47 +175,6 @@ void UStatsMasterClass::IncreaseEND()
 }
 
 
-//Stats Modifiers
-//May not be needed, Keeping in case of change
-
-///// <Will>
-///// <Upgrading >
-///// HP = Base health + X HP/LVL
-///// </summary>
-///// <param name="_Health"></param>
-//void UStatsMasterClass::ModifyHP(float _Health)
-//{
-//
-//}
-//
-///// <Will>
-///// <summary>
-///// 
-///// </summary>
-///// <param name="_Focus"></param>
-//void UStatsMasterClass::ModifyFP(float _Focus)
-//{
-//}
-//
-///// <Will>
-///// <summary>
-///// 
-///// </summary>
-///// <param name="_Stamina"></param>
-//void UStatsMasterClass::ModifyStamina(float _Stamina)
-//{
-//}
-//
-///// <Will>
-///// <summary>
-///// 
-///// </summary>
-///// <param name="_Damage"></param>
-//void UStatsMasterClass::ModifyDamage(float _Damage)
-//{
-//
-//}
-
 
 //Runes
 
@@ -284,7 +243,7 @@ void UStatsMasterClass::SetMaxHP()
 void UStatsMasterClass::SetMaxFocus()
 {
 	MaxFocus = (IntelligenceLvl * 2.0f) + FocusPoints;
-	UE_LOG(LogTemp, Warning, TEXT("Focus Points: %d"), FocusPoints);
+	UE_LOG(LogTemp, Warning, TEXT("Focus Points: %f"), FocusPoints);
 }
 
 
