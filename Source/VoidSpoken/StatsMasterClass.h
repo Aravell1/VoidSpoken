@@ -43,14 +43,14 @@ public:
 
 	///Will
 	///Variables
-	//Base stats
+	// Main Stats
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float Health;
+	float Health = MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float FocusPoints;
+	float FocusPoints = MaxFocus;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
-	float Stamina;
+	float Stamina = MaxStamina;
 	
 	
 	//Runes
@@ -73,23 +73,30 @@ public:
 
 	// Get Max Stats
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxHealth()
 	{
 		return MaxHealth;
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxFocus()
 	{
 		return MaxFocus;
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxStamina()
 	{
 		return MaxStamina;
 	}
+
+	// Initialize Max HP, Stamina, Focus Points
+	void InitializeMaxStats();
+
+	// Initialize Stats
+	void InitializeMainStats();
+
 
 private:
 	
@@ -97,6 +104,11 @@ private:
 	float MaxHealth;
 	float MaxFocus;
 	float MaxStamina;
+
+	// Base Stats
+	float BaseHealth;
+	float BaseFocus;
+	float BaseStamina;
 
 	//Player Levels
 	float VitalityLvl;
@@ -119,9 +131,7 @@ private:
 	void SetMaxFocus();
 	void SetMaxStamina();
 
-	// Initialize Max HP, Stamina, Focus Points
-	void InitializeMaxStats();
-
+	
 
 protected:
 	// Called when the game starts

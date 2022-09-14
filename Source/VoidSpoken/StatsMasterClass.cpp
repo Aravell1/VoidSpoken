@@ -11,14 +11,9 @@ UStatsMasterClass::UStatsMasterClass()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// Set Base Player Stats
-	Health = 30.0f;
-	MaxHealth = 0.0f;
-	
-	FocusPoints = 20.0f;
-	MaxFocus = 0.0f;
-
-	Stamina = 50.0f;
-	MaxStamina = 0.0f;
+	BaseHealth = 30.0f;
+	BaseFocus = 20.0f;
+	BaseStamina = 50.0f;
 
 	// Set player levels
 	VitalityLvl = 1.0f;
@@ -175,47 +170,6 @@ void UStatsMasterClass::IncreaseEND()
 }
 
 
-//Stats Modifiers
-//May not be needed, Keeping in case of change
-
-///// <Will>
-///// <Upgrading >
-///// HP = Base health + X HP/LVL
-///// </summary>
-///// <param name="_Health"></param>
-//void UStatsMasterClass::ModifyHP(float _Health)
-//{
-//
-//}
-//
-///// <Will>
-///// <summary>
-///// 
-///// </summary>
-///// <param name="_Focus"></param>
-//void UStatsMasterClass::ModifyFP(float _Focus)
-//{
-//}
-//
-///// <Will>
-///// <summary>
-///// 
-///// </summary>
-///// <param name="_Stamina"></param>
-//void UStatsMasterClass::ModifyStamina(float _Stamina)
-//{
-//}
-//
-///// <Will>
-///// <summary>
-///// 
-///// </summary>
-///// <param name="_Damage"></param>
-//void UStatsMasterClass::ModifyDamage(float _Damage)
-//{
-//
-//}
-
 
 //Runes
 
@@ -274,7 +228,8 @@ void UStatsMasterClass::Greater()
 //Called when MaxHealth needs to update
 void UStatsMasterClass::SetMaxHP()
 {
-	MaxHealth = (VitalityLvl * 3.0f) + Health;
+	MaxHealth = ((VitalityLvl - 1) * 3.0f) + BaseHealth;
+	//Health = MaxHealth;
 	UE_LOG(LogTemp, Warning, TEXT("Max Player Health: %f"), MaxHealth);
 }
 
@@ -283,8 +238,9 @@ void UStatsMasterClass::SetMaxHP()
 //Called when MaxHealth needs to update
 void UStatsMasterClass::SetMaxFocus()
 {
-	MaxFocus = (IntelligenceLvl * 2.0f) + FocusPoints;
-	UE_LOG(LogTemp, Warning, TEXT("Focus Points: %d"), FocusPoints);
+	MaxFocus = ((IntelligenceLvl - 1) * 2.0f) + BaseFocus;
+	//FocusPoints = MaxFocus;
+	UE_LOG(LogTemp, Warning, TEXT("Max Focus Points: %f"), MaxFocus);
 }
 
 
@@ -292,8 +248,9 @@ void UStatsMasterClass::SetMaxFocus()
 //Called when MaxStamina needs to update
 void UStatsMasterClass::SetMaxStamina()
 {
-	MaxStamina = (EnduranceLvl * 3.0f) + Stamina;
-	UE_LOG(LogTemp, Warning, TEXT("Player Stamina: %f"), FocusPoints);
+	MaxStamina = ((EnduranceLvl - 1) * 3.0f) + BaseStamina;
+	//Stamina = MaxStamina;
+	UE_LOG(LogTemp, Warning, TEXT("Max Stamina: %f"), MaxStamina);
 }
 
 // Initialize max stats when game starts
@@ -302,4 +259,18 @@ void UStatsMasterClass::InitializeMaxStats()
 	SetMaxHP();
 	SetMaxFocus();
 	SetMaxStamina();
+}
+
+
+//Initialize Main Stats on BeginPlay to correct values
+void UStatsMasterClass::InitializeMainStats()
+{
+	Health = MaxHealth;
+	UE_LOG(LogTemp, Warning, TEXT("Player Health: %f"), Health);
+	
+	FocusPoints = MaxFocus;
+	UE_LOG(LogTemp, Warning, TEXT("Focus Points: %f"), FocusPoints);
+	
+	Stamina = MaxStamina;
+	UE_LOG(LogTemp, Warning, TEXT("Max Stamina: %f"), Stamina);
 }
