@@ -53,6 +53,7 @@ void APlayerCharacter::BeginPlay()
 
 	// Checks Player levels to initialize stats
 	PlayerStats->InitializeMaxStats();
+	PlayerStats->InitializeStats();
 	
 }
 
