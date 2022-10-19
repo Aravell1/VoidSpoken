@@ -37,10 +37,18 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	
-	/// Set Player base Stats
+	/// Set Player Stats
 	PlayerStats = CreateDefaultSubobject<UStatsMasterClass>("STATS");
 	
+	PlayerStats->SetBaseHealth(30.f);
+	PlayerStats->GetBaseHealth();
+	
+	PlayerStats->SetBaseFocus(20.f);
+	PlayerStats->GetBaseFocus();
 
+	PlayerStats->SetBaseStamina(50.f);
+	PlayerStats->GetBaseStamina();
+	
 	//Set player State if in combat
 	/*bool InCombat = false;*/
 }
@@ -53,7 +61,7 @@ void APlayerCharacter::BeginPlay()
 
 	// Checks Player levels to initialize stats
 	PlayerStats->InitializeMaxStats();
-	PlayerStats->InitializeStats();
+	PlayerStats->InitializeMainStats();
 	
 }
 
@@ -88,8 +96,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Moving the character
 	PlayerInputComponent->BindAxis("Move Forward/Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right/Left", this, &APlayerCharacter::MoveRight);
-
-	//Test inputs
 	
 }
 

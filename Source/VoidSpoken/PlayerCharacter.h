@@ -60,11 +60,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(BlueprintReadWrite, Category = "PLAYER STATS")
+	UPROPERTY(BlueprintReadOnly, Category = "PLAYER STATS")
 	class UStatsMasterClass* PlayerStats;
 
 	/// Dev: YunYun
 	/// Adding Weapons to this class
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		ABaseWeapon* EquippedWeapon;
+	ABaseWeapon* EquippedWeapon;
 };
