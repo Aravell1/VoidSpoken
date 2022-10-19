@@ -8,7 +8,6 @@
 #include "Animation/AnimSequence.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Engine.h"
 #include "Engine/EngineTypes.h"
 #include "BaseWeapon.generated.h"
@@ -41,42 +40,42 @@ public:
 	/// Function: GetBaseDamage()
 	///		-Returns the float BaseDamage
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		inline float GetBaseDamage();
+		float GetBaseDamage();
 
 	/// Function: GetCurrentComboIndex()
 	///		-Returns the int CurrentComboIndex
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		inline int GetCurrentComboIndex();
+		int GetCurrentComboIndex();
 
 	/// Function: GetComboLength()
 	///		-Returns an int of the Max() of Elements inside the ComboAnimationSequence
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		inline int GetComboLength();
+		int GetComboLength();
 
 	/// Function: GetEquippedCharacter() 
 	///		-Returns a ACharacter* of the variable EquippedCharacter
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		inline ACharacter* GetEquippedCharacter();
+		ACharacter* GetEquippedCharacter();
 	
 	/// Function: GetAttackDelay()
 	///		-Returns the bool AttackDelay
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		inline bool GetAttackDelay();
+		bool GetAttackDelay();
 
 	/// Function: SetAttackDelay()
 	///		-Sets the boolean AttackDelay to {state}
 	UFUNCTION(BlueprintCallable)
-		inline void SetAttackDelay(const bool state);
+		void SetAttackDelay(const bool state);
 
 	/// Function: GetAttackDelay()
 	///		-Returns the boolean CanUniqueAttack
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		inline bool GetCanUniqueAttack();
+		bool GetCanUniqueAttack();
 
 	/// Function: SetCanUniqueAttack()
 	///		-Sets the boolean CanUniqueAttack to {state}
 	UFUNCTION(BlueprintCallable)
-		inline void SetCanUniqueAttack(const bool state);
+		void SetCanUniqueAttack(const bool state);
 
 	///Weapon Functions
 
