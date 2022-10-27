@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "BaseBoss.h"
+#include "AIController.h"
+#include "Math/TransformNonVectorized.h"
 #include "Gatekeeper.generated.h"
 
 UENUM()
@@ -40,8 +42,11 @@ public:
 
 	void BehaviourChange(GatekeeperState state);
 
-	/*UFUNCTION(BlueprintNativeEvent, Category = "Behaviour Change")
-		void BehaviourStateEvent();*/
+	//UFUNCTION(BlueprintNativeEvent, Category = "Behaviour Change")
+	void BehaviourStateEvent();
+
+	UPROPERTY(EditAnywhere)
+		FTransform BossStartPoint;
 
 private:
 	float AttackMultiplier = 0;

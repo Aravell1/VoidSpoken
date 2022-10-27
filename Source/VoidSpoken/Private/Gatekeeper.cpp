@@ -65,37 +65,37 @@ void AGatekeeper::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BehaviourChange(Start);
+	BehaviourChange(GatekeeperState::Start);
 }
 
 void AGatekeeper::BehaviourChange(GatekeeperState state)
 {
 	SetState(state);
-	//BehaviourStateEvent();
+	BehaviourStateEvent();
 }
 
-//void AGatekeeper::BehaviourStateEvent()
-//{
-//	switch (GKState)
-//	{
-//	case GatekeeperState::Start:
-//
-//		break;
-//	case GatekeeperState::Chase:
-//
-//		break;
-//	case GatekeeperState::HeavyAttack:
-//
-//		break;
-//	case GatekeeperState::SummonPortals:
-//
-//		break;
-//	case GatekeeperState::Staggered:
-//
-//		break;
-//	case GatekeeperState::Dead:
-//
-//		break;
-//	}
-//}
+void AGatekeeper::BehaviourStateEvent()
+{
+	switch (GKState)
+	{
+	case GatekeeperState::Start:
+		//MoveToActor()
+		break;
+	case GatekeeperState::Chase:
+
+		break;
+	case GatekeeperState::HeavyAttack:
+
+		break;
+	case GatekeeperState::SummonPortals:
+
+		break;
+	case GatekeeperState::Staggered:
+
+		break;
+	case GatekeeperState::Dead:
+
+		break;
+	}
+}
 
