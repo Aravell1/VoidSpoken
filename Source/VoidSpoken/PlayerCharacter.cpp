@@ -31,6 +31,7 @@ APlayerCharacter::APlayerCharacter()
 	CameraArm->SetupAttachment(RootComponent);
 	CameraArm->TargetArmLength = 300;
 	CameraArm->bUsePawnControlRotation = true;
+	//CameraArm->bEnableLag = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	FollowCamera->SetupAttachment(CameraArm, USpringArmComponent::SocketName);
