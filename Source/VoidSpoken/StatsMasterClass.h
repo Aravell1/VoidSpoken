@@ -38,11 +38,10 @@ class VOIDSPOKEN_API UStatsMasterClass : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
+	// Constructor
 	UStatsMasterClass();
 
 	///Will
-	///Variables
 	// Main Stats
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
@@ -53,12 +52,12 @@ public:
 	float Stamina = MaxStamina;
 	
 	
-	//Runes
+	//Runes ***TEMP***
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RUNES")
 	int RunePoints;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RUNES")
 	int LesserRune;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LEVELS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RUNES")
 	int GreaterRune;
 
 
@@ -66,30 +65,88 @@ public:
 	///Player Functions
 
 	//Regen Functions (will be called every frame)
-	void RegenHP(int _HP);
-	void RegenFP(int _FP);
-	void RegenStamina(int _ST);
+	void RegenHP(float _HP);
+	void RegenFP(float _FP);
+	void RegenStamina(float _ST);
 
 
-	// Get Max Stats
 
+	/// Set & Get Max Stats
+
+	// Set/Get MaxHealth
+	UFUNCTION(BlueprintCallable)
+	float SetMaxHealth();
+	
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxHealth()
 	{
 		return MaxHealth;
 	}
-
+	
+	// Get/Set MaxFocus
+	UFUNCTION(BlueprintCallable)
+	float SetMaxFocus();
+	
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxFocus()
 	{
 		return MaxFocus;
 	}
 
+	// Get/Set MaxStamina
+	UFUNCTION(BlueprintCallable)
+	float SetMaxStamina();
+
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxStamina()
 	{
 		return MaxStamina;
 	}
+
+
+	/// Set & Get Base Stats
+
+	// Get/Set BaseHealth
+	UFUNCTION(BlueprintCallable)
+	void SetBaseHealth(float HP)
+	{
+		BaseHealth = HP;
+	}
+
+	UFUNCTION(BlueprintPure, BlueprintCallable)
+	float GetBaseHealth()
+	{
+		return BaseHealth;
+	}
+
+	// Get/Set BaseFocus
+	UFUNCTION(BlueprintCallable)
+	void SetBaseFocus(float focus)
+	{
+		BaseFocus = focus;
+	}
+
+	UFUNCTION(BlueprintPure, BlueprintCallable)
+	float GetBaseFocus()
+	{
+		return BaseFocus;
+	}
+
+
+	// Get/Set BaseStamina
+	UFUNCTION(BlueprintCallable)
+	void SetBaseStamina(float st)
+	{
+		BaseStamina = st;
+	}
+
+	UFUNCTION(BlueprintPure, BlueprintCallable)
+	float GetBaseStamina()
+	{
+		return BaseStamina;
+	}
+
+
 
 	// Initialize Max HP, Stamina, Focus Points
 	void InitializeMaxStats();
@@ -126,10 +183,7 @@ private:
 	void Lesser();
 	void Greater();
 
-	// Set Max Stats
-	void SetMaxHP();
-	void SetMaxFocus();
-	void SetMaxStamina();
+	
 
 	
 
