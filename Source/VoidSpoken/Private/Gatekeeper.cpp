@@ -24,11 +24,12 @@ AGatekeeper::AGatekeeper()
 	SetAttackMultiplier(1.25f);
 	SetDefenseMultiplier(0.75f);
 
-	//Initialize Pawn Sensing Stats
-
+	BossStartPoint = GetActorLocation() + GetActorForwardVector() * 300;
 
 	//Initialize Character Movement Stats
 	GetCharacterMovement()->MaxWalkSpeed = GetWalkSpeed();
+
+	
 }
 
 float AGatekeeper::GetAttackMultiplier()
@@ -51,51 +52,18 @@ void AGatekeeper::SetDefenseMultiplier(float DefMult)
 	DefenseMultiplier = DefMult;
 }
 
-GatekeeperState AGatekeeper::GetState()
-{
-	return GKState;
-}
 
-void AGatekeeper::SetState(GatekeeperState state)
-{
-	GKState = state;
-}
 
 void AGatekeeper::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BehaviourChange(GatekeeperState::Start);
+	
 }
 
-void AGatekeeper::BehaviourChange(GatekeeperState state)
-{
-	SetState(state);
-	BehaviourStateEvent();
-}
 
-void AGatekeeper::BehaviourStateEvent()
-{
-	switch (GKState)
-	{
-	case GatekeeperState::Start:
-		//MoveToActor()
-		break;
-	case GatekeeperState::Chase:
 
-		break;
-	case GatekeeperState::HeavyAttack:
 
-		break;
-	case GatekeeperState::SummonPortals:
 
-		break;
-	case GatekeeperState::Staggered:
 
-		break;
-	case GatekeeperState::Dead:
-
-		break;
-	}
-}
 
