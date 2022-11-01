@@ -65,7 +65,7 @@ private:
 	AGatekeeper* Gatekeeper;
 	APawn* PlayerPawn = nullptr;
 	FOnMontageEnded EndDelegate;
-	TArray<UAnimMontage*> MontageArray = {Gatekeeper->HeavyAttackMontage, Gatekeeper->StompMontage, Gatekeeper->BeamMontage};
+	TArray<UAnimMontage*> MontageArray;
 
 	float ReachTargetDistance = 320.0f;
 	bool HeavyReset = true;
