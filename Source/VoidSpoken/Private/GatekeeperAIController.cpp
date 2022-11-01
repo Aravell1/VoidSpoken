@@ -17,6 +17,8 @@ AGatekeeperAIController::AGatekeeperAIController()
 
 	if (Gatekeeper)
 	{
+		MontageArray = { Gatekeeper->HeavyAttackMontage, Gatekeeper->StompMontage, Gatekeeper->BeamMontage };
+
 		FOnMontageEnded MontageEndDelegate;
 		MontageEndDelegate.BindUObject(this, &AGatekeeperAIController::OnAnimationEnded);
 		Gatekeeper->GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, Gatekeeper->BaseAttackMontage);
