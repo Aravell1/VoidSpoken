@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BaseEntity.h"
 #include "Perception/PawnSensingComponent.h"
+#include "Components/CapsuleComponent.h" 
 #include "BaseEnemy.generated.h"
 
 /**
@@ -36,8 +37,14 @@ public:
 	float GetRunSpeed();
 	void SetRunSpeed(float Run);
 
+	float GetDamageMultiplier();
+	void SetDamageMultiplier(float DMult);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PawnSensing)
 		class UPawnSensingComponent* PawnSensing;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CapsuleComponent)
+	UCapsuleComponent* CapsuleComponent;
+
 
 	
 private:
@@ -47,5 +54,6 @@ private:
 	float MaxHealth = 0;
 	float WalkSpeed = 0;
 	float RunSpeed = 0;
+	float DamageMultiplier = 10;
 	APawn* AttackTarget = nullptr;
 };
