@@ -420,9 +420,7 @@ void AGatekeeper::UpdateHealth(bool StopMovement, float Damage)
 
 void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	Super::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
-	
-	float PortalCount = HealthCheck(FMath::Floor(Damage));
+	float PortalCount = HealthCheck(FMath::Floor(Damage * (25 / (25 + GetDefense()))));
 
 	if (PortalCount > 0)
 	{
