@@ -14,11 +14,11 @@ void UWeaponAttackNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSeq
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
 #endif
 	
-	APlayerCharacter* PlayerReference = Cast<APlayerCharacter>(MeshComponent->GetOwner());
+	ABaseEntity* Entity = Cast<ABaseEntity>(MeshComponent->GetOwner());
 
 	/// NULL Check
-	if (PlayerReference != nullptr && PlayerReference->EquippedWeapon != nullptr) {
-		PlayerReference->EquippedWeapon->DealDamage();
+	if (Entity != nullptr && Entity->EquippedWeapon != nullptr) {
+		Entity->EquippedWeapon->DealDamage();
 	}
 
 }

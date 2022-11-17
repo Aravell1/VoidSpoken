@@ -14,8 +14,8 @@ void UWeaponResetNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequ
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
 #endif
 
-	APlayerCharacter* PlayerReference = Cast<APlayerCharacter>(MeshComponent->GetOwner());
+	ABaseEntity* Entity = Cast<ABaseEntity>(MeshComponent->GetOwner());
 
 	/// NULL Check
-	if (PlayerReference != nullptr && PlayerReference->EquippedWeapon != nullptr) PlayerReference->EquippedWeapon->Reset();
+	if (Entity != nullptr && Entity->EquippedWeapon != nullptr) Entity->EquippedWeapon->Reset();
 }

@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../PlayerCharacter.h"
 #include "../Public/BaseWeapon.h"
+#include "../Public/BaseEntity.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "WeaponUniqueAttackNotifyState.generated.h"
 

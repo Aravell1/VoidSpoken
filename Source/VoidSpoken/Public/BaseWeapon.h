@@ -234,4 +234,6 @@ protected:
 	UFUNCTION()
 		virtual void OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit); 
 
+	UFUNCTION()
+		bool CheckMovementMode();
 };

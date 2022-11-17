@@ -36,19 +36,15 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	FollowCamera->SetupAttachment(CameraArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+	
+	Stats->SetBaseHealth(30.f);
+	Stats->GetBaseHealth();
+	
+	Stats->SetBaseFocus(20.f);
+	Stats->GetBaseFocus();
 
-	
-	/// Set Player Stats
-	PlayerStats = CreateDefaultSubobject<UStatsMasterClass>("STATS");
-	
-	PlayerStats->SetBaseHealth(30.f);
-	PlayerStats->GetBaseHealth();
-	
-	PlayerStats->SetBaseFocus(20.f);
-	PlayerStats->GetBaseFocus();
-
-	PlayerStats->SetBaseStamina(50.f);
-	PlayerStats->GetBaseStamina();
+	Stats->SetBaseStamina(50.f);
+	Stats->GetBaseStamina();
 	
 	//Set player State if in combat
 	/*bool InCombat = false;*/
@@ -61,8 +57,8 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Checks Player levels to initialize stats
-	PlayerStats->InitializeMaxStats();
-	PlayerStats->InitializeMainStats();
+	Stats->InitializeMaxStats();
+	Stats->InitializeMainStats();
 	
 }
 
@@ -97,6 +93,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Moving the character
 	PlayerInputComponent->BindAxis("Move Forward/Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right/Left", this, &APlayerCharacter::MoveRight);
+
+	// Attacking
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::Attack);
+	///PlayerInputComponent->BindAction("UniqueAttack", IE_Pressed, this, &APlayerCharacter::UniqueAttack);
 	
 }
 
@@ -122,11 +122,19 @@ void APlayerCharacter::MoveForward(float Axis)
 //Find Rotation
 void APlayerCharacter::MoveRight(float Axis)
 {
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	if ((Controller != nullptr) && (Axis != 0.0f))
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(Direction, Axis);
+		if (!IsRunning)
+		{
+			Axis *= 0.5f;
+		}
+
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(Direction, Axis);
+	}
 }
 
 void APlayerCharacter::TurnRate(float Rate)
@@ -139,6 +147,13 @@ void APlayerCharacter::LookUpRate(float Rate)
 	AddControllerPitchInput(Rate * GamepadTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
+void APlayerCharacter::Attack() {
+	if (EquippedWeapon) EquippedWeapon->Attack();
+}
+
+[[deprecated]] void APlayerCharacter::UniqueAttack() {
+	if (EquippedWeapon) EquippedWeapon->UniqueAttack();
+}
 
 // Sprint **NEED TO CHANGE FOR A TOGGLE**
 void APlayerCharacter::RunStart()

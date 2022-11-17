@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../StatsMasterClass.h"
+#include "BaseWeapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BaseEntity.generated.h"
 
@@ -17,6 +19,14 @@ public:
 	// Sets default values for this pawn's properties
 	ABaseEntity();
 
+	UPROPERTY(BlueprintReadOnly, Category = "Player Stats")
+		class UStatsMasterClass* Stats;
+
+	/// Dev: YunYun
+	/// Adding Weapons to this class
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ABaseWeapon* EquippedWeapon = nullptr;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -24,6 +34,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

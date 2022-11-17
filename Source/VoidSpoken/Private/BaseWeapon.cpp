@@ -91,15 +91,18 @@ void ABaseWeapon::Equip(ACharacter* EquippingCharacter) {
 }
 
 void ABaseWeapon::Attack() {
-	if (!AttackDelay && !IsAttacking) {
-		IsAttacking = true;
-		//Check the current index to make sure we do not reference something unwanted
-		if (CurrentComboIndex >= GetComboLength()) Reset();
+	if (!AttackDelay && !IsAttacking && CheckMovementMode()) {
+		if (GetComboLength() > 0) {
+			IsAttacking = true;
 
-		//Disabling Actors movement while attacking
-		EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
+			//Check the current index to make sure we do not reference something unwanted
+			if (CurrentComboIndex >= GetComboLength()) Reset();
 
-		if (ComboAnimationSequence.IsValidIndex(CurrentComboIndex)) EquippedCharacter->GetMesh()->PlayAnimation(ComboAnimationSequence[CurrentComboIndex], false);
+			//Disabling Actors movement while attacking
+			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
+
+			if (ComboAnimationSequence.IsValidIndex(CurrentComboIndex)) EquippedCharacter->GetMesh()->PlayAnimation(ComboAnimationSequence[CurrentComboIndex], false);
+		}
 	}
 }
 
@@ -110,7 +113,7 @@ void ABaseWeapon::Attack() {
 void ABaseWeapon::NextAttack() {
 	//Re-Enabling Actors movement after attacking
 	IsAttacking = false;
-	EquippedCharacterMovementComponent->SetMovementMode(MOVE_Walking);
+	EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
 	CurrentComboIndex++;
 }
 
@@ -123,6 +126,16 @@ void ABaseWeapon::NextAttack() {
 
 		EquippedCharacter->GetMesh()->PlayAnimation(UniqueAttackSequence, false);
 		GetWorldTimerManager().SetTimer(UniqueAttackDelayTimer, this, &ABaseWeapon::Reset, UniqueAttackSequence->GetPlayLength() + UniqueAttackCooldown, false);
+	}
+}
+
+bool ABaseWeapon::CheckMovementMode() {
+	switch (EquippedCharacterMovementComponent->MovementMode) {
+	case (MOVE_None):
+	case (MOVE_Walking):
+			return true;
+	default: 
+		return false;
 	}
 }
 
@@ -147,6 +160,7 @@ void ABaseWeapon::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedC
 	if (IsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Overlap Begin: " + OtherActor->GetName()));
+		UGameplayStatics::ApplyDamage(OtherActor, BaseDamage, NULL, EquippedCharacter, NULL);
 	}
 }
 
@@ -162,5 +176,6 @@ void ABaseWeapon::OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActo
 	if (IsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Hit: " + OtherActor->GetName()));
+		UGameplayStatics::ApplyDamage(OtherActor, BaseDamage, NULL, EquippedCharacter, NULL);
 	}
 }
