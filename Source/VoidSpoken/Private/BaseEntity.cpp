@@ -10,6 +10,8 @@ ABaseEntity::ABaseEntity()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Stats = CreateDefaultSubobject<UStatsMasterClass>("Stats");
+
+	OnTakeAnyDamage.AddDynamic(this, &ABaseEntity::TakeAnyDamage);
 }
 
 // Called when the game starts or when spawned
@@ -35,10 +37,7 @@ void ABaseEntity::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ABaseEntity::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (DamagedActor) {
-		ABaseEntity* DamagedEntity = Cast<ABaseEntity>(DamagedActor);
-		DamagedEntity->Stats->Health = Damage * (25 / (25 + DamagedEntity->Stats->Defense));
-	}
+	Stats->Health -= Damage * (25 / (25 + Stats->Defense));
 }
 
 

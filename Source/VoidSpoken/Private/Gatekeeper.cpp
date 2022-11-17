@@ -13,21 +13,15 @@ AGatekeeper::AGatekeeper()
 	if (!GetMesh()->SkeletalMesh)
 	{
 		static ConstructorHelpers::FObjectFinder<USkeletalMesh>MeshContainer(TEXT("/Game/Blueprints/Bosses/Gatekeeper/Components/Standing_Idle.Standing_Idle"));
-		UE_LOG(LogTemp, Warning, TEXT("**************************************Constructor Code!"));
 		if (MeshContainer.Succeeded())
 		{
 			GetMesh()->SetSkeletalMesh(MeshContainer.Object);
 
-			UE_LOG(LogTemp, Warning, TEXT("**************************************Mesh Code!"));
-
-			//GetMesh()->SetSkeletalMesh(M.Object);
 			GetMesh()->SetupAttachment(GetCapsuleComponent());
 
 			GetMesh()->SetRelativeLocation(FVector(0, 0, -90));
 			GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
 		}
-		else
-			UE_LOG(LogTemp, Warning, TEXT("Failure!"));
 	}
 
 	/*if (!Weapon)
@@ -131,9 +125,6 @@ AGatekeeper::AGatekeeper()
 		PawnSensing->bOnlySensePlayers = true;
 		PawnSensing->OnSeePawn.AddDynamic(this, &AGatekeeper::OnSeePawn);
 	}
-
-	OnTakeAnyDamage.AddDynamic(this, &AGatekeeper::TakeAnyDamage);
-
 }
 
 float AGatekeeper::GetAttackMultiplier()
@@ -429,7 +420,9 @@ void AGatekeeper::UpdateHealth(bool StopMovement, float Damage)
 
 void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	float PortalCount = HealthCheck(FMath::Floor(Damage * GetDamageMultiplier() / GetDefense()));
+	Super::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
+	
+	float PortalCount = HealthCheck(FMath::Floor(Damage));
 
 	if (PortalCount > 0)
 	{
@@ -441,6 +434,7 @@ void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamag
 		if (GetHealth() <= 0)
 			Death();
 	}
+
 }
 
 void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)

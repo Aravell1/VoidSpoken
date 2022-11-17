@@ -95,8 +95,7 @@ private:
 	UFUNCTION()
 		void OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	UFUNCTION()
-		void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
+	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
 
 	void SetSpeed();
 	void AttackDelay();
