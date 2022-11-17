@@ -19,7 +19,7 @@ public:
 	// Sets default values for this pawn's properties
 	ABaseEntity();
 
-	UPROPERTY(BlueprintReadOnly, Category = "Player Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stats")
 		class UStatsMasterClass* Stats;
 
 	/// Dev: YunYun
