@@ -37,7 +37,7 @@ void ABaseEntity::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ABaseEntity::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	Stats->Health -= Damage * (25 / (25 + Stats->Defense));
+	Stats->Health -= FMath::Floor(Damage * (25 / (25 + Stats->Defense)));
 }
 
 
