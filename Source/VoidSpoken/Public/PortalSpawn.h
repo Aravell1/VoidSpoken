@@ -32,6 +32,4 @@ protected:
 private:
 	void SpawnEnemy();
 
-	int EnemyCount = 0;
-
 };

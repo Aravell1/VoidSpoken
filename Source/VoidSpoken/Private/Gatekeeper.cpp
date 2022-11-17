@@ -5,63 +5,88 @@
 
 AGatekeeper::AGatekeeper()
 {
-	if (CapsuleComponent)
-	{
-		RootComponent = CapsuleComponent;
-		CapsuleComponent->SetRelativeScale3D(FVector(2.5, 2.5, 2.5));
-		CapsuleComponent->SetCapsuleHalfHeight(88);
-		CapsuleComponent->SetCapsuleRadius(34);
-	}
+	RootComponent = GetCapsuleComponent();
+	GetCapsuleComponent()->SetRelativeScale3D(FVector(2.5, 2.5, 2.5));
+	GetCapsuleComponent()->SetCapsuleHalfHeight(88);
+	GetCapsuleComponent()->SetCapsuleRadius(34);
 
-	if (!GetMesh())
+	if (!GetMesh()->SkeletalMesh)
 	{
-		static ConstructorHelpers::FObjectFinder<USkeletalMesh>M(TEXT("/Game/Blueprints/Bosses/Gatekeeper/Components/Standing_Idle.Standing_Idle"));
-
-		if (M.Succeeded())
+		static ConstructorHelpers::FObjectFinder<USkeletalMesh>MeshContainer(TEXT("/Game/Blueprints/Bosses/Gatekeeper/Components/Standing_Idle.Standing_Idle"));
+		UE_LOG(LogTemp, Warning, TEXT("**************************************Constructor Code!"));
+		if (MeshContainer.Succeeded())
 		{
-			GetMesh()->SetSkeletalMesh(M.Object);
+			GetMesh()->SetSkeletalMesh(MeshContainer.Object);
+
+			UE_LOG(LogTemp, Warning, TEXT("**************************************Mesh Code!"));
+
+			//GetMesh()->SetSkeletalMesh(M.Object);
+			GetMesh()->SetupAttachment(GetCapsuleComponent());
+
+			GetMesh()->SetRelativeLocation(FVector(0, 0, -90));
+			GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
 		}
-
-		GetMesh()->SetupAttachment(CapsuleComponent);
-
-		GetMesh()->SetRelativeLocation(FVector(0, 0, -90));
-		GetMesh()->SetRelativeRotation(FRotator(0, 0, -90));
+		else
+			UE_LOG(LogTemp, Warning, TEXT("Failure!"));
 	}
 
-	if (!Weapon)
+	/*if (!Weapon)
 	{
 		Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
-		static ConstructorHelpers::FObjectFinder<USkeletalMesh>M(TEXT("/Game/Assets/Weapon_Pack/Skeletal_Mesh/SK_GreatHammer.SK_GreatHammer"));
+		
+		static ConstructorHelpers::FObjectFinder<USkeletalMesh>W(TEXT("/Game/Assets/Weapon_Pack/Skeletal_Mesh/SK_GreatHammer.SK_GreatHammer"));
 
-		if (M.Succeeded())
+		if (W.Succeeded())
 		{
-			Weapon->SetSkeletalMesh(M.Object);
-		}
+			Weapon->SetSkeletalMesh(W.Object);
 
-		Weapon->SetupAttachment(GetMesh(), TEXT("RightHand"));
+			UE_LOG(LogTemp, Warning, TEXT("**************************************Weapon Success!"));
+
+		}
+		else
+			UE_LOG(LogTemp, Warning, TEXT("**************************************Weapon Fail!"));
+
+		UE_LOG(LogTemp, Warning, TEXT("**************************************Weapon Code!"));
+
+		Weapon->SetupAttachment(GetMesh(), GetMesh()->GetSocketBoneName(FName("RightHand")));
+		
 
 		Weapon->SetRelativeLocation(FVector(-5.688907, -9.429593, 1.854035));
 		Weapon->SetRelativeRotation(FRotator(-9.846553, 88.246216, -84.398694));
-	}
+	}*/
 
-	if (!WeaponCollider)
+	/*if (!WeaponCollider)
 	{
 		WeaponCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Weapon Collider"));
+		
 		WeaponCollider->SetupAttachment(Weapon);
 
 		WeaponCollider->SetRelativeLocation(FVector(-26, 0.5, 95));
 		WeaponCollider->SetSphereRadius(WeaponRadius);
-	}
+	}*/
+	/*if (!WeaponCollider)
+	{
+		WeaponCollider = Cast<USphereComponent>(GetDefaultSubobjectByName(TEXT("WeaponCollider1")));
+		if (WeaponCollider)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Success"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed"));
+		}
+	}*/
 
-	if (!ChestLocation)
+	/*if (!ChestLocation)
 	{
 		ChestLocation = CreateDefaultSubobject<USphereComponent>(TEXT("Chest Collider"));
-		ChestLocation->SetupAttachment(GetMesh(), TEXT("Spine2"));
 
-		ChestLocation->SetRelativeLocation(FVector(0, 0, 19));
-		ChestLocation->SetRelativeRotation(FRotator(15, 0, 0));
+		ChestLocation->SetupAttachment(GetMesh(), GetMesh()->GetSocketBoneName(FName("Spine2")));
+
+		ChestLocation->SetRelativeLocation(FVector(0, 0, 20));
+		ChestLocation->SetRelativeRotation(FRotator(0, 0, 30));
 		ChestLocation->SetSphereRadius(ChestRadius);
-	}
+	}*/
 
 	//Initialize General Stats
 	SetAttack(30);
@@ -85,9 +110,6 @@ AGatekeeper::AGatekeeper()
 	SetRunSpeed(500);
 	GetCharacterMovement()->MaxWalkSpeed = GetWalkSpeed();
 
-	if (BossStartPoint == FVector(0, 0, 0))
-		BossStartPoint = GetActorLocation() + GetActorForwardVector() * 300;
-	
 	MontageEndDelegate.BindUObject(this, &AGatekeeper::OnAnimationEnded);
 	if (BaseAttackMontage)
 		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, BaseAttackMontage);
@@ -111,6 +133,7 @@ AGatekeeper::AGatekeeper()
 	}
 
 	OnTakeAnyDamage.AddDynamic(this, &AGatekeeper::TakeAnyDamage);
+
 }
 
 float AGatekeeper::GetAttackMultiplier()
@@ -142,14 +165,16 @@ void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 
 	//Set HP Widget Component Visible
 
-	BehaviourChange(GatekeeperState::Chase);
+	BehaviourChange(Chase);
 }
 
 void AGatekeeper::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BehaviourChange(GatekeeperState::Start);
+	BehaviourChange(Start);
+
+	
 }
 
 void AGatekeeper::StopMovement()
@@ -179,10 +204,11 @@ void AGatekeeper::BehaviourStateEvent()
 {
 	switch (GKState)
 	{
-	case GatekeeperState::Start:
-		AIController->MoveToLocation(BossStartPoint);
+	case Start:
+		if (BossStartPoint)
+			AIController->MoveToActor(BossStartPoint);
 		break;
-	case GatekeeperState::Chase:
+	case Chase:
 		if (AIController->MoveToActor(PlayerPawn, ReachTargetDistance))
 		{
 			if (AttackReset)
@@ -194,7 +220,7 @@ void AGatekeeper::BehaviourStateEvent()
 			}
 		}
 		break;
-	case GatekeeperState::HeavyAttack:
+	case HeavyAttack:
 		if (AIController->MoveToActor(PlayerPawn, ReachTargetDistance))
 		{
 			if (HeavyReset)
@@ -207,7 +233,7 @@ void AGatekeeper::BehaviourStateEvent()
 			}
 		}
 		break;
-	case GatekeeperState::SummonPortals:
+	case SummonPortals:
 		Attacking = false;
 		if (PortalReset)
 		{
@@ -216,10 +242,10 @@ void AGatekeeper::BehaviourStateEvent()
 			StopMovement();
 		}
 		break;
-	case GatekeeperState::Staggered:
+	case Staggered:
 
 		break;
-	case GatekeeperState::Dead:
+	case Dead:
 
 		break;
 	}
@@ -237,7 +263,7 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 			AttackReset = true;
 			BehaviourChange(HeavyAttack);
 		}
-		else if ((Montage == HeavyAttackMontage || Montage == StompMontage || Montage == BeamMontage) && GKState == GatekeeperState::HeavyAttack)
+		else if ((Montage == HeavyAttackMontage || Montage == StompMontage || Montage == BeamMontage) && GKState == HeavyAttack)
 		{
 			Attacking = false;
 			FTimerHandle TimerHandle;
@@ -264,7 +290,7 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 				GetMesh()->GetAnimInstance()->Montage_Play(BeamMontage);
 			}
 		}
-		else if (Montage == BeamMontage && GKState == GatekeeperState::SummonPortals)
+		else if (Montage == BeamMontage && GKState == SummonPortals)
 		{
 			SetSpeed();
 			AttackReset = true;
@@ -320,16 +346,19 @@ void AGatekeeper::TrackPlayer()
 void AGatekeeper::SpawnPortals(int PortalCount)
 {
 	FActorSpawnParameters SpawnInfo;
-	GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[0]->GetActorLocation(), FRotator(PortalSpawns[0]->GetActorRotation()), SpawnInfo);
+	if (PortalSpawns[0])
+		GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[0]->GetActorLocation(), FRotator(PortalSpawns[0]->GetActorRotation()), SpawnInfo);
 
 	if (PortalCount > 1)
 	{
-		GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[1]->GetActorLocation(), FRotator(PortalSpawns[1]->GetActorRotation()), SpawnInfo);
+		if (PortalSpawns[1])
+			GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[1]->GetActorLocation(), FRotator(PortalSpawns[1]->GetActorRotation()), SpawnInfo);
 	}
 
 	if (PortalCount > 2)
 	{
-		GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[2]->GetActorLocation(), FRotator(PortalSpawns[2]->GetActorRotation()), SpawnInfo);
+		if (PortalSpawns[2])
+			GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[2]->GetActorLocation(), FRotator(PortalSpawns[2]->GetActorRotation()), SpawnInfo);
 	}
 }
 
@@ -347,8 +376,8 @@ void AGatekeeper::Death()
 		GetMesh()->GetAnimInstance()->StopAllMontages(false);
 	}
 
-	CapsuleComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
-	CapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
@@ -420,13 +449,7 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 	FVector EndLocation;
 	float AttackRadius;
 
-	if (AnimTrigger == BaseAttackMontage || AnimTrigger == HeavyAttackMontage)
-	{
-		StartLocation = ChestLocation->GetComponentLocation();
-		EndLocation = WeaponCollider->GetComponentLocation();
-		AttackRadius = WeaponRadius;
-	}
-	else if (AnimTrigger == StompMontage)
+	if (AnimTrigger == StompMontage)
 	{
 		StartLocation = GetMesh()->GetComponentLocation();
 		EndLocation = StartLocation;

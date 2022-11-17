@@ -42,8 +42,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PawnSensing)
 		class UPawnSensingComponent* PawnSensing;
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CapsuleComponent)
-	UCapsuleComponent* CapsuleComponent;
 
 
 	

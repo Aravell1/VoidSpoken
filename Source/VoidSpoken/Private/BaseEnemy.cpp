@@ -6,7 +6,7 @@
 ABaseEnemy::ABaseEnemy()
 {
 	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Pawn Sensing"));
-	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule Component"));
+	
 }
 
 float ABaseEnemy::GetMaxHealth()

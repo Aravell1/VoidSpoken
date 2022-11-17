@@ -29,9 +29,9 @@ void APortalSpawn::Tick(float DeltaTime)
 
 void APortalSpawn::SpawnEnemy()
 {
-	if (EnemyCount > 0)
+	if (EnemyArray.Num() > 0)
 	{
-		int EnemyIndex = FMath::RandRange(0, EnemyCount);
+		int EnemyIndex = FMath::RandRange(0, EnemyArray.Num() - 1);
 
 		FVector SpawnLocation = FVector(GetActorLocation().X + FMath::RandRange(-50.0f, 50.0f), GetActorLocation().Y + FMath::RandRange(-50.0f, 50.0f), GetActorLocation().Z);
 		float zLook = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation()).Yaw;

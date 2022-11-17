@@ -55,29 +55,39 @@ public:
 
 	void BeginPlay();
 
-	APawn* PlayerPawn = nullptr;
-	USkeletalMeshComponent* Weapon;
-	USphereComponent* WeaponCollider;
-	USphereComponent* ChestLocation;
+	/*UPROPERTY(VisibleAnywhere, Category = SkeletalMesh)
+		class USkeletalMesh* MeshContainer;
+
+	UPROPERTY(VisibleAnywhere, Category = SkeletalMesh)
+		class USkeletalMeshComponent* PlayerMesh;*/
+
+	UPROPERTY(BlueprintReadWrite)
+		APawn* PlayerPawn = nullptr;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		USkeletalMeshComponent* Weapon;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		USphereComponent* WeaponCollider;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		USphereComponent* ChestLocation;*/
 
 	UPROPERTY(EditAnywhere)
 		TArray<AGatekeeperTransforms*> PortalSpawns = { nullptr, nullptr, nullptr };
 	UPROPERTY(EditAnywhere)
-		FVector BossStartPoint = { 0, 0, 0 };
+		AGatekeeperTransforms* BossStartPoint;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* BaseAttackMontage = nullptr;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* HeavyAttackMontage = nullptr;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* StompMontage = nullptr;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* BeamMontage = nullptr;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* SummonPortalMontage = nullptr;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* EnrageMontage = nullptr;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 
 private:
@@ -109,8 +119,8 @@ private:
 	float ReachTargetDistance = 320.0f;
 	float AttackMultiplier = 1;
 	float DefenseMultiplier = 1;
-	float WeaponRadius = 60;
-	float ChestRadius = 30;
+	/*float WeaponRadius = 60;
+	float ChestRadius = 30;*/
 	float StompRadius = 500;
 	bool HeavyReset = true;
 	bool AttackReset = true;
