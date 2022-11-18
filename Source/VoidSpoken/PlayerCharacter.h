@@ -68,8 +68,4 @@ public:
 
 	void Attack();
 	void UniqueAttack();
-
-private:
-	UFUNCTION()
-		virtual void MoveDirection();
 };
