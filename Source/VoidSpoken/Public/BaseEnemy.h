@@ -19,31 +19,46 @@ class VOIDSPOKEN_API ABaseEnemy : public ABaseEntity
 public:
 	ABaseEnemy();
 
-	float GetMaxHealth();
-	void SetMaxHealth(float MHP);
+	UFUNCTION(BlueprintCallable)
+		float GetMaxHealth();
+	UFUNCTION(BlueprintCallable)
+		void SetMaxHealth(float MHP);
 
-	float GetAttack();
-	void SetAttack(float Atk);
+	UFUNCTION(BlueprintCallable)
+		float GetAttack();
+	UFUNCTION(BlueprintCallable)
+		void SetAttack(float Atk);
 
-	float GetDefense();
-	void SetDefense(float Def);
+	UFUNCTION(BlueprintCallable)
+		float GetDefense();
+	UFUNCTION(BlueprintCallable)
+		void SetDefense(float Def);
 
-	float GetHealth();
-	void SetHealth(float HP);
+	UFUNCTION(BlueprintCallable)
+		float GetHealth();
+	UFUNCTION(BlueprintCallable)
+		void SetHealth(float HP);
 
-	float GetWalkSpeed();
-	void SetWalkSpeed(float Walk);
+	UFUNCTION(BlueprintCallable)
+		float GetWalkSpeed();
+	UFUNCTION(BlueprintCallable)
+		void SetWalkSpeed(float Walk);
 
-	float GetRunSpeed();
-	void SetRunSpeed(float Run);
+	UFUNCTION(BlueprintCallable)
+		float GetRunSpeed();
+	UFUNCTION(BlueprintCallable)
+		void SetRunSpeed(float Run);
 
-	float GetDamageMultiplier();
-	void SetDamageMultiplier(float DMult);
+	UFUNCTION(BlueprintCallable)
+		float GetDamageMultiplier();
+	UFUNCTION(BlueprintCallable)
+		void SetDamageMultiplier(float DMult);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PawnSensing)
 		class UPawnSensingComponent* PawnSensing;
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		APawn* AttackTarget = nullptr;
 	
 private:
 	float Health = 0;
@@ -53,5 +68,4 @@ private:
 	float WalkSpeed = 0;
 	float RunSpeed = 0;
 	float DamageMultiplier = 10;
-	APawn* AttackTarget = nullptr;
 };
