@@ -25,7 +25,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 700.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
-
+	
 	// setup camera
 	CameraArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera arm"));
 	CameraArm->SetupAttachment(RootComponent);
@@ -66,9 +66,6 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	
-
 }
 
 // Called to bind functionality to input
@@ -100,41 +97,36 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	
 }
 
-
 //Finding foward vector and moving
 void APlayerCharacter::MoveForward(float Axis)
 {
-	if ((Controller != nullptr) && (Axis != 0.0f))
-	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		if (!IsRunning)
-		{
-			Axis *= 0.5f;
-		}
+	if (IsRunning)
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	else 
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Axis);
-	}
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	AddMovementInput(Direction, Axis);
 }
 
 //Find Rotation
 void APlayerCharacter::MoveRight(float Axis)
 {
-	if ((Controller != nullptr) && (Axis != 0.0f))
-	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		if (!IsRunning)
-		{
-			Axis *= 0.5f;
-		}
+	if (IsRunning)
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	else
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		AddMovementInput(Direction, Axis);
-	}
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(Direction, Axis);
 }
 
 void APlayerCharacter::TurnRate(float Rate)

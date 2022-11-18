@@ -53,6 +53,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float WalkSpeed = 250;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float RunSpeed = 450;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -62,4 +68,8 @@ public:
 
 	void Attack();
 	void UniqueAttack();
+
+private:
+	UFUNCTION()
+		virtual void MoveDirection();
 };

@@ -9,7 +9,7 @@
 #include "WeaponAttackNotify.h"
 #include "Engine.h"
 
-void UWeaponAttackNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
+[[deprecated]] void UWeaponAttackNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
 #if WITH_EDITOR
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
 #endif
@@ -18,7 +18,6 @@ void UWeaponAttackNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSeq
 
 	/// NULL Check
 	if (Entity != nullptr && Entity->EquippedWeapon != nullptr) {
-		Entity->EquippedWeapon->DealDamage();
+		//Entity->EquippedWeapon->DealDamage();
 	}
-
 }
