@@ -20,7 +20,7 @@
  * 
  */
 UENUM()
-enum GatekeeperState
+enum class GatekeeperState
 {
 	Start	UMETA(DisplayName = "Start"),
 	Chase	UMETA(DisplayName = "Chase"),
@@ -61,8 +61,6 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = SkeletalMesh)
 		class USkeletalMeshComponent* PlayerMesh;*/
 
-	UPROPERTY(BlueprintReadWrite)
-		APawn* PlayerPawn = nullptr;
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		USkeletalMeshComponent* Weapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -98,6 +96,8 @@ private:
 	UFUNCTION()
 		void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
+	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
+
 	void SetSpeed();
 	void AttackDelay();
 	void Enrage();
@@ -110,7 +110,8 @@ private:
 	void UpdateHealth(bool StopMovement, float Damage);
 	void AttackTrace(UAnimMontage* AnimTrigger);
 
-	GatekeeperState GKState = Start;
+	UPROPERTY(VisibleAnywhere)
+		GatekeeperState GKState = GatekeeperState::Start;
 
 	AGatekeeperAIController* AIController;
 	TArray<UAnimMontage*> MontageArray = { HeavyAttackMontage, StompMontage, BeamMontage };

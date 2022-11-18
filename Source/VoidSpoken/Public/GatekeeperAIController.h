@@ -23,11 +23,13 @@ public:
 	AGatekeeperAIController();
 	virtual void SeePlayer(APawn* Player);
 
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
 
 private:
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = true))
 		TObjectPtr<UBehaviorTree> BehaviorTree;
 
@@ -36,4 +38,5 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = true))
 		TObjectPtr<UBlackboardComponent> BlackboardComponent;
+
 };

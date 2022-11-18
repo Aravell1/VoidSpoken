@@ -13,21 +13,15 @@ AGatekeeper::AGatekeeper()
 	if (!GetMesh()->SkeletalMesh)
 	{
 		static ConstructorHelpers::FObjectFinder<USkeletalMesh>MeshContainer(TEXT("/Game/Blueprints/Bosses/Gatekeeper/Components/Standing_Idle.Standing_Idle"));
-		UE_LOG(LogTemp, Warning, TEXT("**************************************Constructor Code!"));
 		if (MeshContainer.Succeeded())
 		{
 			GetMesh()->SetSkeletalMesh(MeshContainer.Object);
 
-			UE_LOG(LogTemp, Warning, TEXT("**************************************Mesh Code!"));
-
-			//GetMesh()->SetSkeletalMesh(M.Object);
 			GetMesh()->SetupAttachment(GetCapsuleComponent());
 
 			GetMesh()->SetRelativeLocation(FVector(0, 0, -90));
 			GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
 		}
-		else
-			UE_LOG(LogTemp, Warning, TEXT("Failure!"));
 	}
 
 	/*if (!Weapon)
@@ -134,6 +128,8 @@ AGatekeeper::AGatekeeper()
 
 	OnTakeAnyDamage.AddDynamic(this, &AGatekeeper::TakeAnyDamage);
 
+	
+
 }
 
 float AGatekeeper::GetAttackMultiplier()
@@ -158,21 +154,26 @@ void AGatekeeper::SetDefenseMultiplier(float DefMult)
 
 void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 {
-	PlayerPawn = OtherPawn;
-	AIController->SeePlayer(PlayerPawn);
+	AttackTarget = OtherPawn;
+	AIController->SeePlayer(AttackTarget);
 
 	SetSpeed();
 
 	//Set HP Widget Component Visible
 
-	BehaviourChange(Chase);
+	BehaviourChange(GatekeeperState::Chase);
 }
 
 void AGatekeeper::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BehaviourChange(Start);
+	if (!AIController)
+		AIController = GetController<AGatekeeperAIController>();
+	if (AIController)
+		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &AGatekeeper::OnMoveCompleted);
+
+	BehaviourChange(GatekeeperState::Start);
 
 	
 }
@@ -204,36 +205,17 @@ void AGatekeeper::BehaviourStateEvent()
 {
 	switch (GKState)
 	{
-	case Start:
+	case GatekeeperState::Start:
 		if (BossStartPoint)
-			AIController->MoveToActor(BossStartPoint);
+			AIController->MoveToActor(BossStartPoint, 100);
 		break;
-	case Chase:
-		if (AIController->MoveToActor(PlayerPawn, ReachTargetDistance))
-		{
-			if (AttackReset)
-			{
-				AttackReset = false;
-				GetMesh()->GetAnimInstance()->Montage_Play(BaseAttackMontage);
-				StopMovement();
-				TrackPlayer();
-			}
-		}
+	case GatekeeperState::Chase:
+		AIController->MoveToActor(AttackTarget, ReachTargetDistance);
 		break;
-	case HeavyAttack:
-		if (AIController->MoveToActor(PlayerPawn, ReachTargetDistance))
-		{
-			if (HeavyReset)
-			{
-				HeavyReset = false;
-				RandomMontage = MontageArray[FMath::RandRange(0, MontageArray.Num() - 1)];
-				GetMesh()->GetAnimInstance()->Montage_Play(RandomMontage);
-				StopMovement();
-				TrackPlayer();
-			}
-		}
+	case GatekeeperState::HeavyAttack:
+		AIController->MoveToActor(AttackTarget, ReachTargetDistance);
 		break;
-	case SummonPortals:
+	case GatekeeperState::SummonPortals:
 		Attacking = false;
 		if (PortalReset)
 		{
@@ -242,10 +224,10 @@ void AGatekeeper::BehaviourStateEvent()
 			StopMovement();
 		}
 		break;
-	case Staggered:
+	case GatekeeperState::Staggered:
 
 		break;
-	case Dead:
+	case GatekeeperState::Dead:
 
 		break;
 	}
@@ -261,9 +243,9 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 			Attacking = false;
 			SetSpeed();
 			AttackReset = true;
-			BehaviourChange(HeavyAttack);
+			BehaviourChange(GatekeeperState::HeavyAttack);
 		}
-		else if ((Montage == HeavyAttackMontage || Montage == StompMontage || Montage == BeamMontage) && GKState == HeavyAttack)
+		else if ((Montage == HeavyAttackMontage || Montage == StompMontage || Montage == BeamMontage) && GKState == GatekeeperState::HeavyAttack)
 		{
 			Attacking = false;
 			FTimerHandle TimerHandle;
@@ -290,19 +272,52 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 				GetMesh()->GetAnimInstance()->Montage_Play(BeamMontage);
 			}
 		}
-		else if (Montage == BeamMontage && GKState == SummonPortals)
+		else if (Montage == BeamMontage && GKState == GatekeeperState::SummonPortals)
 		{
 			SetSpeed();
 			AttackReset = true;
 			HeavyReset = true;
 			PortalReset = true;
-			BehaviourChange(Chase);
+			BehaviourChange(GatekeeperState::Chase);
 		}
 		else if (Montage == EnrageMontage)
 		{
 			SetSpeed();
-			BehaviourChange(HeavyAttack);
+			BehaviourChange(GatekeeperState::HeavyAttack);
 		}
+	}
+}
+
+void AGatekeeper::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
+{
+	if (Result.IsSuccess())
+	{
+		switch (GKState)
+		{
+		case GatekeeperState::Chase:
+			if (AttackReset)
+			{
+				AttackReset = false;
+				GetMesh()->GetAnimInstance()->Montage_Play(BaseAttackMontage);
+				StopMovement();
+				TrackPlayer();
+			}
+			break;
+		case GatekeeperState::HeavyAttack:
+			if (HeavyReset)
+			{
+				HeavyReset = false;
+				RandomMontage = MontageArray[FMath::RandRange(0, MontageArray.Num() - 1)];
+				GetMesh()->GetAnimInstance()->Montage_Play(RandomMontage);
+				StopMovement();
+				TrackPlayer();
+			}
+			break;
+		}
+	}
+	else
+	{
+		BehaviourStateEvent();
 	}
 }
 
@@ -322,7 +337,7 @@ void AGatekeeper::AttackDelay()
 {
 	HeavyReset = true;
 	SetSpeed();
-	BehaviourChange(Chase);
+	BehaviourChange(GatekeeperState::Chase);
 }
 
 void AGatekeeper::Enrage()
@@ -337,7 +352,7 @@ void AGatekeeper::Enrage()
 
 void AGatekeeper::TrackPlayer()
 {
-	float zLook = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerPawn->GetActorLocation()).Yaw;
+	float zLook = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), AttackTarget->GetActorLocation()).Yaw;
 	SetActorRotation(UKismetMathLibrary::RLerp(FRotator(0, 0, GetActorRotation().Yaw), FRotator(0, 0, zLook), 0.02f, true));
 	if (Attacking)
 		TrackPlayer();
@@ -346,19 +361,9 @@ void AGatekeeper::TrackPlayer()
 void AGatekeeper::SpawnPortals(int PortalCount)
 {
 	FActorSpawnParameters SpawnInfo;
-	if (PortalSpawns[0])
-		GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[0]->GetActorLocation(), FRotator(PortalSpawns[0]->GetActorRotation()), SpawnInfo);
-
-	if (PortalCount > 1)
+	for (int i = 0; i <= PortalCount; i++)
 	{
-		if (PortalSpawns[1])
-			GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[1]->GetActorLocation(), FRotator(PortalSpawns[1]->GetActorRotation()), SpawnInfo);
-	}
-
-	if (PortalCount > 2)
-	{
-		if (PortalSpawns[2])
-			GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[2]->GetActorLocation(), FRotator(PortalSpawns[2]->GetActorRotation()), SpawnInfo);
+		GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[i]->GetActorLocation(), FRotator(PortalSpawns[i]->GetActorRotation()), SpawnInfo);
 	}
 }
 
@@ -369,7 +374,7 @@ void AGatekeeper::Death()
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->MaxWalkSpeed = 0;
 	Attacking = false;
-	BehaviourChange(Dead);
+	BehaviourChange(GatekeeperState::Dead);
 
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 	{
@@ -434,7 +439,7 @@ void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamag
 	if (PortalCount > 0)
 	{
 		SpawnPortals(PortalCount);
-		BehaviourChange(SummonPortals);
+		BehaviourChange(GatekeeperState::SummonPortals);
 	}
 	else
 	{
