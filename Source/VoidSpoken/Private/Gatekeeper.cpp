@@ -24,64 +24,6 @@ AGatekeeper::AGatekeeper()
 		}
 	}
 
-	/*if (!Weapon)
-	{
-		Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
-		
-		static ConstructorHelpers::FObjectFinder<USkeletalMesh>W(TEXT("/Game/Assets/Weapon_Pack/Skeletal_Mesh/SK_GreatHammer.SK_GreatHammer"));
-
-		if (W.Succeeded())
-		{
-			Weapon->SetSkeletalMesh(W.Object);
-
-			UE_LOG(LogTemp, Warning, TEXT("**************************************Weapon Success!"));
-
-		}
-		else
-			UE_LOG(LogTemp, Warning, TEXT("**************************************Weapon Fail!"));
-
-		UE_LOG(LogTemp, Warning, TEXT("**************************************Weapon Code!"));
-
-		Weapon->SetupAttachment(GetMesh(), GetMesh()->GetSocketBoneName(FName("RightHand")));
-		
-
-		Weapon->SetRelativeLocation(FVector(-5.688907, -9.429593, 1.854035));
-		Weapon->SetRelativeRotation(FRotator(-9.846553, 88.246216, -84.398694));
-	}*/
-
-	/*if (!WeaponCollider)
-	{
-		WeaponCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Weapon Collider"));
-		
-		WeaponCollider->SetupAttachment(Weapon);
-
-		WeaponCollider->SetRelativeLocation(FVector(-26, 0.5, 95));
-		WeaponCollider->SetSphereRadius(WeaponRadius);
-	}*/
-	/*if (!WeaponCollider)
-	{
-		WeaponCollider = Cast<USphereComponent>(GetDefaultSubobjectByName(TEXT("WeaponCollider1")));
-		if (WeaponCollider)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Success"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed"));
-		}
-	}*/
-
-	/*if (!ChestLocation)
-	{
-		ChestLocation = CreateDefaultSubobject<USphereComponent>(TEXT("Chest Collider"));
-
-		ChestLocation->SetupAttachment(GetMesh(), GetMesh()->GetSocketBoneName(FName("Spine2")));
-
-		ChestLocation->SetRelativeLocation(FVector(0, 0, 20));
-		ChestLocation->SetRelativeRotation(FRotator(0, 0, 30));
-		ChestLocation->SetSphereRadius(ChestRadius);
-	}*/
-
 	//Initialize General Stats
 	SetAttack(30);
 	SetDefense(20);
@@ -102,21 +44,8 @@ AGatekeeper::AGatekeeper()
 	//Initialize Character Movement Stats
 	SetWalkSpeed(350);
 	SetRunSpeed(500);
-	GetCharacterMovement()->MaxWalkSpeed = GetWalkSpeed();
+	GetCharacterMovement()->MaxWalkSpeed = 100;
 
-	MontageEndDelegate.BindUObject(this, &AGatekeeper::OnAnimationEnded);
-	if (BaseAttackMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, BaseAttackMontage);
-	if (HeavyAttackMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, HeavyAttackMontage);
-	if (StompMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, StompMontage);
-	if (BeamMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, BeamMontage);
-	if (SummonPortalMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, SummonPortalMontage);
-	if (EnrageMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, EnrageMontage);
 
 	if (PawnSensing)
 	{
@@ -125,11 +54,6 @@ AGatekeeper::AGatekeeper()
 		PawnSensing->bOnlySensePlayers = true;
 		PawnSensing->OnSeePawn.AddDynamic(this, &AGatekeeper::OnSeePawn);
 	}
-
-	OnTakeAnyDamage.AddDynamic(this, &AGatekeeper::TakeAnyDamage);
-
-	
-
 }
 
 float AGatekeeper::GetAttackMultiplier()
@@ -173,6 +97,21 @@ void AGatekeeper::BeginPlay()
 	if (AIController)
 		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &AGatekeeper::OnMoveCompleted);
 
+	FOnMontageEnded MontageEndDelegate;
+	MontageEndDelegate.BindUObject(this, &AGatekeeper::OnAnimationEnded);
+	if (BaseAttackMontage)
+		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, BaseAttackMontage);
+	if (HeavyAttackMontage)
+		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, HeavyAttackMontage);
+	if (StompMontage)
+		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, StompMontage);
+	if (BeamMontage)
+		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, BeamMontage);
+	if (SummonPortalMontage)
+		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, SummonPortalMontage);
+	if (EnrageMontage)
+		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, EnrageMontage);
+
 	BehaviourChange(GatekeeperState::Start);
 
 	
@@ -207,7 +146,7 @@ void AGatekeeper::BehaviourStateEvent()
 	{
 	case GatekeeperState::Start:
 		if (BossStartPoint)
-			AIController->MoveToActor(BossStartPoint, 100);
+			AIController->MoveToActor(BossStartPoint, 5);
 		break;
 	case GatekeeperState::Chase:
 		AIController->MoveToActor(AttackTarget, ReachTargetDistance);
@@ -232,6 +171,12 @@ void AGatekeeper::BehaviourStateEvent()
 		break;
 	}
 
+}
+
+void AGatekeeper::Tick(float DeltaTime)
+{
+	if (Attacking)
+		TrackPlayer();
 }
 
 void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -315,10 +260,6 @@ void AGatekeeper::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingRe
 			break;
 		}
 	}
-	else
-	{
-		BehaviourStateEvent();
-	}
 }
 
 void AGatekeeper::SetSpeed()
@@ -353,9 +294,8 @@ void AGatekeeper::Enrage()
 void AGatekeeper::TrackPlayer()
 {
 	float zLook = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), AttackTarget->GetActorLocation()).Yaw;
-	SetActorRotation(UKismetMathLibrary::RLerp(FRotator(0, 0, GetActorRotation().Yaw), FRotator(0, 0, zLook), 0.02f, true));
-	if (Attacking)
-		TrackPlayer();
+	SetActorRotation(UKismetMathLibrary::RLerp(FRotator(0, GetActorRotation().Yaw, 0), FRotator(0, zLook, 0), 0.02f, true));
+	
 }
 
 void AGatekeeper::SpawnPortals(int PortalCount)

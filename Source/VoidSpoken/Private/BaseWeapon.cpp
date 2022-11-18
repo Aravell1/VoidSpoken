@@ -35,7 +35,7 @@ void ABaseWeapon::PostInitializeComponents() {
 	WeaponCollisionBox->SetGenerateOverlapEvents(true);
 	WeaponCollisionBox->SetNotifyRigidBodyCollision(true);
 
-	FAttachmentTransformRules* TransformRules = new FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
+	FAttachmentTransformRules* TransformRules = new FAttachmentTransformRules(EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, false);
 	WeaponCollisionBox->AttachToComponent(WeaponMeshComponent, *TransformRules, "Weapon Collision Box");
 
 	//Weapon Collision Delegates

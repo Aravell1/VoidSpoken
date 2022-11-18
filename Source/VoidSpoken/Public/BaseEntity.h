@@ -24,7 +24,7 @@ public:
 
 	/// Dev: YunYun
 	/// Adding Weapons to this class
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		ABaseWeapon* EquippedWeapon = nullptr;
 
 protected:
