@@ -13,6 +13,7 @@
 #include "Components/SphereComponent.h" 
 #include "GatekeeperTransforms.h"
 #include "Kismet/KismetSystemLibrary.h" 
+#include "BaseWeapon.h"
 #include "Gatekeeper.generated.h"
 
 
@@ -90,6 +91,8 @@ public:
 
 private:
 
+	virtual void Tick(float DeltaTime) override;
+
 	UFUNCTION()
 		void OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted);
 
@@ -114,13 +117,11 @@ private:
 
 	AGatekeeperAIController* AIController;
 	TArray<UAnimMontage*> MontageArray = { HeavyAttackMontage, StompMontage, BeamMontage };
-	FOnMontageEnded MontageEndDelegate;
+	
 
 	float ReachTargetDistance = 320.0f;
 	float AttackMultiplier = 1;
 	float DefenseMultiplier = 1;
-	/*float WeaponRadius = 60;
-	float ChestRadius = 30;*/
 	float StompRadius = 500;
 	bool HeavyReset = true;
 	bool AttackReset = true;
