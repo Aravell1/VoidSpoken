@@ -9,6 +9,14 @@ APortalSpawn::APortalSpawn()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	if (!BoxMesh)
+		BoxMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Box Mesh"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>Box(TEXT("StaticMesh'/Game/Maps/Meshes/SM_ChamferCube.SM_ChamferCube'"));
+
+	if (Box.Succeeded())
+	{
+		BoxMesh->SetStaticMesh(Box.Object);
+	}
 }
 
 // Called when the game starts or when spawned

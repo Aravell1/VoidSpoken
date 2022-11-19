@@ -61,7 +61,8 @@ public:
 		APawn* AttackTarget = nullptr;
 	
 private:
-	float Health = 0;
+	UPROPERTY(VisibleAnywhere)
+		float Health = 0;
 	float Attack = 0;
 	float Defense = 0;
 	float MaxHealth = 0;

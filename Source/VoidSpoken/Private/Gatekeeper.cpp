@@ -78,6 +78,7 @@ void AGatekeeper::SetDefenseMultiplier(float DefMult)
 
 void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 {
+
 	AttackTarget = OtherPawn;
 	AIController->SeePlayer(AttackTarget);
 
@@ -85,7 +86,9 @@ void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 
 	//Set HP Widget Component Visible
 
-	BehaviourChange(GatekeeperState::Chase);
+	SetState(GatekeeperState::Chase);
+
+	PawnSensing->SetSensingUpdatesEnabled(false);
 }
 
 void AGatekeeper::BeginPlay()
@@ -96,25 +99,13 @@ void AGatekeeper::BeginPlay()
 		AIController = GetController<AGatekeeperAIController>();
 	if (AIController)
 		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &AGatekeeper::OnMoveCompleted);
-
-	FOnMontageEnded MontageEndDelegate;
-	MontageEndDelegate.BindUObject(this, &AGatekeeper::OnAnimationEnded);
-	if (BaseAttackMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, BaseAttackMontage);
-	if (HeavyAttackMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, HeavyAttackMontage);
-	if (StompMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, StompMontage);
-	if (BeamMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, BeamMontage);
-	if (SummonPortalMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, SummonPortalMontage);
-	if (EnrageMontage)
-		GetMesh()->GetAnimInstance()->Montage_SetBlendingOutDelegate(MontageEndDelegate, EnrageMontage);
-
-	BehaviourChange(GatekeeperState::Start);
-
 	
+	MontageEndDelegate.BindUObject(this, &AGatekeeper::OnAnimationEnded);
+	MontageArray.Add(HeavyAttackMontage);
+	MontageArray.Add(StompMontage);
+	MontageArray.Add(BeamMontage);
+
+	SetState(GatekeeperState::Start);
 }
 
 void AGatekeeper::StopMovement()
@@ -124,6 +115,7 @@ void AGatekeeper::StopMovement()
 	Attacking = true;
 }
 
+
 GatekeeperState AGatekeeper::GetState()
 {
 	return GKState;
@@ -132,11 +124,6 @@ GatekeeperState AGatekeeper::GetState()
 void AGatekeeper::SetState(GatekeeperState state)
 {
 	GKState = state;
-}
-
-void AGatekeeper::BehaviourChange(GatekeeperState state)
-{
-	SetState(state);
 	BehaviourStateEvent();
 }
 
@@ -160,6 +147,8 @@ void AGatekeeper::BehaviourStateEvent()
 		{
 			PortalReset = false;
 			GetMesh()->GetAnimInstance()->Montage_Play(SummonPortalMontage);
+			GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, SummonPortalMontage);
+
 			StopMovement();
 		}
 		break;
@@ -188,7 +177,7 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 			Attacking = false;
 			SetSpeed();
 			AttackReset = true;
-			BehaviourChange(GatekeeperState::HeavyAttack);
+			SetState(GatekeeperState::HeavyAttack);
 		}
 		else if ((Montage == HeavyAttackMontage || Montage == StompMontage || Montage == BeamMontage) && GKState == GatekeeperState::HeavyAttack)
 		{
@@ -204,18 +193,9 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 			FTimerHandle TimerHandle;
 			GetWorldTimerManager().SetTimer(TimerHandle,
 				this,
-				&AGatekeeper::AttackDelay,
+				&AGatekeeper::PortalDelay,
 				1.0f);
-			if (GetHealth() <= GetMaxHealth() * GetHPThresholdLow())
-			{
-				AttackReset = true;
-				HeavyReset = true;
-				Enrage();
-			}
-			else
-			{
-				GetMesh()->GetAnimInstance()->Montage_Play(BeamMontage);
-			}
+			
 		}
 		else if (Montage == BeamMontage && GKState == GatekeeperState::SummonPortals)
 		{
@@ -223,12 +203,12 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 			AttackReset = true;
 			HeavyReset = true;
 			PortalReset = true;
-			BehaviourChange(GatekeeperState::Chase);
+			SetState(GatekeeperState::Chase);
 		}
 		else if (Montage == EnrageMontage)
 		{
 			SetSpeed();
-			BehaviourChange(GatekeeperState::HeavyAttack);
+			SetState(GatekeeperState::HeavyAttack);
 		}
 	}
 }
@@ -244,6 +224,7 @@ void AGatekeeper::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingRe
 			{
 				AttackReset = false;
 				GetMesh()->GetAnimInstance()->Montage_Play(BaseAttackMontage);
+				GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, BaseAttackMontage);
 				StopMovement();
 				TrackPlayer();
 			}
@@ -254,6 +235,7 @@ void AGatekeeper::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingRe
 				HeavyReset = false;
 				RandomMontage = MontageArray[FMath::RandRange(0, MontageArray.Num() - 1)];
 				GetMesh()->GetAnimInstance()->Montage_Play(RandomMontage);
+				GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, RandomMontage);
 				StopMovement();
 				TrackPlayer();
 			}
@@ -278,7 +260,22 @@ void AGatekeeper::AttackDelay()
 {
 	HeavyReset = true;
 	SetSpeed();
-	BehaviourChange(GatekeeperState::Chase);
+	SetState(GatekeeperState::Chase);
+}
+
+void AGatekeeper::PortalDelay()
+{
+	if (GetHealth() <= GetMaxHealth() * GetHPThresholdLow())
+	{
+		AttackReset = true;
+		HeavyReset = true;
+		Enrage();
+	}
+	else
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(BeamMontage);
+		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, BeamMontage);
+	}
 }
 
 void AGatekeeper::Enrage()
@@ -288,6 +285,7 @@ void AGatekeeper::Enrage()
 		Enraged = true;
 		SetAttack(GetAttack() * GetAttackMultiplier());
 		GetMesh()->GetAnimInstance()->Montage_Play(EnrageMontage);
+		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, EnrageMontage);
 	}
 }
 
@@ -301,7 +299,7 @@ void AGatekeeper::TrackPlayer()
 void AGatekeeper::SpawnPortals(int PortalCount)
 {
 	FActorSpawnParameters SpawnInfo;
-	for (int i = 0; i <= PortalCount; i++)
+	for (int i = 0; i < PortalCount; i++)
 	{
 		GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[i]->GetActorLocation(), FRotator(PortalSpawns[i]->GetActorRotation()), SpawnInfo);
 	}
@@ -314,7 +312,7 @@ void AGatekeeper::Death()
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->MaxWalkSpeed = 0;
 	Attacking = false;
-	BehaviourChange(GatekeeperState::Dead);
+	SetState(GatekeeperState::Dead);
 
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 	{
@@ -374,12 +372,14 @@ void AGatekeeper::UpdateHealth(bool StopMovement, float Damage)
 
 void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	float PortalCount = HealthCheck(FMath::Floor(Damage * GetDamageMultiplier() / GetDefense()));
+	float PortalCount = HealthCheck(FMath::Floor(Damage * (25 / (25 + GetDefense()))));
+
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, FString::FromInt((int)PortalCount));
 
 	if (PortalCount > 0)
 	{
 		SpawnPortals(PortalCount);
-		BehaviourChange(GatekeeperState::SummonPortals);
+		SetState(GatekeeperState::SummonPortals);
 	}
 	else
 	{

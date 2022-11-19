@@ -19,6 +19,9 @@ public:
 	APortalSpawn();
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UStaticMeshComponent* BoxMesh;
+
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<ABaseEnemy> EnemyClass = ABaseEnemy::StaticClass();
 

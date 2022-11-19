@@ -43,7 +43,6 @@ public:
 	void SetState(GatekeeperState state);
 
 	void BehaviourStateEvent();
-	void BehaviourChange(GatekeeperState state);
 
 	float GetAttackMultiplier();
 	void SetAttackMultiplier(float AttackMult);
@@ -102,6 +101,7 @@ private:
 
 	void SetSpeed();
 	void AttackDelay();
+	void PortalDelay();
 	void Enrage();
 	void StopMovement();
 	void TrackPlayer();
@@ -112,12 +112,15 @@ private:
 	void UpdateHealth(bool StopMovement, float Damage);
 	void AttackTrace(UAnimMontage* AnimTrigger);
 
+
 	UPROPERTY(VisibleAnywhere)
 		GatekeeperState GKState = GatekeeperState::Start;
 
 	AGatekeeperAIController* AIController;
-	TArray<UAnimMontage*> MontageArray = { HeavyAttackMontage, StompMontage, BeamMontage };
-	
+
+	UPROPERTY(VisibleAnywhere)
+		TArray<UAnimMontage*> MontageArray;
+	FOnMontageEnded MontageEndDelegate;
 
 	float ReachTargetDistance = 320.0f;
 	float AttackMultiplier = 1;
