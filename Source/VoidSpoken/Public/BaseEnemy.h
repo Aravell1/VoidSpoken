@@ -8,9 +8,12 @@
 #include "Components/CapsuleComponent.h" 
 #include "BaseEnemy.generated.h"
 
+
 /**
  * 
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBroadcastDelegate);
+
 UCLASS()
 class VOIDSPOKEN_API ABaseEnemy : public ABaseEntity
 {
@@ -18,6 +21,9 @@ class VOIDSPOKEN_API ABaseEnemy : public ABaseEntity
 
 public:
 	ABaseEnemy();
+
+	UPROPERTY(BlueprintAssignable, Category = "HealthBar")
+		FBroadcastDelegate UpdateHealthBar;
 
 	UFUNCTION(BlueprintCallable)
 		float GetMaxHealth();

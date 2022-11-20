@@ -17,7 +17,7 @@ AGatekeeperAIController::AGatekeeperAIController()
 
 void AGatekeeperAIController::SeePlayer(APawn* Player)
 {
-	SetFocus(Player);
+	//SetFocus(Player);
 }
 
 void AGatekeeperAIController::BeginPlay()

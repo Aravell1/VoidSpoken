@@ -10,6 +10,7 @@
 #include "GatekeeperAIController.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PortalSpawn.h"
+#include "GameFramework/Actor.h" 
 #include "Components/SphereComponent.h" 
 #include "GatekeeperTransforms.h"
 #include "Kismet/KismetSystemLibrary.h" 
@@ -53,20 +54,8 @@ public:
 	UFUNCTION()
 		void OnSeePawn(APawn* OtherPawn);
 
-	void BeginPlay();
-
-	/*UPROPERTY(VisibleAnywhere, Category = SkeletalMesh)
-		class USkeletalMesh* MeshContainer;
-
-	UPROPERTY(VisibleAnywhere, Category = SkeletalMesh)
-		class USkeletalMeshComponent* PlayerMesh;*/
-
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		USkeletalMeshComponent* Weapon;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		USphereComponent* WeaponCollider;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		USphereComponent* ChestLocation;*/
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<APortalSpawn> Portal;
 
 	UPROPERTY(EditAnywhere)
 		TArray<AGatekeeperTransforms*> PortalSpawns = { nullptr, nullptr, nullptr };
@@ -88,16 +77,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 
-private:
-
+protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
-
+	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
+	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
 	UFUNCTION()
 		void OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
-
-	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
+private:
 
 	void SetSpeed();
 	void AttackDelay();
@@ -112,14 +101,13 @@ private:
 	void UpdateHealth(bool StopMovement, float Damage);
 	void AttackTrace(UAnimMontage* AnimTrigger);
 
-
 	UPROPERTY(VisibleAnywhere)
 		GatekeeperState GKState = GatekeeperState::Start;
 
-	AGatekeeperAIController* AIController;
-
 	UPROPERTY(VisibleAnywhere)
 		TArray<UAnimMontage*> MontageArray;
+
+	AGatekeeperAIController* AIController;
 	FOnMontageEnded MontageEndDelegate;
 
 	float ReachTargetDistance = 320.0f;
@@ -131,6 +119,7 @@ private:
 	bool PortalReset = true;
 	bool Attacking = false;
 	bool Enraged = false;
+	bool LockState = false;
 
 	
 };

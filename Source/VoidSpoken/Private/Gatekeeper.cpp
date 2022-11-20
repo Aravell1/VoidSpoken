@@ -56,41 +56,6 @@ AGatekeeper::AGatekeeper()
 	}
 }
 
-float AGatekeeper::GetAttackMultiplier()
-{
-	return AttackMultiplier;
-}
-
-void AGatekeeper::SetAttackMultiplier(float AttackMult)
-{
-	AttackMultiplier = AttackMult;
-}
-
-float AGatekeeper::GetDefenseMultiplier()
-{
-	return DefenseMultiplier;
-}
-
-void AGatekeeper::SetDefenseMultiplier(float DefMult)
-{
-	DefenseMultiplier = DefMult;
-}
-
-void AGatekeeper::OnSeePawn(APawn* OtherPawn)
-{
-
-	AttackTarget = OtherPawn;
-	AIController->SeePlayer(AttackTarget);
-
-	SetSpeed();
-
-	//Set HP Widget Component Visible
-
-	SetState(GatekeeperState::Chase);
-
-	PawnSensing->SetSensingUpdatesEnabled(false);
-}
-
 void AGatekeeper::BeginPlay()
 {
 	Super::BeginPlay();
@@ -108,23 +73,22 @@ void AGatekeeper::BeginPlay()
 	SetState(GatekeeperState::Start);
 }
 
-void AGatekeeper::StopMovement()
+void AGatekeeper::Tick(float DeltaTime)
 {
-	GetCharacterMovement()->StopMovementImmediately();
-	GetCharacterMovement()->MaxWalkSpeed = 0;
-	Attacking = true;
+	if (Attacking)
+		TrackPlayer();
 }
 
-
-GatekeeperState AGatekeeper::GetState()
+void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 {
-	return GKState;
-}
+	AttackTarget = OtherPawn;
+	AIController->SeePlayer(AttackTarget);
 
-void AGatekeeper::SetState(GatekeeperState state)
-{
-	GKState = state;
-	BehaviourStateEvent();
+	SetSpeed();
+
+	SetState(GatekeeperState::Chase);
+
+	PawnSensing->SetSensingUpdatesEnabled(false);
 }
 
 void AGatekeeper::BehaviourStateEvent()
@@ -156,16 +120,16 @@ void AGatekeeper::BehaviourStateEvent()
 
 		break;
 	case GatekeeperState::Dead:
-
+		LockState = true;
 		break;
 	}
-
 }
 
-void AGatekeeper::Tick(float DeltaTime)
+void AGatekeeper::StopMovement()
 {
-	if (Attacking)
-		TrackPlayer();
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->MaxWalkSpeed = 0;
+	Attacking = true;
 }
 
 void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -301,7 +265,7 @@ void AGatekeeper::SpawnPortals(int PortalCount)
 	FActorSpawnParameters SpawnInfo;
 	for (int i = 0; i < PortalCount; i++)
 	{
-		GetWorld()->SpawnActor<APortalSpawn>(PortalSpawns[i]->GetActorLocation(), FRotator(PortalSpawns[i]->GetActorRotation()), SpawnInfo);
+		GetWorld()->SpawnActor<APortalSpawn>(Portal, PortalSpawns[i]->GetActorLocation(), FRotator(PortalSpawns[i]->GetActorRotation()), SpawnInfo);
 	}
 }
 
@@ -319,12 +283,21 @@ void AGatekeeper::Death()
 		GetMesh()->GetAnimInstance()->StopAllMontages(false);
 	}
 
+	if (AIController->GetFocusActor())
+		AIController->ClearFocus(EAIFocusPriority::Gameplay);
+
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
 	SetLifeSpan(10);
+}
+
+void AGatekeeper::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	EquippedWeapon->Destroy();
+	Super::EndPlay(EndPlayReason);
 }
 
 int AGatekeeper::HealthCheck(float Damage)
@@ -365,14 +338,13 @@ void AGatekeeper::UpdateHealth(bool StopMovement, float Damage)
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->MaxWalkSpeed = 0;
 	}
-
-	//Update Health Bar Widget
-
 }
 
 void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	float PortalCount = HealthCheck(FMath::Floor(Damage * (25 / (25 + GetDefense()))));
+
+	UpdateHealthBar.Broadcast();
 
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, FString::FromInt((int)PortalCount));
 
@@ -417,10 +389,37 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 	}
 }
 
+float AGatekeeper::GetAttackMultiplier()
+{
+	return AttackMultiplier;
+}
 
+void AGatekeeper::SetAttackMultiplier(float AttackMult)
+{
+	AttackMultiplier = AttackMult;
+}
 
+float AGatekeeper::GetDefenseMultiplier()
+{
+	return DefenseMultiplier;
+}
 
+void AGatekeeper::SetDefenseMultiplier(float DefMult)
+{
+	DefenseMultiplier = DefMult;
+}
 
+GatekeeperState AGatekeeper::GetState()
+{
+	return GKState;
+}
 
-
+void AGatekeeper::SetState(GatekeeperState state)
+{
+	if (!LockState)
+	{
+		GKState = state;
+		BehaviourStateEvent();
+	}
+}
 
