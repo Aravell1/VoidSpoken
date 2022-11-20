@@ -4,20 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "BaseBoss.h"
-#include "AIController.h"
 #include "Math/TransformNonVectorized.h"
+#include "Animation/AnimMontage.h" 
+#include "Animation/AnimInstance.h"
 #include "Gatekeeper.generated.h"
 
-UENUM()
-enum GatekeeperState
-{
-	Start	UMETA(DisplayName = "Start"),
-	Chase	UMETA(DisplayName = "Chase"),
-	HeavyAttack	UMETA(DisplayName = "HeavyAttack"),
-	SummonPortals	UMETA(DisplayName = "SummonPortals"),
-	Staggered	UMETA(DisplayName = "Staggered"),
-	Dead	UMETA(DisplayName = "Dead")
-};
+
 /**
  * 
  */
@@ -35,24 +27,29 @@ public:
 	float GetDefenseMultiplier();
 	void SetDefenseMultiplier(float DefMult);
 
-	enum GatekeeperState GetState();
-	void SetState(GatekeeperState state);
-
 	void BeginPlay();
 
-	void BehaviourChange(GatekeeperState state);
-
-	//UFUNCTION(BlueprintNativeEvent, Category = "Behaviour Change")
-	void BehaviourStateEvent();
 
 	UPROPERTY(EditAnywhere)
-		FTransform BossStartPoint;
+		FVector3d BossStartPoint;
+
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* BaseAttackMontage = nullptr;
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* HeavyAttackMontage = nullptr;
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* StompMontage = nullptr;
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* BeamMontage = nullptr;
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* SummonPortalMontage = nullptr;
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* EnrageMontage = nullptr;
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* RandomMontage = nullptr;
 
 private:
 	float AttackMultiplier = 0;
 	float DefenseMultiplier = 0;
-	
-	GatekeeperState GKState = Start;
-
 	
 };
