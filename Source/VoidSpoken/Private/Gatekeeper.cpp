@@ -306,7 +306,8 @@ void AGatekeeper::Death()
 
 void AGatekeeper::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	EquippedWeapon->Destroy();
+	if (EquippedWeapon != nullptr)
+		EquippedWeapon->Destroy();
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -372,6 +373,8 @@ void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamag
 
 void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 {
+	Super::AttackTrace(AnimTrigger);
+
 	FVector StartLocation;
 	FVector EndLocation;
 	float AttackRadius;
@@ -387,15 +390,26 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 		return;
 	}
 
-	TArray<AActor*> ActorsToIgnore = {};
+	TArray<AActor*> ActorsToIgnore = { this };
 	TArray<FHitResult> OutHits;
 	if (UKismetSystemLibrary::SphereTraceMulti(GetWorld(), StartLocation, EndLocation, AttackRadius,
 		TraceTypeQuery3, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHits, true, 
 		FLinearColor::Red, FLinearColor::Green, 1.0f))
 	{
 		float Damage = FMath::Floor(GetAttack() * FMath::RandRange(0.9f, 1.1f));
-		FDamageEvent DamageEvent;
-		OutHits[0].GetActor()->TakeDamage(Damage, DamageEvent, NULL, this);
+		for (int i = 0; i < OutHits.Num(); i++)
+		{
+			if (OutHits[i].GetActor() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+			{
+				//DrawDebugLine(GetWorld(), StartLocation, OutHits[i].GetActor()->GetActorLocation(), FColor::Blue, false, 5);
+				UGameplayStatics::ApplyDamage(OutHits[i].GetActor(), Damage, NULL, this, NULL);
+				FVector ImpulseVector = (OutHits[i].GetActor()->GetActorLocation() - StartLocation).GetSafeNormal() * StompImpulseForce;
+				ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+				Player->LaunchCharacter(ImpulseVector, true, false);
+				return;
+			}
+
+		}
 	}
 }
 

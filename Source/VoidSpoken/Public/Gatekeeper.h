@@ -76,7 +76,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 
+	UPROPERTY(EditDefaultsOnly)
+		float StompImpulseForce = 5000;
 
+		void AttackTrace(UAnimMontage* AnimTrigger) override;
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -99,7 +102,6 @@ private:
 	int HealthCheck(float Damage);
 	bool HPThresholdCheck(float HPThreshold, float Damage);
 	void UpdateHealth(bool StopMovement, float Damage);
-	void AttackTrace(UAnimMontage* AnimTrigger);
 
 	UPROPERTY(VisibleAnywhere)
 		GatekeeperState GKState = GatekeeperState::Start;
@@ -114,7 +116,7 @@ private:
 	float ReachTargetDistance = 320.0f;
 	float AttackMultiplier = 1;
 	float DefenseMultiplier = 1;
-	float StompRadius = 500;
+	float StompRadius = 750;
 	bool HeavyReset = true;
 	bool AttackReset = true;
 	bool PortalReset = true;

@@ -70,6 +70,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		AEnemyWeapon* EquippedWeapon;
 
+	virtual void AttackTrace(UAnimMontage* AnimTrigger);
+
 private:
 
 	UPROPERTY(VisibleAnywhere)

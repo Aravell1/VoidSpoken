@@ -79,3 +79,7 @@ void ABaseEnemy::SetDamageMultiplier(float DMult)
 	DamageMultiplier = DMult;
 }
 
+void ABaseEnemy::AttackTrace(UAnimMontage* AnimTrigger)
+{
+}
+
