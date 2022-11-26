@@ -25,7 +25,7 @@ AGatekeeper::AGatekeeper()
 	}
 
 	//Initialize General Stats
-	SetAttack(30);
+	SetAttack(20);
 	SetDefense(20);
 	SetMaxHealth(200);
 	SetHealth(GetMaxHealth());
@@ -56,6 +56,7 @@ AGatekeeper::AGatekeeper()
 	}
 }
 
+
 void AGatekeeper::BeginPlay()
 {
 	Super::BeginPlay();
@@ -77,6 +78,17 @@ void AGatekeeper::Tick(float DeltaTime)
 {
 	if (Attacking)
 		TrackPlayer();
+
+	if (GKState != GatekeeperState::Start && GKState != GatekeeperState::Dead && GKState != GatekeeperState::Staggered)
+	{
+		if (FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation()) > ReachTargetDistance && !AIController->IsFollowingAPath())
+		{
+			if (!GetWorldTimerManager().IsTimerActive(TimerHandle) && !GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+			{
+				AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+			}
+		}
+	}
 }
 
 void AGatekeeper::OnSeePawn(APawn* OtherPawn)
@@ -146,7 +158,6 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 		else if ((Montage == HeavyAttackMontage || Montage == StompMontage || Montage == BeamMontage) && GKState == GatekeeperState::HeavyAttack)
 		{
 			Attacking = false;
-			FTimerHandle TimerHandle;
 			GetWorldTimerManager().SetTimer(TimerHandle,
 				this,
 				&AGatekeeper::AttackDelay,
@@ -154,7 +165,6 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 		}
 		else if (Montage == SummonPortalMontage)
 		{
-			FTimerHandle TimerHandle;
 			GetWorldTimerManager().SetTimer(TimerHandle,
 				this,
 				&AGatekeeper::PortalDelay,

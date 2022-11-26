@@ -22,10 +22,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stats")
 		class UStatsMasterClass* Stats;
 
-	/// Dev: YunYun
-	/// Adding Weapons to this class
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		ABaseWeapon* EquippedWeapon = nullptr;
+	
 
 protected:
 	// Called when the game starts or when spawned

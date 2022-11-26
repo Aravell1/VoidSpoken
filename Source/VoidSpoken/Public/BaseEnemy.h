@@ -6,6 +6,7 @@
 #include "BaseEntity.h"
 #include "Perception/PawnSensingComponent.h"
 #include "Components/CapsuleComponent.h" 
+#include "EnemyWeapon.h"
 #include "BaseEnemy.generated.h"
 
 
@@ -65,8 +66,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		APawn* AttackTarget = nullptr;
-	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		AEnemyWeapon* EquippedWeapon;
+
 private:
+
 	UPROPERTY(VisibleAnywhere)
 		float Health = 0;
 	float Attack = 0;

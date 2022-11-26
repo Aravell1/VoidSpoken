@@ -78,3 +78,4 @@ void ABaseEnemy::SetDamageMultiplier(float DMult)
 {
 	DamageMultiplier = DMult;
 }
+

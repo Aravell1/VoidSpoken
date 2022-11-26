@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "../Public/BaseWeapon.h"
-#include "../Public/BaseEntity.h"
+#include "../PlayerCharacter.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "WeaponUniqueAttackNotifyState.generated.h"
 

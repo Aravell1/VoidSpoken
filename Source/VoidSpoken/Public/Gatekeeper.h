@@ -14,7 +14,6 @@
 #include "Components/SphereComponent.h" 
 #include "GatekeeperTransforms.h"
 #include "Kismet/KismetSystemLibrary.h" 
-#include "BaseWeapon.h"
 #include "Gatekeeper.generated.h"
 
 
@@ -77,6 +76,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -109,6 +109,7 @@ private:
 
 	AGatekeeperAIController* AIController;
 	FOnMontageEnded MontageEndDelegate;
+	FTimerHandle TimerHandle;
 
 	float ReachTargetDistance = 320.0f;
 	float AttackMultiplier = 1;
