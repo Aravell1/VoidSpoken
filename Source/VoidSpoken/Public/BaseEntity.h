@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "../StatsMasterClass.h"
+#include "StatsMasterClass.h"
 #include "BaseWeapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BaseEntity.generated.h"

@@ -61,7 +61,7 @@ void AEnemyWeapon::Equip(ACharacter* EquippingCharacter, float Damage)
 
 void AEnemyWeapon::DealDamage(AActor* OtherActor)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Purple, FString::SanitizeFloat(BaseDamage));
+	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Purple, FString::SanitizeFloat(BaseDamage));
 	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage, NULL, EquippedCharacter, NULL);
 }
 

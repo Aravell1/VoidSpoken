@@ -63,7 +63,7 @@ void APortalSpawn::SpawnEnemy()
 		FRotator SpawnRotation = FRotator(0, zLook, 0);
 		FActorSpawnParameters SpawnInfo;
 		EnemyBPClass = EnemyBPArray[EnemyIndex];
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, EnemyBPClass->GetName());
+		//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, EnemyBPClass->GetName());
 
 		ACharacter* Enemy = GetWorld()->SpawnActor<ACharacter>(EnemyBPClass, FVector(0, 0, -50000), SpawnRotation, SpawnInfo);
 		Enemy->SetActorLocation(SpawnLocation + FVector(0, 0, 100));

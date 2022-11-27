@@ -78,7 +78,10 @@ public:
 
 	// Set/Get MaxHealth
 	UFUNCTION(BlueprintCallable)
-	float SetMaxHealth();
+	void SetMaxHealthPlayer();
+
+	UFUNCTION(BlueprintCallable)
+	void SetMaxHealth(float MHP);
 	
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxHealth()
@@ -88,7 +91,10 @@ public:
 	
 	// Get/Set MaxFocus
 	UFUNCTION(BlueprintCallable)
-	float SetMaxFocus();
+	void SetMaxFocusPlayer();
+
+	UFUNCTION(BlueprintCallable)
+	void SetMaxFocus(float MFocus);
 	
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxFocus()
@@ -98,7 +104,10 @@ public:
 
 	// Get/Set MaxStamina
 	UFUNCTION(BlueprintCallable)
-	float SetMaxStamina();
+	void SetMaxStaminaPlayer();
+
+	UFUNCTION(BlueprintCallable)
+	void SetMaxStamina(float MStam);
 
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	float GetMaxStamina()

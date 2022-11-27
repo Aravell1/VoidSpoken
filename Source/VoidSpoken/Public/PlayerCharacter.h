@@ -12,7 +12,7 @@
 #include "StatsMasterClass.h"
 
 ///Combo System Includes
-#include "Public/BaseWeapon.h"
+#include "BaseWeapon.h"
 
 #include "PlayerCharacter.generated.h"
 

@@ -26,9 +26,9 @@ AGatekeeper::AGatekeeper()
 
 	//Initialize General Stats
 	SetAttack(20);
-	SetDefense(20);
-	SetMaxHealth(200);
-	SetHealth(GetMaxHealth());
+	Stats->Defense = 20;
+	Stats->SetMaxHealth(200);
+	Stats->Health = Stats->GetMaxHealth();
 
 	//Initialize Boss Stats
 	SetMinAttackDelay(1.5f);
@@ -239,7 +239,7 @@ void AGatekeeper::AttackDelay()
 
 void AGatekeeper::PortalDelay()
 {
-	if (GetHealth() <= GetMaxHealth() * GetHPThresholdLow())
+	if (Stats->Health <= Stats->GetMaxHealth() * GetHPThresholdLow())
 	{
 		AttackReset = true;
 		HeavyReset = true;
@@ -337,12 +337,12 @@ int AGatekeeper::HealthCheck(float Damage)
 
 bool AGatekeeper::HPThresholdCheck(float HPThreshold, float Damage)
 {
-	return GetHealth() > GetMaxHealth() * HPThreshold && GetHealth() - Damage <= GetMaxHealth() * HPThreshold;
+	return Stats->Health > Stats->GetMaxHealth() * HPThreshold && Stats->Health - Damage <= Stats->GetMaxHealth() * HPThreshold;
 }
 
 void AGatekeeper::UpdateHealth(bool StopMovement, float Damage)
 {
-	SetHealth(GetHealth() - Damage);
+	Stats->Health = (Stats->Health - Damage);
 
 	if (StopMovement)
 	{
@@ -353,7 +353,7 @@ void AGatekeeper::UpdateHealth(bool StopMovement, float Damage)
 
 void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	float PortalCount = HealthCheck(FMath::Floor(Damage * (25 / (25 + GetDefense()))));
+	float PortalCount = HealthCheck(FMath::Floor(Damage * (25 / (25 + Stats->Defense))));
 
 	UpdateHealthBar.Broadcast();
 
@@ -366,7 +366,7 @@ void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamag
 	}
 	else
 	{
-		if (GetHealth() <= 0)
+		if (Stats->Health <= 0)
 			Death();
 	}
 }
