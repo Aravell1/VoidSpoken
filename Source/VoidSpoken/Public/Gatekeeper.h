@@ -102,6 +102,7 @@ private:
 	int HealthCheck(float Damage);
 	bool HPThresholdCheck(float HPThreshold, float Damage);
 	void UpdateHealth(bool StopMovement, float Damage);
+	void RandomizeTimeToRun();
 
 	UPROPERTY(VisibleAnywhere)
 		GatekeeperState GKState = GatekeeperState::Start;
@@ -114,6 +115,10 @@ private:
 	FTimerHandle TimerHandle;
 
 	float ReachTargetDistance = 320.0f;
+	float TimeToRun = 4.0f;
+	float RandomTimeToRun = 3.0f;
+	float RunTimer = 0;
+
 	float AttackMultiplier = 1;
 	float DefenseMultiplier = 1;
 	float StompRadius = 750;

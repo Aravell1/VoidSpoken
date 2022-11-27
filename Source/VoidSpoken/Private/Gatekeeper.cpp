@@ -86,7 +86,18 @@ void AGatekeeper::Tick(float DeltaTime)
 			if (!GetWorldTimerManager().IsTimerActive(TimerHandle) && !GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 			{
 				AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+				RandomizeTimeToRun();
 			}
+		}
+	}
+
+	if (AIController->IsFollowingAPath() && GetCharacterMovement()->MaxWalkSpeed == GetWalkSpeed() && GKState != GatekeeperState::Start)
+	{
+		RunTimer += DeltaTime;
+		if (RunTimer >= RandomTimeToRun)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
+			RunTimer = 0;
 		}
 	}
 }
@@ -113,9 +124,11 @@ void AGatekeeper::BehaviourStateEvent()
 		break;
 	case GatekeeperState::Chase:
 		AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+		RandomizeTimeToRun();
 		break;
 	case GatekeeperState::HeavyAttack:
 		AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+		RandomizeTimeToRun();
 		break;
 	case GatekeeperState::SummonPortals:
 		Attacking = false;
@@ -158,6 +171,7 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 		else if ((Montage == HeavyAttackMontage || Montage == StompMontage || Montage == BeamMontage) && GKState == GatekeeperState::HeavyAttack)
 		{
 			Attacking = false;
+			SetSpeed();
 			GetWorldTimerManager().SetTimer(TimerHandle,
 				this,
 				&AGatekeeper::AttackDelay,
@@ -165,6 +179,7 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 		}
 		else if (Montage == SummonPortalMontage)
 		{
+			SetSpeed();
 			GetWorldTimerManager().SetTimer(TimerHandle,
 				this,
 				&AGatekeeper::PortalDelay,
@@ -268,6 +283,11 @@ void AGatekeeper::TrackPlayer()
 	float zLook = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), AttackTarget->GetActorLocation()).Yaw;
 	SetActorRotation(UKismetMathLibrary::RLerp(FRotator(0, GetActorRotation().Yaw, 0), FRotator(0, zLook, 0), 0.02f, true));
 	
+}
+
+void AGatekeeper::RandomizeTimeToRun()
+{
+	RandomTimeToRun = FMath::RandRange(TimeToRun - 1.0f, TimeToRun + 1.0f);
 }
 
 void AGatekeeper::SpawnPortals(int PortalCount)

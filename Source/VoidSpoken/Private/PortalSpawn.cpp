@@ -51,6 +51,7 @@ void APortalSpawn::SpawnEnemy()
 		ABaseEnemy* Enemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyClass, FVector(0, 0, -50000), SpawnRotation, SpawnInfo);
 		Enemy->SetActorLocation(SpawnLocation + FVector(0, 0, 100));
 		//Make enemy chase player
+		Enemy->AttackTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
 		SetLifeSpan(7);
 	}
@@ -69,6 +70,7 @@ void APortalSpawn::SpawnEnemy()
 		Enemy->SetActorLocation(SpawnLocation + FVector(0, 0, 100));
 
 		//Make enemy chase player
+		//Enemy->Attack = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
 		SetLifeSpan(7);
 	}
