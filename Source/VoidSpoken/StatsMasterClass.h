@@ -51,6 +51,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
 	float Stamina = MaxStamina;
 	
+	/// Yun
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+		float Defense = 0;
 	
 	//Runes ***TEMP***
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RUNES")

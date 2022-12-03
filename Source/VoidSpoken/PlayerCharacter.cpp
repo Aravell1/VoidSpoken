@@ -25,7 +25,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 700.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
-
+	
 	// setup camera
 	CameraArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera arm"));
 	CameraArm->SetupAttachment(RootComponent);
@@ -36,19 +36,15 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	FollowCamera->SetupAttachment(CameraArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+	
+	Stats->SetBaseHealth(30.f);
+	Stats->GetBaseHealth();
+	
+	Stats->SetBaseFocus(20.f);
+	Stats->GetBaseFocus();
 
-	
-	/// Set Player Stats
-	PlayerStats = CreateDefaultSubobject<UStatsMasterClass>("STATS");
-	
-	PlayerStats->SetBaseHealth(30.f);
-	PlayerStats->GetBaseHealth();
-	
-	PlayerStats->SetBaseFocus(20.f);
-	PlayerStats->GetBaseFocus();
-
-	PlayerStats->SetBaseStamina(50.f);
-	PlayerStats->GetBaseStamina();
+	Stats->SetBaseStamina(50.f);
+	Stats->GetBaseStamina();
 	
 	//Set player State if in combat
 	/*bool InCombat = false;*/
@@ -61,8 +57,8 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Checks Player levels to initialize stats
-	PlayerStats->InitializeMaxStats();
-	PlayerStats->InitializeMainStats();
+	Stats->InitializeMaxStats();
+	Stats->InitializeMainStats();
 	
 }
 
@@ -70,9 +66,6 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	
-
 }
 
 // Called to bind functionality to input
@@ -97,26 +90,27 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Moving the character
 	PlayerInputComponent->BindAxis("Move Forward/Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right/Left", this, &APlayerCharacter::MoveRight);
+
+	// Attacking
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::Attack);
+	///PlayerInputComponent->BindAction("UniqueAttack", IE_Pressed, this, &APlayerCharacter::UniqueAttack);
 	
 }
-
 
 //Finding foward vector and moving
 void APlayerCharacter::MoveForward(float Axis)
 {
-	if ((Controller != nullptr) && (Axis != 0.0f))
-	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		if (!IsRunning)
-		{
-			Axis *= 0.5f;
-		}
+	if (IsRunning)
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	else 
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Axis);
-	}
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	AddMovementInput(Direction, Axis);
 }
 
 //Find Rotation
@@ -125,7 +119,13 @@ void APlayerCharacter::MoveRight(float Axis)
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
+	if (IsRunning)
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	else
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
 	AddMovementInput(Direction, Axis);
 }
 
@@ -139,6 +139,13 @@ void APlayerCharacter::LookUpRate(float Rate)
 	AddControllerPitchInput(Rate * GamepadTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
+void APlayerCharacter::Attack() {
+	if (EquippedWeapon) EquippedWeapon->Attack();
+}
+
+[[deprecated]] void APlayerCharacter::UniqueAttack() {
+	if (EquippedWeapon) EquippedWeapon->UniqueAttack();
+}
 
 // Sprint **NEED TO CHANGE FOR A TOGGLE**
 void APlayerCharacter::RunStart()

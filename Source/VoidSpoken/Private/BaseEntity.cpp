@@ -9,6 +9,9 @@ ABaseEntity::ABaseEntity()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Stats = CreateDefaultSubobject<UStatsMasterClass>("Stats");
+
+	OnTakeAnyDamage.AddDynamic(this, &ABaseEntity::TakeAnyDamage);
 }
 
 // Called when the game starts or when spawned
@@ -31,4 +34,10 @@ void ABaseEntity::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
+
+void ABaseEntity::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	Stats->Health -= FMath::Floor(Damage * (25 / (25 + Stats->Defense)));
+}
+
 

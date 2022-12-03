@@ -14,10 +14,10 @@ void UWeaponUniqueAttackNotifyState::NotifyBegin(USkeletalMeshComponent* MeshCom
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
 #endif
 
-	APlayerCharacter* PlayerReference = Cast<APlayerCharacter>(MeshComponent->GetOwner());
+	ABaseEntity* Entity = Cast<ABaseEntity>(MeshComponent->GetOwner());
 
 	/// NULL Check
-	if (PlayerReference != nullptr && PlayerReference->EquippedWeapon != nullptr) PlayerReference->EquippedWeapon->SetCanUniqueAttack(true);
+	if (Entity != nullptr && Entity->EquippedWeapon != nullptr) Entity->EquippedWeapon->SetCanUniqueAttack(true);
 }
 
 [[deprecated]] void UWeaponUniqueAttackNotifyState::NotifyTick(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, float FrameDeltaTime) {
@@ -31,8 +31,8 @@ void UWeaponUniqueAttackNotifyState::NotifyEnd(USkeletalMeshComponent* MeshCompo
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
 #endif
 
-	APlayerCharacter* PlayerReference = Cast<APlayerCharacter>(MeshComponent->GetOwner());
+	ABaseEntity* Entity = Cast<ABaseEntity>(MeshComponent->GetOwner());
 
 	/// NULL Check
-	if (PlayerReference != nullptr && PlayerReference->EquippedWeapon != nullptr) PlayerReference->EquippedWeapon->SetCanUniqueAttack(false);
+	if (Entity != nullptr && Entity->EquippedWeapon != nullptr) Entity->EquippedWeapon->SetCanUniqueAttack(false);
 }

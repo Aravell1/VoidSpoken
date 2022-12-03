@@ -6,6 +6,7 @@
 ABaseEnemy::ABaseEnemy()
 {
 	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Pawn Sensing"));
+	
 }
 
 float ABaseEnemy::GetMaxHealth()
@@ -66,4 +67,14 @@ float ABaseEnemy::GetRunSpeed()
 void ABaseEnemy::SetRunSpeed(float Run)
 {
 	RunSpeed = Run;
+}
+
+float ABaseEnemy::GetDamageMultiplier()
+{
+	return DamageMultiplier;
+}
+
+void ABaseEnemy::SetDamageMultiplier(float DMult)
+{
+	DamageMultiplier = DMult;
 }

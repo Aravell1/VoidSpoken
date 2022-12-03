@@ -5,11 +5,15 @@
 #include "CoreMinimal.h"
 #include "BaseEntity.h"
 #include "Perception/PawnSensingComponent.h"
+#include "Components/CapsuleComponent.h" 
 #include "BaseEnemy.generated.h"
+
 
 /**
  * 
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBroadcastDelegate);
+
 UCLASS()
 class VOIDSPOKEN_API ABaseEnemy : public ABaseEntity
 {
@@ -18,34 +22,57 @@ class VOIDSPOKEN_API ABaseEnemy : public ABaseEntity
 public:
 	ABaseEnemy();
 
-	float GetMaxHealth();
-	void SetMaxHealth(float MHP);
+	UPROPERTY(BlueprintAssignable, Category = "HealthBar")
+		FBroadcastDelegate UpdateHealthBar;
 
-	float GetAttack();
-	void SetAttack(float Atk);
+	UFUNCTION(BlueprintCallable)
+		float GetMaxHealth();
+	UFUNCTION(BlueprintCallable)
+		void SetMaxHealth(float MHP);
 
-	float GetDefense();
-	void SetDefense(float Def);
+	UFUNCTION(BlueprintCallable)
+		float GetAttack();
+	UFUNCTION(BlueprintCallable)
+		void SetAttack(float Atk);
 
-	float GetHealth();
-	void SetHealth(float HP);
+	UFUNCTION(BlueprintCallable)
+		float GetDefense();
+	UFUNCTION(BlueprintCallable)
+		void SetDefense(float Def);
 
-	float GetWalkSpeed();
-	void SetWalkSpeed(float Walk);
+	UFUNCTION(BlueprintCallable)
+		float GetHealth();
+	UFUNCTION(BlueprintCallable)
+		void SetHealth(float HP);
 
-	float GetRunSpeed();
-	void SetRunSpeed(float Run);
+	UFUNCTION(BlueprintCallable)
+		float GetWalkSpeed();
+	UFUNCTION(BlueprintCallable)
+		void SetWalkSpeed(float Walk);
+
+	UFUNCTION(BlueprintCallable)
+		float GetRunSpeed();
+	UFUNCTION(BlueprintCallable)
+		void SetRunSpeed(float Run);
+
+	UFUNCTION(BlueprintCallable)
+		float GetDamageMultiplier();
+	UFUNCTION(BlueprintCallable)
+		void SetDamageMultiplier(float DMult);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PawnSensing)
 		class UPawnSensingComponent* PawnSensing;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		APawn* AttackTarget = nullptr;
 	
 private:
-	float Health = 0;
+	UPROPERTY(VisibleAnywhere)
+		float Health = 0;
 	float Attack = 0;
 	float Defense = 0;
 	float MaxHealth = 0;
 	float WalkSpeed = 0;
 	float RunSpeed = 0;
-	APawn* AttackTarget = nullptr;
+	float DamageMultiplier = 10;
 };

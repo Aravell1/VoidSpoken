@@ -15,6 +15,7 @@ class VOIDSPOKEN_API ABaseBoss : public ABaseEnemy
 	GENERATED_BODY()
 	
 public:
+
 	float GetHPThresholdHigh();
 	void SetHPThresholdHigh(float ThreshHigh);
 

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "BaseEntity.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -18,7 +18,7 @@
 
 
 UCLASS()
-class VOIDSPOKEN_API APlayerCharacter : public ACharacter
+class VOIDSPOKEN_API APlayerCharacter : public ABaseEntity
 {
 	GENERATED_BODY()
 
@@ -33,7 +33,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
-	
+
 	void MoveForward(float Axis);
 	void MoveRight(float Axis);
 
@@ -53,6 +53,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float WalkSpeed = 250;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float RunSpeed = 450;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -60,11 +66,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(BlueprintReadOnly, Category = "PLAYER STATS")
-	class UStatsMasterClass* PlayerStats;
+	void Attack();
+	void UniqueAttack();
 
-	/// Dev: YunYun
-	/// Adding Weapons to this class
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ABaseWeapon* EquippedWeapon;
 };

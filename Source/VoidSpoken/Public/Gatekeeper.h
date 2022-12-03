@@ -7,12 +7,31 @@
 #include "Math/TransformNonVectorized.h"
 #include "Animation/AnimMontage.h" 
 #include "Animation/AnimInstance.h"
+#include "GatekeeperAIController.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "PortalSpawn.h"
+#include "GameFramework/Actor.h" 
+#include "Components/SphereComponent.h" 
+#include "GatekeeperTransforms.h"
+#include "Kismet/KismetSystemLibrary.h" 
+#include "BaseWeapon.h"
 #include "Gatekeeper.generated.h"
 
 
 /**
  * 
  */
+UENUM()
+enum class GatekeeperState
+{
+	Start	UMETA(DisplayName = "Start"),
+	Chase	UMETA(DisplayName = "Chase"),
+	HeavyAttack	UMETA(DisplayName = "HeavyAttack"),
+	SummonPortals	UMETA(DisplayName = "SummonPortals"),
+	Staggered	UMETA(DisplayName = "Staggered"),
+	Dead	UMETA(DisplayName = "Dead")
+};
+
 UCLASS()
 class VOIDSPOKEN_API AGatekeeper : public ABaseBoss
 {
@@ -21,35 +40,86 @@ class VOIDSPOKEN_API AGatekeeper : public ABaseBoss
 public:
 	AGatekeeper();
 
+	enum GatekeeperState GetState();
+	void SetState(GatekeeperState state);
+
+	void BehaviourStateEvent();
+
 	float GetAttackMultiplier();
 	void SetAttackMultiplier(float AttackMult);
 
 	float GetDefenseMultiplier();
 	void SetDefenseMultiplier(float DefMult);
 
-	void BeginPlay();
+	UFUNCTION()
+		void OnSeePawn(APawn* OtherPawn);
 
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<APortalSpawn> Portal;
 
 	UPROPERTY(EditAnywhere)
-		FVector3d BossStartPoint;
-
+		TArray<AGatekeeperTransforms*> PortalSpawns = { nullptr, nullptr, nullptr };
 	UPROPERTY(EditAnywhere)
+		AGatekeeperTransforms* BossStartPoint;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* BaseAttackMontage = nullptr;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* HeavyAttackMontage = nullptr;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* StompMontage = nullptr;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* BeamMontage = nullptr;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* SummonPortalMontage = nullptr;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* EnrageMontage = nullptr;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 
+protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Tick(float DeltaTime) override;
+	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
+	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
+	UFUNCTION()
+		void OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted);
+
 private:
-	float AttackMultiplier = 0;
-	float DefenseMultiplier = 0;
+
+	void SetSpeed();
+	void AttackDelay();
+	void PortalDelay();
+	void Enrage();
+	void StopMovement();
+	void TrackPlayer();
+	void SpawnPortals(int PortalCount);
+	void Death();
+	int HealthCheck(float Damage);
+	bool HPThresholdCheck(float HPThreshold, float Damage);
+	void UpdateHealth(bool StopMovement, float Damage);
+	void AttackTrace(UAnimMontage* AnimTrigger);
+
+	UPROPERTY(VisibleAnywhere)
+		GatekeeperState GKState = GatekeeperState::Start;
+
+	UPROPERTY(VisibleAnywhere)
+		TArray<UAnimMontage*> MontageArray;
+
+	AGatekeeperAIController* AIController;
+	FOnMontageEnded MontageEndDelegate;
+
+	float ReachTargetDistance = 320.0f;
+	float AttackMultiplier = 1;
+	float DefenseMultiplier = 1;
+	float StompRadius = 500;
+	bool HeavyReset = true;
+	bool AttackReset = true;
+	bool PortalReset = true;
+	bool Attacking = false;
+	bool Enraged = false;
+	bool LockState = false;
+
 	
 };
