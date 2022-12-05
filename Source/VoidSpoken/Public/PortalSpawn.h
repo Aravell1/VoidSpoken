@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "BaseEnemy.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "../VoidSpokenGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "PortalSpawn.generated.h"
 

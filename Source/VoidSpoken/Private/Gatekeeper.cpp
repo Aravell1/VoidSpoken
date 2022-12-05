@@ -321,6 +321,8 @@ void AGatekeeper::Death()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
+	Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()))->KillGatekeeperSpawns();
+
 	SetLifeSpan(10);
 }
 
@@ -329,6 +331,7 @@ void AGatekeeper::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (EquippedWeapon != nullptr)
 		EquippedWeapon->Destroy();
 	Super::EndPlay(EndPlayReason);
+
 }
 
 int AGatekeeper::HealthCheck(float Damage)

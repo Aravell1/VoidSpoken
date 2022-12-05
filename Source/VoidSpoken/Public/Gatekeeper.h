@@ -10,6 +10,7 @@
 #include "GatekeeperAIController.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PortalSpawn.h"
+#include "../VoidSpokenGameModeBase.h"
 #include "GameFramework/Actor.h" 
 #include "Components/SphereComponent.h" 
 #include "GatekeeperTransforms.h"
