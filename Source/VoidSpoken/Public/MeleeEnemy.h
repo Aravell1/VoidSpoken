@@ -40,7 +40,10 @@ public:
 	void BeginPlay();
 
 	UPROPERTY(EditAnywhere)
-		bool findPoints = false;
+	bool FindPoints = false;
+
+	UPROPERTY(EditAnywhere)
+	bool ReturnToStart = true;
 
 	UPROPERTY(EditAnywhere, Category = PatrolPoints)
 	TArray<AActor*> PatrolPoints;
@@ -58,11 +61,15 @@ public:
 	UAnimMontage* HeadExplosion = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	float AttackRange = 0.0f;
+	float AttackRange = 3.0f;
+
+	UPROPERTY(EditAnywhere)
+	float ChaseRange = 10.0f;
 
 private:
 	MeleeBehaviourState CurrentBehaviour = Patrol;
 	int PatrolIndex;
+	int direction;
 
 //
 //public:
