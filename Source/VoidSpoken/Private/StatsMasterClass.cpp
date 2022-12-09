@@ -44,48 +44,6 @@ void UStatsMasterClass::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 }
 
 
-//Stats Regeneration
-
-/// <WILL>
-/// <Health Regeneration>
-/// if player is NOT in combat
-/// Regen 2HP each 5 second
-/// 
-/// <param name="_HP"></param>
-void UStatsMasterClass::RegenHP(float _HP)
-{
-
-}
-
-/// <WILL>
-/// <Focus Regeneration?>
-/// Focus point are fully regenerated after 3 seconds
-/// if the player does not use a void skill
-/// 
-/// <param name="_FP"></param>
-void UStatsMasterClass::RegenFP(float _FP)
-{
-
-}
-
-/// <WILL>
-/// <Stamina regeneration>
-/// if player IS in combat
-/// Regen 2 ST each 5 second
-/// 
-/// OR
-/// 
-/// if player is NOT in combat
-/// Regen 5 ST each 5 second
-/// 
-/// <param name="_ST"></param>
-void UStatsMasterClass::RegenStamina(float _ST)
-{
-
-}
-
-
-
 //Leveling
 
 /// <Will>

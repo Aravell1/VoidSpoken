@@ -46,8 +46,6 @@ APlayerCharacter::APlayerCharacter()
 	Stats->SetBaseStamina(50.f);
 	Stats->GetBaseStamina();
 	
-	//Set player State if in combat
-	/*bool InCombat = false;*/
 }
 
 
@@ -59,13 +57,14 @@ void APlayerCharacter::BeginPlay()
 	// Checks Player levels to initialize stats
 	Stats->InitializeMaxStats();
 	Stats->InitializeMainStats();
-	
+
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 }
 
 // Called to bind functionality to input
@@ -147,6 +146,7 @@ void APlayerCharacter::Attack() {
 	if (EquippedWeapon) EquippedWeapon->UniqueAttack();
 }
 
+
 // Sprint **NEED TO CHANGE FOR A TOGGLE**
 void APlayerCharacter::RunStart()
 {
@@ -156,4 +156,37 @@ void APlayerCharacter::RunStart()
 void APlayerCharacter::RunStop()
 {
 	IsRunning = false;
+}
+
+
+void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (!Invincible)
+	{
+		ABaseEntity::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
+		Stats->Health -= Damage;
+		Invincible = true;
+		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 1.5f, false);
+		if (!GetWorld()->GetTimerManager().IsTimerActive(RegenerationTimer))
+			GetWorld()->GetTimerManager().ClearTimer(RegenerationTimer);
+		GetWorld()->GetTimerManager().SetTimer(RegenerationTimer, this, &APlayerCharacter::RegenerateHealth, HealingDelay, true);
+	}
+}
+
+void APlayerCharacter::RegenerateHealth()
+{
+	Stats->Health += HealingRate;
+
+	if (Stats->Health > Stats->GetMaxHealth())
+	{
+		Stats->Health = Stats->GetMaxHealth();
+
+		if (GetWorld()->GetTimerManager().IsTimerActive(RegenerationTimer))
+			GetWorld()->GetTimerManager().ClearTimer(RegenerationTimer);
+	}
+}
+
+void APlayerCharacter::ResetInvincibility()
+{
+	Invincible = false;
 }

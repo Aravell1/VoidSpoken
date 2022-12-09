@@ -9,6 +9,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "VoidSpoken/VoidSpokenGameModeBase.h"
+#include "BaseEntity.h"
+#include "TimerManager.h"
+#include "Engine/EngineTypes.h"
 #include "StatsMasterClass.h"
 
 ///Combo System Includes
@@ -72,5 +76,22 @@ public:
 
 	void Attack();
 	void UniqueAttack();
+
+	float RegenTime = 1.f;
+
+	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
+
+	UFUNCTION()
+	void ResetInvincibility();
+
+	//Regeneration
+
+	FTimerHandle RegenerationTimer;
+	float HealingDelay = 5.f;
+	float HealingRate = 2.5f;
+	void RegenerateHealth();
+	FTimerHandle InvincibilityTimer;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool Invincible = false;
 
 };

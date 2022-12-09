@@ -68,8 +68,11 @@ public:
 	///Player Functions
 
 	//Regen Functions (will be called every frame)
-	void RegenHP(float _HP);
-	void RegenFP(float _FP);
+	void RegenHP(float _HP)
+	{
+		BaseHealth += _HP;
+	}
+	void RegenFP();
 	void RegenStamina(float _ST);
 
 
@@ -165,6 +168,14 @@ public:
 
 	// Initialize Stats
 	void InitializeMainStats();
+
+
+	/*UFUNCTION(BlueprintCallable)
+	void RegenTimer();*/
+
+	/*UPROPERTY()
+	float RegenTime = 1.0f;*/
+
 
 
 private:
