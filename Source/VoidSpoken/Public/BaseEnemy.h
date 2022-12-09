@@ -6,6 +6,7 @@
 #include "BaseEntity.h"
 #include "Perception/PawnSensingComponent.h"
 #include "Components/CapsuleComponent.h" 
+#include "EnemyWeapon.h"
 #include "BaseEnemy.generated.h"
 
 
@@ -26,24 +27,9 @@ public:
 		FBroadcastDelegate UpdateHealthBar;
 
 	UFUNCTION(BlueprintCallable)
-		float GetMaxHealth();
-	UFUNCTION(BlueprintCallable)
-		void SetMaxHealth(float MHP);
-
-	UFUNCTION(BlueprintCallable)
 		float GetAttack();
 	UFUNCTION(BlueprintCallable)
 		void SetAttack(float Atk);
-
-	UFUNCTION(BlueprintCallable)
-		float GetDefense();
-	UFUNCTION(BlueprintCallable)
-		void SetDefense(float Def);
-
-	UFUNCTION(BlueprintCallable)
-		float GetHealth();
-	UFUNCTION(BlueprintCallable)
-		void SetHealth(float HP);
 
 	UFUNCTION(BlueprintCallable)
 		float GetWalkSpeed();
@@ -65,8 +51,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		APawn* AttackTarget = nullptr;
-	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		AEnemyWeapon* EquippedWeapon;
+
+	virtual void AttackTrace(UAnimMontage* AnimTrigger);
+
 private:
+
 	UPROPERTY(VisibleAnywhere)
 		float Health = 0;
 	float Attack = 0;

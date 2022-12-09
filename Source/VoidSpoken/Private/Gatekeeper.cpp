@@ -25,10 +25,10 @@ AGatekeeper::AGatekeeper()
 	}
 
 	//Initialize General Stats
-	SetAttack(30);
-	SetDefense(20);
-	SetMaxHealth(200);
-	SetHealth(GetMaxHealth());
+	SetAttack(20);
+	Stats->Defense = 20;
+	Stats->SetMaxHealth(200);
+	Stats->Health = Stats->GetMaxHealth();
 
 	//Initialize Boss Stats
 	SetMinAttackDelay(1.5f);
@@ -56,6 +56,7 @@ AGatekeeper::AGatekeeper()
 	}
 }
 
+
 void AGatekeeper::BeginPlay()
 {
 	Super::BeginPlay();
@@ -77,6 +78,28 @@ void AGatekeeper::Tick(float DeltaTime)
 {
 	if (Attacking)
 		TrackPlayer();
+
+	if (GKState != GatekeeperState::Start && GKState != GatekeeperState::Dead && GKState != GatekeeperState::Staggered)
+	{
+		if (FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation()) > ReachTargetDistance && !AIController->IsFollowingAPath())
+		{
+			if (!GetWorldTimerManager().IsTimerActive(TimerHandle) && !GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+			{
+				AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+				RandomizeTimeToRun();
+			}
+		}
+	}
+
+	if (AIController->IsFollowingAPath() && GetCharacterMovement()->MaxWalkSpeed == GetWalkSpeed() && GKState != GatekeeperState::Start)
+	{
+		RunTimer += DeltaTime;
+		if (RunTimer >= RandomTimeToRun)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
+			RunTimer = 0;
+		}
+	}
 }
 
 void AGatekeeper::OnSeePawn(APawn* OtherPawn)
@@ -101,9 +124,11 @@ void AGatekeeper::BehaviourStateEvent()
 		break;
 	case GatekeeperState::Chase:
 		AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+		RandomizeTimeToRun();
 		break;
 	case GatekeeperState::HeavyAttack:
 		AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+		RandomizeTimeToRun();
 		break;
 	case GatekeeperState::SummonPortals:
 		Attacking = false;
@@ -146,7 +171,7 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 		else if ((Montage == HeavyAttackMontage || Montage == StompMontage || Montage == BeamMontage) && GKState == GatekeeperState::HeavyAttack)
 		{
 			Attacking = false;
-			FTimerHandle TimerHandle;
+			SetSpeed();
 			GetWorldTimerManager().SetTimer(TimerHandle,
 				this,
 				&AGatekeeper::AttackDelay,
@@ -154,7 +179,7 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 		}
 		else if (Montage == SummonPortalMontage)
 		{
-			FTimerHandle TimerHandle;
+			SetSpeed();
 			GetWorldTimerManager().SetTimer(TimerHandle,
 				this,
 				&AGatekeeper::PortalDelay,
@@ -229,7 +254,7 @@ void AGatekeeper::AttackDelay()
 
 void AGatekeeper::PortalDelay()
 {
-	if (GetHealth() <= GetMaxHealth() * GetHPThresholdLow())
+	if (Stats->Health <= Stats->GetMaxHealth() * GetHPThresholdLow())
 	{
 		AttackReset = true;
 		HeavyReset = true;
@@ -258,6 +283,11 @@ void AGatekeeper::TrackPlayer()
 	float zLook = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), AttackTarget->GetActorLocation()).Yaw;
 	SetActorRotation(UKismetMathLibrary::RLerp(FRotator(0, GetActorRotation().Yaw, 0), FRotator(0, zLook, 0), 0.02f, true));
 	
+}
+
+void AGatekeeper::RandomizeTimeToRun()
+{
+	RandomTimeToRun = FMath::RandRange(TimeToRun - 1.0f, TimeToRun + 1.0f);
 }
 
 void AGatekeeper::SpawnPortals(int PortalCount)
@@ -291,13 +321,17 @@ void AGatekeeper::Death()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
+	Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()))->KillGatekeeperSpawns();
+
 	SetLifeSpan(10);
 }
 
 void AGatekeeper::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	EquippedWeapon->Destroy();
+	if (EquippedWeapon != nullptr)
+		EquippedWeapon->Destroy();
 	Super::EndPlay(EndPlayReason);
+
 }
 
 int AGatekeeper::HealthCheck(float Damage)
@@ -326,12 +360,12 @@ int AGatekeeper::HealthCheck(float Damage)
 
 bool AGatekeeper::HPThresholdCheck(float HPThreshold, float Damage)
 {
-	return GetHealth() > GetMaxHealth() * HPThreshold && GetHealth() - Damage <= GetMaxHealth() * HPThreshold;
+	return Stats->Health > Stats->GetMaxHealth() * HPThreshold && Stats->Health - Damage <= Stats->GetMaxHealth() * HPThreshold;
 }
 
 void AGatekeeper::UpdateHealth(bool StopMovement, float Damage)
 {
-	SetHealth(GetHealth() - Damage);
+	Stats->Health = (Stats->Health - Damage);
 
 	if (StopMovement)
 	{
@@ -342,7 +376,7 @@ void AGatekeeper::UpdateHealth(bool StopMovement, float Damage)
 
 void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	float PortalCount = HealthCheck(FMath::Floor(Damage * (25 / (25 + GetDefense()))));
+	float PortalCount = HealthCheck(FMath::Floor(Damage * (25 / (25 + Stats->Defense))));
 
 	UpdateHealthBar.Broadcast();
 
@@ -355,13 +389,15 @@ void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamag
 	}
 	else
 	{
-		if (GetHealth() <= 0)
+		if (Stats->Health <= 0)
 			Death();
 	}
 }
 
 void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 {
+	Super::AttackTrace(AnimTrigger);
+
 	FVector StartLocation;
 	FVector EndLocation;
 	float AttackRadius;
@@ -377,15 +413,26 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 		return;
 	}
 
-	TArray<AActor*> ActorsToIgnore = {};
+	TArray<AActor*> ActorsToIgnore = { this };
 	TArray<FHitResult> OutHits;
 	if (UKismetSystemLibrary::SphereTraceMulti(GetWorld(), StartLocation, EndLocation, AttackRadius,
 		TraceTypeQuery3, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHits, true, 
 		FLinearColor::Red, FLinearColor::Green, 1.0f))
 	{
 		float Damage = FMath::Floor(GetAttack() * FMath::RandRange(0.9f, 1.1f));
-		FDamageEvent DamageEvent;
-		OutHits[0].GetActor()->TakeDamage(Damage, DamageEvent, NULL, this);
+		for (int i = 0; i < OutHits.Num(); i++)
+		{
+			if (OutHits[i].GetActor() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+			{
+				//DrawDebugLine(GetWorld(), StartLocation, OutHits[i].GetActor()->GetActorLocation(), FColor::Blue, false, 5);
+				UGameplayStatics::ApplyDamage(OutHits[i].GetActor(), Damage, NULL, this, NULL);
+				FVector ImpulseVector = (OutHits[i].GetActor()->GetActorLocation() - StartLocation).GetSafeNormal() * StompImpulseForce;
+				ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+				Player->LaunchCharacter(ImpulseVector, true, false);
+				return;
+			}
+
+		}
 	}
 }
 

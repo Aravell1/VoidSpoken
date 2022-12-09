@@ -10,11 +10,11 @@
 #include "GatekeeperAIController.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PortalSpawn.h"
+#include "../VoidSpokenGameModeBase.h"
 #include "GameFramework/Actor.h" 
 #include "Components/SphereComponent.h" 
 #include "GatekeeperTransforms.h"
 #include "Kismet/KismetSystemLibrary.h" 
-#include "BaseWeapon.h"
 #include "Gatekeeper.generated.h"
 
 
@@ -77,6 +77,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 
+	UPROPERTY(EditDefaultsOnly)
+		float StompImpulseForce = 5000;
+
+		void AttackTrace(UAnimMontage* AnimTrigger) override;
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -99,7 +103,7 @@ private:
 	int HealthCheck(float Damage);
 	bool HPThresholdCheck(float HPThreshold, float Damage);
 	void UpdateHealth(bool StopMovement, float Damage);
-	void AttackTrace(UAnimMontage* AnimTrigger);
+	void RandomizeTimeToRun();
 
 	UPROPERTY(VisibleAnywhere)
 		GatekeeperState GKState = GatekeeperState::Start;
@@ -109,11 +113,16 @@ private:
 
 	AGatekeeperAIController* AIController;
 	FOnMontageEnded MontageEndDelegate;
+	FTimerHandle TimerHandle;
 
 	float ReachTargetDistance = 320.0f;
+	float TimeToRun = 4.0f;
+	float RandomTimeToRun = 3.0f;
+	float RunTimer = 0;
+
 	float AttackMultiplier = 1;
 	float DefenseMultiplier = 1;
-	float StompRadius = 500;
+	float StompRadius = 750;
 	bool HeavyReset = true;
 	bool AttackReset = true;
 	bool PortalReset = true;

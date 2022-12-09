@@ -9,16 +9,6 @@ ABaseEnemy::ABaseEnemy()
 	
 }
 
-float ABaseEnemy::GetMaxHealth()
-{
-	return MaxHealth;
-}
-
-void ABaseEnemy::SetMaxHealth(float MHP)
-{
-	MaxHealth = MHP;
-}
-
 float ABaseEnemy::GetAttack()
 {
 	return Attack;
@@ -27,26 +17,6 @@ float ABaseEnemy::GetAttack()
 void ABaseEnemy::SetAttack(float Atk)
 {
 	Attack = Atk;
-}
-
-float ABaseEnemy::GetDefense()
-{
-	return Defense;
-}
-
-void ABaseEnemy::SetDefense(float Def)
-{
-	Defense = Def;
-}
-
-float ABaseEnemy::GetHealth()
-{
-	return Health;
-}
-
-void ABaseEnemy::SetHealth(float HP)
-{
-	Health = HP;
 }
 
 float ABaseEnemy::GetWalkSpeed()
@@ -78,3 +48,8 @@ void ABaseEnemy::SetDamageMultiplier(float DMult)
 {
 	DamageMultiplier = DMult;
 }
+
+void ABaseEnemy::AttackTrace(UAnimMontage* AnimTrigger)
+{
+}
+

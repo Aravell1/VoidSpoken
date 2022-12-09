@@ -3,25 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseWeapon.h"
-#include "PlayerCharacter.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "WeaponAttackNotifyState.generated.h"
+#include "BaseEnemy.h"
+#include "EnemyAttackNotifyState.generated.h"
 
-/*
-* Script Name:	WeaponAttackNotifyState.h
-* Author:		YunYun (Jan Skucinski)
-* Email:		Jan.Frank.Skucinski@gmail.com
-*/
-
+/**
+ * 
+ */
 UCLASS()
-class VOIDSPOKEN_API UWeaponAttackNotifyState : public UAnimNotifyState
+class VOIDSPOKEN_API UEnemyAttackNotifyState : public UAnimNotifyState
 {
 	GENERATED_BODY()
-
-public:
-	virtual void NotifyBegin(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, float TotalDuration) override;
-	virtual void NotifyTick(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, float FrameDeltaTime) override;
-	virtual void NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) override;
 	
+protected:
+
+	virtual void NotifyBegin(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, float TotalDuration) override;
+	virtual void NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) override;
 };

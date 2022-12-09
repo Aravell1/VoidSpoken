@@ -14,10 +14,10 @@
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
 #endif
 	
-	ABaseEntity* Entity = Cast<ABaseEntity>(MeshComponent->GetOwner());
+	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
 
 	/// NULL Check
-	if (Entity != nullptr && Entity->EquippedWeapon != nullptr) {
-		//Entity->EquippedWeapon->DealDamage();
+	if (Player != nullptr && Player->EquippedWeapon != nullptr) {
+		//Player->EquippedWeapon->DealDamage();
 	}
 }

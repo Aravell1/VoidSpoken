@@ -12,7 +12,7 @@
 #include "StatsMasterClass.h"
 
 ///Combo System Includes
-#include "Public/BaseWeapon.h"
+#include "BaseWeapon.h"
 
 #include "PlayerCharacter.generated.h"
 
@@ -47,7 +47,11 @@ public:
 
 	void LookUpRate(float Rate);
 
-	
+	/// Dev: YunYun
+	/// Adding Weapons to this class
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		//TSubclassOf<ABaseWeapon*> EquippedWeapon = nullptr;
+		ABaseWeapon* EquippedWeapon = nullptr;
 
 protected:
 	// Called when the game starts or when spawned

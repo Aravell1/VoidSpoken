@@ -7,7 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Animation/AnimMontage.h"
 #include "Components/BoxComponent.h"
-#include "../StatsMasterClass.h"
+#include "StatsMasterClass.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine.h"
 #include "Engine/EngineTypes.h"

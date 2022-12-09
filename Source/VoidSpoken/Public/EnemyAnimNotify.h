@@ -3,22 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseWeapon.h"
-#include "PlayerCharacter.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "WeaponAttackNotify.generated.h"
+#include "BaseEnemy.h"
+#include "EnemyAnimNotify.generated.h"
 
-/*
-* Script Name:	WeaponResetNotify.h
-* Author:		YunYun (Jan Skucinski)
-* Email:		Jan.Frank.Skucinski@gmail.com
-*/
-
+/**
+ * 
+ */
 UCLASS()
-class VOIDSPOKEN_API UWeaponAttackNotify : public UAnimNotify
+class VOIDSPOKEN_API UEnemyAnimNotify : public UAnimNotify
 {
 	GENERATED_BODY()
+	
+protected:
 
-public:
 	virtual void Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) override;
+
 };
