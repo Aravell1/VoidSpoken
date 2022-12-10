@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "BaseEnemy.h"
 #include "Animation/AnimMontage.h"
-//#include "Kismet/GameplayStatics.h"
+#include "Kismet/GameplayStatics.h"
 #include "Containers/Array.h"
+#include "Math/Vector.h"
+#include "MeleeEnemyAIController.h"
 #include "MeleeEnemy.generated.h"
 
 UENUM()
@@ -14,7 +16,7 @@ enum MeleeBehaviourState
 {
 	Patrol	UMETA(DisplayName = "Patrol"),
 	Chase	UMETA(DisplayName = "Chase"),
-	Attack	UMETA(DisplayName = "Attack"),
+	AttackPlayer	UMETA(DisplayName = "AttackPlayer"),
 	Search	UMETA(DisplayName = "Search"),
 	Dead	UMETA(DisplayName = "Dead")
 };
@@ -36,8 +38,7 @@ public:
 	void Search();
 	void Die();
 	void DropItem();
-
-	void BeginPlay();
+	void TakeDamage(float DMG);
 
 	UPROPERTY(EditAnywhere)
 	bool FindPoints = false;
@@ -54,11 +55,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	AActor* PlayerTarget = nullptr;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (ToolTip = "set the very first animation to the head explosion attack"))
 	TArray<UAnimMontage*> AttackAnims;
 
 	UPROPERTY(EditAnywhere)
-	UAnimMontage* HeadExplosion = nullptr;
+	bool UseHeadExplosion = false;
 
 	UPROPERTY(EditAnywhere)
 	float AttackRange = 3.0f;
@@ -66,53 +67,21 @@ public:
 	UPROPERTY(EditAnywhere)
 	float ChaseRange = 10.0f;
 
+	UPROPERTY(EditAnywhere)
+	float LocationRange = 5.0f;
+
+	UPROPERTY(EditAnywhere)
+	int Direction = 1;
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
 private:
 	MeleeBehaviourState CurrentBehaviour = Patrol;
+	AMeleeEnemyAIController* AIController;
 	int PatrolIndex;
-	int direction;
-
-//
-//public:
-//	AMeleeEnemy();
-// 
-//	// list of patrol points
-//	TArray<APawn> PatrolPoints;
-// 
-//	// player target
-//	APawn* Player;
-// 
-//	//list of animations
-//	TArray<UAnimMontage> AttackAnims;
-// 
-//	//head exploding animation
-//	UAnimMontage HeadExplosion;
-// 
-//	//attack range
-//	float AttackRange;
-//
-//private:
-//	// enum behaviour states
-//	/*enum Behaviour {
-//		patrol,
-//		chase,
-//		attack,
-//		search
-//	};*/
-// 
-//	// current behaviour
-//	//Behaviour current = Behaviour.patrol;
-// 
-//	//MeleeBehaviourState CurrentBehaviour = Patrol;
-// 
-//	// location
-//	int PatrolIndex;
-
-//private:
-	//change states
-	//attack
-	//change patrol points
-	//death
-
+	bool CanAttack;
 
 };
 

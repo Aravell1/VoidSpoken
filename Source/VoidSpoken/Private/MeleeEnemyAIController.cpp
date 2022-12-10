@@ -24,7 +24,7 @@ void AMeleeEnemyAIController::BeginPlay()
 	}
 }
 
-void AGatekeeperAIController::OnPossess(APawn* InPawn)
+void AMeleeEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
