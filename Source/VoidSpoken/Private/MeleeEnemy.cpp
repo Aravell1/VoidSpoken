@@ -69,15 +69,21 @@ void AMeleeEnemy::Tick(float DeltaTime)
 			if (FVector::Distance(this->GetActorLocation(), PlayerTarget->GetActorLocation()) < ChaseRange)
 				ChangeStates(Chase);
 
+			if(IsAttacking)
+				//do nothing
 			break;
 
 		case Chase:
 			ChasePlayer();
 			break;
 
+		//case Search:
+		//	ChangeStates(Patrol);
+		//	break;
+
 	// if Attack, Execute Attack
 		case AttackPlayer:
-
+			Attack();
 			break;
 
 	// if dead, execute Die method
@@ -152,19 +158,27 @@ void AMeleeEnemy::Die()
 		//play normal death
 	}
 
-	DropItem();
 }
 
 void AMeleeEnemy::Attack() {
 	
 	FVector StartLocation;
 	FVector EndLocation;
-	
-	int attack = FMath::RandRange(0, AttackAnims.Num() - 1);
+	if (!IsAttacking) {
+		IsAttacking = true;
+		int attackSel;
+		attackSel = FMath::RandRange(0, AttackAnims.Num() - 1);
 
-	if () {
+		if (attackSel == 0 && UseHeadExplosion) {
+			Die();
+		}
+		else {
+			attackSel = FMath::RandRange(1, AttackAnims.Num() - 1);
+		}
 
+		GetMesh()->GetAnimInstance()->Montage_Play(AttackAnims[attackSel]);
 	}
+		
 }
 
 void AMeleeEnemy::DropItem()

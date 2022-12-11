@@ -33,7 +33,6 @@ class VOIDSPOKEN_API AMeleeEnemy : public ABaseEnemy
 public:
 	AMeleeEnemy();
 
-
 	UPROPERTY(EditAnywhere)
 	bool FindPoints = false;
 
@@ -91,7 +90,7 @@ private:
 	AMeleeEnemyAIController* AIController;
 	FOnMontageEnded MontageEnd;
 	int PatrolIndex;
-	bool CanAttack;
+	bool IsAttacking;
 
 };
 
