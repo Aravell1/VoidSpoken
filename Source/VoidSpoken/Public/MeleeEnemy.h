@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BaseEnemy.h"
 #include "Animation/AnimMontage.h"
+#include "Animation/AnimInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Containers/Array.h"
 #include "Math/Vector.h"
@@ -32,13 +33,6 @@ class VOIDSPOKEN_API AMeleeEnemy : public ABaseEnemy
 public:
 	AMeleeEnemy();
 
-	void ChangeStates(MeleeBehaviourState NewState);
-	void ChangePatrolPoints();
-	void ChasePlayer();
-	void Search();
-	void Die();
-	void DropItem();
-	void TakeDamage(float DMG);
 
 	UPROPERTY(EditAnywhere)
 	bool FindPoints = false;
@@ -59,16 +53,22 @@ public:
 	TArray<UAnimMontage*> AttackAnims;
 
 	UPROPERTY(EditAnywhere)
+	UAnimMontage* DeathAnim;
+
+	UPROPERTY(EditAnywhere)
 	bool UseHeadExplosion = false;
 
 	UPROPERTY(EditAnywhere)
-	float AttackRange = 3.0f;
+	float AttackRange = 5.0f;
 
 	UPROPERTY(EditAnywhere)
 	float ChaseRange = 10.0f;
 
 	UPROPERTY(EditAnywhere)
 	float LocationRange = 5.0f;
+
+	UPROPERTY(EditAnywhere)
+	float DropChance = 50.0f;
 
 	UPROPERTY(EditAnywhere)
 	int Direction = 1;
@@ -78,8 +78,18 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	void ChangeStates(MeleeBehaviourState NewState);
+	void ChangePatrolPoints();
+	void ChasePlayer();
+	void Search();
+	void Die();
+	void DropItem();
+	void TakeDamage(float DMG);
+	void Attack();
+
 	MeleeBehaviourState CurrentBehaviour = Patrol;
 	AMeleeEnemyAIController* AIController;
+	FOnMontageEnded MontageEnd;
 	int PatrolIndex;
 	bool CanAttack;
 

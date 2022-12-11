@@ -63,30 +63,33 @@ void AMeleeEnemy::Tick(float DeltaTime)
 	//if chase,
 	switch (CurrentBehaviour) {
 		case Patrol:
-			if (AIController->GetMoveStatus() == EPathFollowingStatus::Idle) {
+			if (AIController->GetMoveStatus() == EPathFollowingStatus::Idle) 
 				ChangePatrolPoints();
-			}
 
 			if (FVector::Distance(this->GetActorLocation(), PlayerTarget->GetActorLocation()) < ChaseRange)
-				CurrentBehaviour = Chase;
+				ChangeStates(Chase);
 
 			break;
+
 		case Chase:
-
+			ChasePlayer();
 			break;
+
 	// if Attack, Execute Attack
 		case AttackPlayer:
 
 			break;
-		case Dead:
 
+	// if dead, execute Die method
+		case Dead:
+			DropItem();
+			Die();
 			break;
 
 	}
 
 	// if Search, execute Search method
 
-	// if dead, execute Die method
 }
 
 void AMeleeEnemy::ChangeStates(MeleeBehaviourState NewState)
@@ -119,8 +122,15 @@ void AMeleeEnemy::ChangePatrolPoints()
 void AMeleeEnemy::ChasePlayer()
 {
 	// go after player
+	AIController->MoveToActor(PlayerTarget, LocationRange);
+
 		// if player is in attackrange, go to attack
+	if (FVector::Distance(this->GetActorLocation(), PlayerTarget->GetActorLocation()) < AttackRange)
+		ChangeStates(AttackPlayer);
+
 		//if the player goes out of chase range, change to search state
+	if (FVector::Distance(this->GetActorLocation(), PlayerTarget->GetActorLocation()) > ChaseRange)
+		ChangeStates(Patrol);
 }
 
 void AMeleeEnemy::Search()
@@ -132,24 +142,48 @@ void AMeleeEnemy::Search()
 
 void AMeleeEnemy::Die() 
 {
-	//selecet death animation
-	//if head explosion, set a damage raidius, if player is in range deal DAMAGE TO THEM
-	//item drop chance
+		//selecet death animation
+	int selectDeath = FMath::RandRange(0, 1);
 
+	if (selectDeath == 0 && UseHeadExplosion) {
+		//play head explosion
+	}
+	else {
+		//play normal death
+	}
+
+	DropItem();
+}
+
+void AMeleeEnemy::Attack() {
+	
+	FVector StartLocation;
+	FVector EndLocation;
+	
+	int attack = FMath::RandRange(0, AttackAnims.Num() - 1);
+
+	if () {
+
+	}
 }
 
 void AMeleeEnemy::DropItem()
 {
 	//random chance to drop item
-		// if true
+	float Chance = FMath::RandRange(0, 100);
+	// if true
+	if (Chance >= DropChance) {
 			// select a item to drop
+		int selection = FMath::RandRange(0, ItemDrops.Num() - 1);
 			// drop item
-		
+		//GetWorld()->SpawnActor();
+	}
+			
 }
 
 void AMeleeEnemy::TakeDamage(float DMG) {
 	//Health -= DMG;
 	/*if (Health < 0) {
-		Die();
+		//change state to dead
 	}*/
 }
