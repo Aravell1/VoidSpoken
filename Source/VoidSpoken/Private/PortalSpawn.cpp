@@ -9,15 +9,6 @@ APortalSpawn::APortalSpawn()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	if (!BoxMesh)
-		BoxMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Box Mesh"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>Box(TEXT("StaticMesh'/Game/Maps/Meshes/SM_ChamferCube.SM_ChamferCube'"));
-
-	if (Box.Succeeded())
-	{
-		BoxMesh->SetStaticMesh(Box.Object);
-	}
-	RootComponent = BoxMesh;
 }
 
 // Called when the game starts or when spawned
@@ -70,6 +61,7 @@ void APortalSpawn::SpawnEnemy()
 		ACharacter* Enemy = GetWorld()->SpawnActor<ACharacter>(EnemyBPClass, FVector(0, 0, -50000), SpawnRotation, SpawnInfo);
 		Enemy->SetActorLocation(SpawnLocation + FVector(0, 0, 100));
 		Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()))->AddGatekeeperSpawn(Enemy);
+		OrderAttackBP.Broadcast();
 		//Make enemy chase player
 		//Enemy->Attack = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 

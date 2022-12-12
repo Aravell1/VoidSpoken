@@ -20,8 +20,7 @@ public:
 	void AddGatekeeperSpawn(AActor* EnemySpawn);
 	void KillGatekeeperSpawns();
 
-private:
-
-	TArray<AActor*> GatekeeperEnemySpawns;
+	UPROPERTY(BlueprintReadWrite)
+		TArray<AActor*> GatekeeperEnemySpawns;
 	
 };

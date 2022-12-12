@@ -3,6 +3,10 @@
 
 #include "BaseBoss.h"
 
+ABaseBoss::ABaseBoss()
+{
+}
+
 float ABaseBoss::GetHPThresholdHigh()
 {
     return HPThresholdHigh;
@@ -51,4 +55,8 @@ float ABaseBoss::GetMaxAttackDelay()
 void ABaseBoss::SetMaxAttackDelay(float MaxDelay)
 {
     MaxAttackDelay = MaxDelay;
+}
+
+void ABaseBoss::AttackTrace(UAnimMontage* AnimTrigger)
+{
 }

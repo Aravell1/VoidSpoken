@@ -10,7 +10,7 @@
 #include "BaseEntity.generated.h"
 
 
-UCLASS()
+UCLASS(Abstract)
 class VOIDSPOKEN_API ABaseEntity : public ACharacter
 {
 	GENERATED_BODY()
@@ -33,7 +33,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	virtual void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
+		virtual void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

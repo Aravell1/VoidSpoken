@@ -10,6 +10,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "PortalSpawn.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackCommand);
+
 UCLASS()
 class VOIDSPOKEN_API APortalSpawn : public AActor
 {
@@ -20,8 +22,6 @@ public:
 	APortalSpawn();
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UStaticMeshComponent* BoxMesh;
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<ABaseEnemy> EnemyClass = ABaseEnemy::StaticClass();
@@ -32,6 +32,9 @@ public:
 		TArray<TSubclassOf<ABaseEnemy>> EnemyArray = {};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TArray<TSubclassOf<ACharacter>> EnemyBPArray = {};
+
+	UPROPERTY(BlueprintAssignable)
+		FAttackCommand OrderAttackBP;
 
 protected:
 	// Called when the game starts or when spawned

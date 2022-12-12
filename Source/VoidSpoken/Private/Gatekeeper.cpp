@@ -25,7 +25,8 @@ AGatekeeper::AGatekeeper()
 	}
 
 	//Initialize General Stats
-	SetAttack(20);
+	if (GetAttack() <= 0)
+		SetAttack(10);
 	Stats->Defense = 20;
 	Stats->SetMaxHealth(200);
 	Stats->Health = Stats->GetMaxHealth();

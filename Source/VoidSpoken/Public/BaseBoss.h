@@ -9,12 +9,13 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class VOIDSPOKEN_API ABaseBoss : public ABaseEnemy
 {
 	GENERATED_BODY()
 	
 public:
+	ABaseBoss();
 
 	float GetHPThresholdHigh();
 	void SetHPThresholdHigh(float ThreshHigh);
@@ -31,6 +32,7 @@ public:
 	float GetMaxAttackDelay();
 	void SetMaxAttackDelay(float MaxDelay);
 
+	virtual void AttackTrace(UAnimMontage* AnimTrigger) override;
 
 private:
 	float HPThresholdHigh = 0;

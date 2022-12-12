@@ -15,7 +15,7 @@
  */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBroadcastDelegate);
 
-UCLASS()
+UCLASS(Abstract)
 class VOIDSPOKEN_API ABaseEnemy : public ABaseEntity
 {
 	GENERATED_BODY()
@@ -57,13 +57,11 @@ public:
 
 	virtual void AttackTrace(UAnimMontage* AnimTrigger);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float Attack = 0;
+
 private:
 
-	UPROPERTY(VisibleAnywhere)
-		float Health = 0;
-	float Attack = 0;
-	float Defense = 0;
-	float MaxHealth = 0;
 	float WalkSpeed = 0;
 	float RunSpeed = 0;
 	float DamageMultiplier = 10;
