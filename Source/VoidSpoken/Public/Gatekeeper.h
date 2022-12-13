@@ -45,12 +45,6 @@ public:
 
 	void BehaviourStateEvent();
 
-	float GetAttackMultiplier();
-	void SetAttackMultiplier(float AttackMult);
-
-	float GetDefenseMultiplier();
-	void SetDefenseMultiplier(float DefMult);
-
 	UFUNCTION()
 		void OnSeePawn(APawn* OtherPawn);
 

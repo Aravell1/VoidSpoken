@@ -38,10 +38,6 @@ AGatekeeper::AGatekeeper()
 	SetHPThresholdMed(0.5f);
 	SetHPThresholdLow(0.25f);
 
-	//Initialize Gatekeeper Stats
-	SetAttackMultiplier(1.25f);
-	SetDefenseMultiplier(0.75f);
-
 	//Initialize Character Movement Stats
 	SetWalkSpeed(350);
 	SetRunSpeed(500);
@@ -136,6 +132,8 @@ void AGatekeeper::BehaviourStateEvent()
 		if (PortalReset)
 		{
 			PortalReset = false;
+			if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+				GetMesh()->GetAnimInstance()->StopAllMontages(false);
 			GetMesh()->GetAnimInstance()->Montage_Play(SummonPortalMontage);
 			GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, SummonPortalMontage);
 
@@ -273,7 +271,8 @@ void AGatekeeper::Enrage()
 	if (!Enraged)
 	{
 		Enraged = true;
-		SetAttack(GetAttack() * GetAttackMultiplier());
+		SetAttack(GetAttack() * AttackMultiplier);
+		EquippedWeapon->SetBaseDamage(GetAttack());
 		GetMesh()->GetAnimInstance()->Montage_Play(EnrageMontage);
 		GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, EnrageMontage);
 	}
@@ -377,7 +376,7 @@ void AGatekeeper::UpdateHealth(bool StopMovement, float Damage)
 
 void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	float PortalCount = HealthCheck(FMath::Floor(Damage * (25 / (25 + Stats->Defense))));
+	float PortalCount = HealthCheck(FMath::Floor(Damage * (25 / (25 + Stats->Defense * DefenseMultiplier))));
 
 	UpdateHealthBar.Broadcast();
 
@@ -400,13 +399,11 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 	Super::AttackTrace(AnimTrigger);
 
 	FVector StartLocation;
-	FVector EndLocation;
 	float AttackRadius;
 
 	if (AnimTrigger == StompMontage)
 	{
 		StartLocation = GetMesh()->GetComponentLocation();
-		EndLocation = StartLocation;
 		AttackRadius = StompRadius;
 	}
 	else
@@ -414,47 +411,28 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 		return;
 	}
 
-	TArray<AActor*> ActorsToIgnore = { this };
-	TArray<FHitResult> OutHits;
-	if (UKismetSystemLibrary::SphereTraceMulti(GetWorld(), StartLocation, EndLocation, AttackRadius,
-		TraceTypeQuery3, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHits, true, 
-		FLinearColor::Red, FLinearColor::Green, 1.0f))
+	TArray<AActor*> ActorsToIgnore = { GetOwner() };
+	TArray<AActor*> OutActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Camera));
+
+	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), StartLocation, AttackRadius, ObjectTypes, nullptr, ActorsToIgnore, OutActors);
+	if (OutActors.Num() > 0)
 	{
 		float Damage = FMath::Floor(GetAttack() * FMath::RandRange(0.9f, 1.1f));
-		for (int i = 0; i < OutHits.Num(); i++)
+		for (int i = 0; i < OutActors.Num(); i++)
 		{
-			if (OutHits[i].GetActor() == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+			if (OutActors[i] == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 			{
-				//DrawDebugLine(GetWorld(), StartLocation, OutHits[i].GetActor()->GetActorLocation(), FColor::Blue, false, 5);
-				UGameplayStatics::ApplyDamage(OutHits[i].GetActor(), Damage, NULL, this, NULL);
-				FVector ImpulseVector = (OutHits[i].GetActor()->GetActorLocation() - StartLocation).GetSafeNormal() * StompImpulseForce;
-				ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-				Player->LaunchCharacter(ImpulseVector, true, false);
+				//DrawDebugLine(GetWorld(), StartLocation, OutActors[i]->GetActorLocation(), FColor::Blue, false, 5);
+				UGameplayStatics::ApplyDamage(OutActors[i], Damage, NULL, this, NULL);
+				FVector ImpulseVector = (OutActors[i]->GetActorLocation() - StartLocation).GetSafeNormal() * StompImpulseForce;
+				Cast<ACharacter>(OutActors[i])->LaunchCharacter(ImpulseVector, true, false);
 				return;
 			}
 
 		}
 	}
-}
-
-float AGatekeeper::GetAttackMultiplier()
-{
-	return AttackMultiplier;
-}
-
-void AGatekeeper::SetAttackMultiplier(float AttackMult)
-{
-	AttackMultiplier = AttackMult;
-}
-
-float AGatekeeper::GetDefenseMultiplier()
-{
-	return DefenseMultiplier;
-}
-
-void AGatekeeper::SetDefenseMultiplier(float DefMult)
-{
-	DefenseMultiplier = DefMult;
 }
 
 GatekeeperState AGatekeeper::GetState()
