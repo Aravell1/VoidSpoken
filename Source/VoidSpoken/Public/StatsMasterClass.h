@@ -44,15 +44,15 @@ public:
 	///Will
 	// Main Stats
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats|Health")
 	float Health = MaxHealth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats|Focus")
 	float FocusPoints = MaxFocus;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats|Stamina")
 	float Stamina = MaxStamina;
 	
 	/// Yun
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "STATS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 		float Defense = 0;
 	
 	//Runes ***TEMP***
@@ -62,7 +62,6 @@ public:
 	int LesserRune;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RUNES")
 	int GreaterRune;
-
 
 	///Will
 	///Player Functions
@@ -75,11 +74,7 @@ public:
 	void RegenFP();
 	void RegenStamina(float _ST);
 
-
-
 	/// Set & Get Max Stats
-
-	// Set/Get MaxHealth
 	UFUNCTION(BlueprintCallable)
 	void SetMaxHealthPlayer();
 
@@ -117,7 +112,6 @@ public:
 	{
 		return MaxStamina;
 	}
-
 
 	/// Set & Get Base Stats
 
@@ -161,8 +155,6 @@ public:
 		return BaseStamina;
 	}
 
-
-
 	// Initialize Max HP, Stamina, Focus Points
 	void InitializeMaxStats();
 
@@ -176,19 +168,27 @@ public:
 	/*UPROPERTY()
 	float RegenTime = 1.0f;*/
 
-
-
 private:
 	
 	// Max Stats (initialized on Begin Play)
-	float MaxHealth;
-	float MaxFocus;
-	float MaxStamina;
+	UPROPERTY(VisibleAnywhere, Category = "Stats|Health")
+		float MaxHealth;
+
+	UPROPERTY(VisibleAnywhere, Category = "Stats|Focus")
+		float MaxFocus;
+
+	UPROPERTY(VisibleAnywhere, Category = "Stats|Stamina")
+		float MaxStamina;
 
 	// Base Stats
-	float BaseHealth;
-	float BaseFocus;
-	float BaseStamina;
+	UPROPERTY(VisibleAnywhere, Category = "Stats|Health")
+		float BaseHealth;
+
+	UPROPERTY(VisibleAnywhere, Category = "Stats|Focus")
+		float BaseFocus;
+
+	UPROPERTY(VisibleAnywhere, Category = "Stats|Stamina")
+		float BaseStamina;
 
 	//Player Levels
 	float VitalityLvl;
@@ -205,10 +205,6 @@ private:
 	//Runes functions
 	void Lesser();
 	void Greater();
-
-	
-
-	
 
 protected:
 	// Called when the game starts

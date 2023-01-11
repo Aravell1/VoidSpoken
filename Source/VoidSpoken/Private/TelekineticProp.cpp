@@ -1,0 +1,215 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "TelekineticProp.h"
+
+// Sets default values
+ATelekineticProp::ATelekineticProp()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	#pragma region Setup Static Mesh Component
+	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
+	RootComponent = StaticMesh;
+
+	StaticMesh->SetSimulatePhysics(true);
+	StaticMesh->SetCollisionProfileName("Telekinesis");
+	StaticMesh->CustomDepthStencilValue = 1;
+
+	StaticMesh->SetAngularDamping(2.0f);
+	#pragma endregion
+}
+
+void ATelekineticProp::PostInitializeComponents() {
+	Super::PostInitializeComponents();
+
+	StaticMesh->OnComponentHit.AddDynamic(this, &ATelekineticProp::OnComponentHit);
+}
+
+// Called when the game starts or when spawned
+void ATelekineticProp::BeginPlay()
+{
+	Super::BeginPlay();
+
+
+	#pragma region Setup Timeline
+	FOnTimelineFloat LiftProgressUpdate;
+	LiftProgressUpdate.BindUFunction(this, FName("LiftUpdate"));
+
+	FOnTimelineEvent LiftFinishedEvent;
+	LiftFinishedEvent.BindUFunction(this, FName("LiftFinished"));
+
+	LiftTimeline.AddInterpFloat(LiftCurve, LiftProgressUpdate);
+	LiftTimeline.SetTimelineFinishedFunc(LiftFinishedEvent);
+	#pragma endregion
+}
+
+// Called every frame
+void ATelekineticProp::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	LiftTimeline.TickTimeline(DeltaTime);
+
+	switch (State) {
+	case ETelekinesisState::ETS_Default:
+		break;
+	case ETelekinesisState::ETS_Pulled:
+		ReachCharacter();
+	}
+}
+
+#pragma region Highlights
+void ATelekineticProp::Highlight_Implementation(bool bHighlight) {
+	StaticMesh->SetRenderCustomDepth(bHighlight);
+}
+
+void ATelekineticProp::HighlightPure(bool bHighlight) {
+	StaticMesh->SetRenderCustomDepth(bHighlight);
+}
+#pragma endregion
+
+void ATelekineticProp::Pull_Implementation(ACharacter* Character) {
+	HighlightPure(false);
+	Execute_Highlight(this, false);
+	PlayerCharacter = Character;
+	LiftOff();
+}
+
+void ATelekineticProp::PullPure(ACharacter* Character) {
+	HighlightPure(false);
+	Execute_Highlight(this, false);
+	PlayerCharacter = Character;
+	LiftOff();
+}
+
+void ATelekineticProp::Push_Implementation(FVector Destination, float Force) {
+	PushTarget = Destination;
+	State = ETelekinesisState::ETS_Pushed;
+	StopLift();
+
+	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
+
+	FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f) * Force);
+	StaticMesh->AddImpulse(Impulse, NAME_None, true);
+	StaticMesh->SetLinearDamping(0.1f);
+	StaticMesh->SetAngularDamping(0.0f);
+}
+
+void ATelekineticProp::PushPure(FVector Destination, float Force) {
+	PushTarget = Destination;
+	State = ETelekinesisState::ETS_Pushed;
+	StopLift();
+
+	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
+
+	FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f) * Force);
+	StaticMesh->SetEnableGravity(true);
+	StaticMesh->AddImpulse(Impulse, NAME_None, true);
+}
+
+void ATelekineticProp::Drop_Implementation() {
+	PushTarget = FVector::ZeroVector;
+	State = ETelekinesisState::ETS_Default;
+	StopLift();
+
+	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
+
+	StaticMesh->SetEnableGravity(true);
+	StaticMesh->SetLinearDamping(0.1f);
+	StaticMesh->SetAngularDamping(0.0f);
+}
+
+void ATelekineticProp::DropPure() {
+	PushTarget = FVector::ZeroVector;
+	State = ETelekinesisState::ETS_Default;
+	StopLift();
+
+	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
+
+	StaticMesh->SetEnableGravity(true);
+	StaticMesh->SetLinearDamping(0.1f);
+	StaticMesh->SetAngularDamping(0.0f);
+}
+
+#pragma region Visual Touches
+void ATelekineticProp::LiftUpdate(const float Alpha) {
+	FVector NewLocation = FMath::Lerp(LiftStart, LiftEnd, Alpha);
+	SetActorLocation(NewLocation);
+}
+
+void ATelekineticProp::LiftFinished() {
+	StaticMesh->AddAngularImpulseInDegrees(UKismetMathLibrary::Multiply_VectorFloat(PlayerCharacter->GetActorUpVector(), 800.0f), NAME_None, true);
+
+	StaticMesh->SetEnableGravity(false);
+	StaticMesh->SetLinearDamping(20.0f);
+	StaticMesh->SetAngularDamping(2.0f);
+	State = ETelekinesisState::ETS_Pulled;
+
+}
+
+void ATelekineticProp::ChaoticJitter() {
+	JitterCounter++;
+	if (JitterCounter >= 60) {
+		JitterCounter = 0;
+		StaticMesh->AddImpulse(UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::RandomUnitVector(), 200.0f), NAME_None, true);
+	}
+}
+
+void ATelekineticProp::ReachCharacter() {
+	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::ClampVectorSize(UKismetMathLibrary::Subtract_VectorVector(Player->TelekinesisSource->GetComponentLocation(), GetActorLocation()), 0, 1000.0f), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f));
+	StaticMesh->AddImpulse(Impulse, NAME_None, true);
+
+	if (UKismetMathLibrary::Vector_Distance(GetActorLocation(), Player->TelekinesisSource->GetComponentLocation()) <= 50.0f)
+		Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_Hold);
+
+	ChaoticJitter();
+}
+
+void ATelekineticProp::LiftOff() {
+	Highlight_Implementation(false);
+	HighlightPure(false);
+
+	LiftStart = GetActorLocation();
+	LiftEnd = GetActorLocation() + FVector(0, 0, 100);
+	LiftTimeline.PlayFromStart();
+}
+
+void ATelekineticProp::StopLift() {
+	LiftTimeline.Stop();
+}
+#pragma endregion
+
+#pragma region Collision Events
+
+void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
+	if (State == ETelekinesisState::ETS_Pushed /*|| State == ETelekinesisState::ETS_Pulled*/) {
+		StaticMesh->SetEnableGravity(true);
+		if (State == ETelekinesisState::ETS_Pulled) {
+			DropPure();
+			Drop_Implementation();
+		}
+
+		float Mass = StaticMesh->GetMass();
+		float Velocity = GetVelocity().Size();
+		float Damage = ((Mass + FMath::Pow(Velocity, 0.25f) / (Mass / Velocity))) / 32;
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "M: " + FString::SanitizeFloat(Mass) + " V: " + FString::SanitizeFloat(Velocity) + " Damage: " + FString::SanitizeFloat(Damage));
+
+		StaticMesh->SetAllPhysicsLinearVelocity(FVector());
+		StaticMesh->AddImpulse(UKismetMathLibrary::Multiply_VectorFloat(NormalImpulse, 0.2f));
+		State = ETelekinesisState::ETS_Default;
+
+		UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, PlayerCharacter, NULL);
+	}
+}
+
+#pragma endregion
+
+
