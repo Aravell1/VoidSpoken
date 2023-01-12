@@ -18,3 +18,26 @@ void AVoidSpokenGameModeBase::KillGatekeeperSpawns()
 		}
 	}
 }
+
+void AVoidSpokenGameModeBase::SetHealItem(int heal)
+{
+	HealPickup += heal;
+
+	UE_LOG(LogTemp, Warning, TEXT("HEALING Items: %d"), HealPickup);
+}
+
+void AVoidSpokenGameModeBase::SetFocusItem(int focus)
+{
+	FocusPickup += focus;
+
+	UE_LOG(LogTemp, Warning, TEXT("FOCUS Items: %d"), FocusPickup);
+}
+
+void AVoidSpokenGameModeBase::SetStaminaItem(int stamina)
+{
+	StaminaPickup += stamina;
+
+	UE_LOG(LogTemp, Warning, TEXT("STAMINA Items: %d"), StaminaPickup);	
+}
+
+

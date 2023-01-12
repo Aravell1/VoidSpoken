@@ -40,7 +40,7 @@ APlayerCharacter::APlayerCharacter()
 	Stats->SetBaseHealth(30.f);
 	Stats->GetBaseHealth();
 	
-	Stats->SetBaseFocus(20.f);
+	Stats->SetBaseFocus(50.f);
 	Stats->GetBaseFocus();
 
 	Stats->SetBaseStamina(50.f);

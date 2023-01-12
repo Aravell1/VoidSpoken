@@ -72,8 +72,7 @@ public:
 	{
 		BaseHealth += _HP;
 	}
-	void RegenFP();
-	void RegenStamina(float _ST);
+	
 
 
 
@@ -168,13 +167,6 @@ public:
 
 	// Initialize Stats
 	void InitializeMainStats();
-
-
-	/*UFUNCTION(BlueprintCallable)
-	void RegenTimer();*/
-
-	/*UPROPERTY()
-	float RegenTime = 1.0f;*/
 
 
 
