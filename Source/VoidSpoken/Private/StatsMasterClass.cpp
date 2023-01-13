@@ -71,7 +71,6 @@ void UStatsMasterClass::IncreaseVIT()
 /// If player has 1 or more Rune Points
 /// Level up Strength by 1
 /// 
-/// <param name="_Str"></param>
 void UStatsMasterClass::IncreaseSTR()
 {
 	if (RunePoints >= 1)
@@ -197,7 +196,7 @@ void UStatsMasterClass::SetMaxHealth(float MHP)
 //Called when MaxHealth needs to update
 void UStatsMasterClass::SetMaxFocusPlayer()
 {
-	MaxFocus = ((IntelligenceLvl - 1) * 2.0f) + BaseFocus;
+	MaxFocus = ((IntelligenceLvl - 1) * 3.0f) + BaseFocus;
 
 	//UE_LOG(LogTemp, Warning, TEXT("Max Focus Points: %f"), MaxFocus);
 }

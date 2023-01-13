@@ -23,4 +23,39 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		TArray<AActor*> GatekeeperEnemySpawns;
 	
+
+	UFUNCTION()
+	void SetHealItem(int heal);
+
+	UFUNCTION(BlueprintCallable)
+	int GetHealItem()
+	{
+		return HealPickup;
+	}
+
+	UFUNCTION()
+	void SetFocusItem(int focus);
+
+	UFUNCTION(BlueprintCallable)
+		int GetFocusItem()
+	{
+		return FocusPickup;
+	}
+
+	UFUNCTION()
+	void SetStaminaItem(int stamina);
+
+	UFUNCTION(BlueprintCallable)
+	int GetStaminaItem()
+	{
+		return HealPickup;
+	}
+
+
+private:
+
+	int HealPickup;
+	int FocusPickup;
+	int StaminaPickup;
+
 };
