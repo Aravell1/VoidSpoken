@@ -64,21 +64,9 @@ void ATelekineticProp::Tick(float DeltaTime)
 void ATelekineticProp::Highlight_Implementation(bool bHighlight) {
 	StaticMesh->SetRenderCustomDepth(bHighlight);
 }
-
-void ATelekineticProp::HighlightPure(bool bHighlight) {
-	StaticMesh->SetRenderCustomDepth(bHighlight);
-}
 #pragma endregion
 
 void ATelekineticProp::Pull_Implementation(ACharacter* Character) {
-	HighlightPure(false);
-	Execute_Highlight(this, false);
-	PlayerCharacter = Character;
-	LiftOff();
-}
-
-void ATelekineticProp::PullPure(ACharacter* Character) {
-	HighlightPure(false);
 	Execute_Highlight(this, false);
 	PlayerCharacter = Character;
 	LiftOff();
@@ -93,38 +81,14 @@ void ATelekineticProp::Push_Implementation(FVector Destination, float Force) {
 	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
 
 	FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f) * Force);
-	StaticMesh->AddImpulse(Impulse, NAME_None, true);
-	StaticMesh->SetLinearDamping(0.1f);
-	StaticMesh->SetAngularDamping(0.0f);
-}
-
-void ATelekineticProp::PushPure(FVector Destination, float Force) {
-	PushTarget = Destination;
-	State = ETelekinesisState::ETS_Pushed;
-	StopLift();
-
-	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
-
-	FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f) * Force);
 	StaticMesh->SetEnableGravity(true);
 	StaticMesh->AddImpulse(Impulse, NAME_None, true);
+	
+	StaticMesh->SetLinearDamping(0.1f);
+	StaticMesh->SetAngularDamping(0.0f);
 }
 
 void ATelekineticProp::Drop_Implementation() {
-	PushTarget = FVector::ZeroVector;
-	State = ETelekinesisState::ETS_Default;
-	StopLift();
-
-	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
-
-	StaticMesh->SetEnableGravity(true);
-	StaticMesh->SetLinearDamping(0.1f);
-	StaticMesh->SetAngularDamping(0.0f);
-}
-
-void ATelekineticProp::DropPure() {
 	PushTarget = FVector::ZeroVector;
 	State = ETelekinesisState::ETS_Default;
 	StopLift();
@@ -174,7 +138,6 @@ void ATelekineticProp::ReachCharacter() {
 
 void ATelekineticProp::LiftOff() {
 	Highlight_Implementation(false);
-	HighlightPure(false);
 
 	LiftStart = GetActorLocation();
 	LiftEnd = GetActorLocation() + FVector(0, 0, 100);
@@ -192,7 +155,6 @@ void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor*
 	if (State == ETelekinesisState::ETS_Pushed /*|| State == ETelekinesisState::ETS_Pulled*/) {
 		StaticMesh->SetEnableGravity(true);
 		if (State == ETelekinesisState::ETS_Pulled) {
-			DropPure();
 			Drop_Implementation();
 		}
 

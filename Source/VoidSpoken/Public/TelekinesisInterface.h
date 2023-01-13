@@ -30,25 +30,13 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Telekinesis")
 		void Highlight(bool bHighlight);
 
-	UFUNCTION()
-		virtual void HighlightPure(bool bHighlight) = 0;
-
 	UFUNCTION(BlueprintNativeEvent, Category = "Telekinesis")
 		void Push(FVector Destination, float Force);
-
-	UFUNCTION()
-		virtual void PushPure(FVector Destination, float Force) = 0;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Telekinesis")
 		void Pull(ACharacter* Character);
 
-	UFUNCTION()
-		virtual void PullPure(ACharacter* Character) = 0;
-
 	UFUNCTION(BlueprintNativeEvent, Category = "Telekinesis")
 		void Drop();
-
-	UFUNCTION()
-		virtual void DropPure() = 0;
 
 };

@@ -16,6 +16,7 @@
 #include "StatsMasterClass.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/TimelineComponent.h"
+#include "UObject/ConstructorHelpers.h"
 #include "TelekinesisInterface.h"
 #include "BaseWeapon.h"
 
@@ -26,6 +27,13 @@ enum class ETelekinesisAttackState : uint8 {
 	ETA_None = 0 UMETA(DisplayName = "None"),	// Holding Nothing
 	ETA_Pull = 1 UMETA(DisplayName = "Pull"),	// Started Pulling an Object (Can stop mid way through)
 	ETA_Hold = 2 UMETA(DisplayName = "Hold"),	// Got to holding position and awaiting to be thrown
+};
+
+UENUM()
+enum class EWeaponSlot : uint8 {
+	EWS_None = 0 UMETA(DisplayName = "None"),			// Holding Nothing
+	EWS_First = 1 UMETA(DisplayName = "First Weapon"),	// Started Pulling an Object (Can stop mid way through)
+	EWS_Second = 2 UMETA(DisplayName = "Second Weapon")	// Got to holding position and awaiting to be thrown
 };
 
 UENUM()
@@ -52,7 +60,7 @@ public:
 		class UCameraComponent* FollowCamera;
 
 	#pragma region Movement / Camera Functions and Variables
-	private:
+private:
 	void MoveForward(float Axis);
 	void MoveRight(float Axis);
 
@@ -66,14 +74,30 @@ public:
 
 	void LookUpRate(float Rate);
 
-	#pragma endregion
+#pragma endregion
 
 public:
+
 	/// Dev: YunYun
 	/// Adding Weapons to this class
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		//TSubclassOf<ABaseWeapon*> EquippedWeapon = nullptr;
+
+	#pragma region Weapons and Functions
+
+	EWeaponSlot CurrentWeapon = EWeaponSlot::EWS_None;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
 		ABaseWeapon* EquippedWeapon = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+		TArray<TSubclassOf<ABaseWeapon>> WeaponInventory = {};
+
+	UFUNCTION(BlueprintCallable)
+		void EquipFromInventory(int32 Index, FName EquippingSocket);
+
+	UFUNCTION(BlueprintCallable)
+		void SwapWeapons();
+
+	#pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		USceneComponent* TelekinesisSource = nullptr; // FVector(-190, 40, 147)
@@ -97,11 +121,11 @@ protected:
 
 	/// Determines how fast the Walking Speed the player moves
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Walking Speed")
-		float fWalkSpeed = 250.0;
+		float fWalkSpeed = 250.0f;
 	
 	/// Determines how fast the Running Speed the player moves
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Run Speed")
-		float fRunSpeed = 450.0;
+		float fRunSpeed = 450.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Telekinetic Attack State")
 		ETelekinesisAttackState ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
@@ -242,7 +266,7 @@ public:
 
 	/// A delay to start regenerating stamina
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Stamina Delay (s)")
-		float fStaminaDelay = 2.5f;
+		float fStaminaDelay =.75f;
 
 	/// The regeneration rate of Stamina, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Stamina Regeneration Rate ( /s )")
@@ -265,9 +289,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Dodge Stamina Cost")
 		float fDodgeStaminaCost = 8.0f;
 
-	void SetDodging() { bIsDodging = !bIsDodging; };
+
+
+	void SetDodging() { bIsDodging = !bIsDodging; if (!bIsDodging) DodgingTimer.Stop(); };
 	void SetDodging(bool State) { bIsDodging = State; };
+
+	void HandleDodge();
 	
+	UFUNCTION()
+		void DodgingStarted();
+
+	UFUNCTION()
+		void DodgingFinished();
+
 	private:
 
 	/// Determines if the player is currently dodging, making the player invincible for a short duration of time
@@ -288,10 +322,7 @@ public:
 	void Dodge();
 
 	UFUNCTION()
-	void DodgingUpdate(const float Alpha);
-	
-	UFUNCTION()
-	void DodgingFinished();
+		void DodgingUpdate(const float Alpha);
 
 	FVector DodgingDirection;
 

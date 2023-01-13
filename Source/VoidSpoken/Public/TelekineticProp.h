@@ -79,19 +79,11 @@ public:
 	/// Implementing the Telekinesis interface
 	void Highlight_Implementation(bool bHighlight) override;
 
-	virtual void HighlightPure(bool bHighlight) override;
-
 	void Pull_Implementation(ACharacter* Character) override;
-
-	virtual void PullPure(ACharacter* Character) override;
 
 	void Push_Implementation(FVector Destination, float Force) override;
 
-	virtual void PushPure(FVector Destination, float Force) override;
-
 	void Drop_Implementation() override;
-
-	virtual void DropPure() override;
 
 	// Visual Effects Functions
 	void LiftOff();
