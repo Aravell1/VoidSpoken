@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine.h"
 #include "Engine/EngineTypes.h"
+#include "BaseWeaponInterface.h"
 #include "BaseWeapon.generated.h"
 
 /*
@@ -31,8 +32,7 @@ enum AttackType {
 };
 
 UCLASS(Abstract)
-class VOIDSPOKEN_API ABaseWeapon : public AActor
-{
+class VOIDSPOKEN_API ABaseWeapon : public AActor, public IBaseWeaponInterface {
 	GENERATED_BODY()
 	
 public:	
@@ -91,15 +91,24 @@ public:
 	UFUNCTION()
 		bool CheckMovementMode();
 
+	UFUNCTION() 
+		float GetStaminaCost() {
+			if (ComboStaminaMultipliers.IsValidIndex(CurrentComboIndex)) return ComboStaminaMultipliers[CurrentComboIndex];
+			else return 0.0f;
+		}
+
 	///Weapon Functions
 
+	#pragma region IBaseWeaponInterface Implementation
 	/// Function: Equip(ACharacter* EquippingCharacter) 
 	///		-This functions sets the variable EquippedCharacter
 	///		-Will Also set this Weapon's owner as EquippedCharacter
 	///		-Initialises the UAnimInstance from the Default (At the time of this Equip(), what was the UAnimInstance the Character had)
 	///		-Initialises the UCharacterMovementComponent from the given EquippedCharacter 
-	UFUNCTION(BlueprintCallable)
-		virtual void Equip(ACharacter* EquippingCharacter);
+	
+	void Equip_Implementation(ACharacter* EquippingCharacter) override;
+
+	#pragma endregion
 
 	/// Function: Attack()
 	///		-Momentarily disables player movement
@@ -165,6 +174,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (NoGetter))
 		float BaseDamage = 0;
 
+	/// Base Stamina of this Weapon
+	///		-How much each Attack costs within the ComboAttackString
+	///		-Cannot Attack if the player doesn't have enough stamina
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (NoGetter))
+		float BaseStamina = 0;
+
 	/// The Actor that has equipped this weapon
 	///		-For purposes of unwanted self damage infliction
 	///		-This will also be used to equip to this Actor
@@ -181,18 +196,23 @@ protected:
 	/// This Array contains all the Animation Montages for the Attack of this weapon.
 	///		-This cannot be uninitialized
 	///		-This will loop constantly when this runs through the whole Montage Array
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Normal Attack")
 		TArray<UAnimMontage*> ComboAnimationMontage = {};
 
 	/// This array will dictate how much of the Base Damage is accounted for
 	///		-Normalized Value (%)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Normal Attack")
 		TArray<float> ComboAttackMultipliers = {};
+
+	/// This array will scale how much stamina the attack (within the array) is used
+	///		-Normalized Values (%)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Normal Attack")
+		TArray<float> ComboStaminaMultipliers = {};
 	
 	/// This keeps track of the current Attack to be executed.
 	///		-Cannot be edited by blueprints to prevent any unwanted behaviours
 	///		-Will only increment to the length of the ComboMontage - 1
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter), Category = "Normal Attack")
 		int CurrentComboIndex = 0;
 
 	/// This keeps track of the current Attack to be executed.
@@ -206,19 +226,19 @@ protected:
 	/// This Charged Attack Animation will be played if the Entity uses it
 	///		-This parameter can be uninitialized
 	///		-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Charged Attack")
 		UAnimMontage* ChargedAttackMontage = nullptr;
 
 	/// This value will dictate how much of the Base Damage is accounted for
 	///		-Normalized Value (%)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Charged Attack")
 		float ChargedAttackComboMultiplier = 0;
 
 	/// How much Stamina is comsumed
 	///		-Will not player if Player doesn't have enough resources
 	///		-This is a subtractive value
 	///		-This value substracts from the Stats->Stamina
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Charged Attack")
 		float ChargedAttackConsumption = 0;
 
 	// Unique Attack
@@ -226,30 +246,30 @@ protected:
 	/// This Unique Animation will be played if given the opportunity
 	///		-Given at the desired index (Unique Attack Index), will interrupt the current attacks animation
 	///		-This parameter can be uninitialized (not all weapons need a unique attack)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
 		UAnimMontage* UniqueAttackMontage = nullptr;
 
 	/// Where will this window of opportunity  be opened at
 	///		-This can happen anywhere from 0 to ComboMontage - 1.
 	///		-Will not play if UniqueAnimationMontage is null, or uninitialized
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
 		int UniqueAttackIndex = 0;
 
 	/// This value will dictate how much of the Base Damage is accounted for
 	///		-Normalized Value (%)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
 		float UniqueAttackComboMultiplier = 0;
 
 	/// How much Focus is comsumed
 	///		-Will not player if Player doesn't have enough resources
 	///		-This is a subtractive value
 	///		-This value substracts from the Stats->Focus
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
 		float UniqueAttackConsumption = 0;
 
 	/// The cooldown (in seconds) after the attack has been initiated
 	///		-This is additive of the UniqueAttackMontage's play length (in seconds)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
 		float UniqueAttackCooldown = 0;
 
 	/// Components of this class
@@ -287,7 +307,8 @@ protected:
 	///This TimerHandler is to insure that after some time has passed, the function 
 	FTimerHandle UniqueAttackDelayTimer;
 
-	//Collision Delegates
+	#pragma region Collision Delegates
+	
 	UFUNCTION()
 		virtual void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
@@ -296,4 +317,6 @@ protected:
 
 	UFUNCTION()
 		virtual void OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit); 
+	
+	#pragma endregion
 };
