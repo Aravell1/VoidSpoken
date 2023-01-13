@@ -15,10 +15,13 @@
 #include "Engine/EngineTypes.h"
 #include "StatsMasterClass.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetStringLibrary.h"
 #include "Components/TimelineComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "TelekinesisInterface.h"
 #include "BaseWeapon.h"
+
+#include "UObject/UObjectGlobals.h"
 
 #include "PlayerCharacter.generated.h"
 
@@ -96,6 +99,21 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void SwapWeapons();
+
+	template <typename ObjClass>
+	static FORCEINLINE ObjClass* LoadObjFromPath(const FName& Path)
+	{
+		if (Path == NAME_None) return nullptr;
+
+		return Cast<ObjClass>(StaticLoadObject(ObjClass::StaticClass(), nullptr, *Path.ToString()));
+	}
+
+	static FORCEINLINE ABaseWeapon* LoadBaseWeaponFromPath(const FName& Path)
+	{
+		if (Path == NAME_None) return nullptr;
+
+		return LoadObjFromPath<ABaseWeapon>(Path);
+	}
 
 	#pragma endregion
 

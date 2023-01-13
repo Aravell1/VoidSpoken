@@ -1,6 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+//https://forums.unrealengine.com/t/how-to-spawn-a-blueprint-actor-via-c/78121/5
+
+
 #include "PlayerCharacter.h"
 
 #pragma region Constructor and Inheritied Functions
@@ -153,11 +156,14 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 void APlayerCharacter::EquipFromInventory(int32 Index, FName EquippingSocket = "LeftWeaponSocket") {
 	if (WeaponInventory.IsValidIndex(Index)) {
-		FString FilePath = UKismetSystemLibrary::GetPathName(WeaponInventory[Index]);
-		UObject* SpawnedActor = Cast<UObject>(StaticLoadObject(UObject::StaticClass(), NULL, *FilePath));
+		FString PathName = TEXT("/Game/Blueprints/Weapons/") + WeaponInventory[Index]->GetName();
+		const TCHAR* CPath = *PathName;
+		
+		//UObject* SpawnedActor = Cast<UObject>(LoadObject<UObject>(NULL, CPath));
+		UObject* SpawnedActor = Cast<UObject>(StaticLoadObject(UObject::StaticClass(), NULL, TEXT("/Game/Blueprints/Weapons/BP_Test_C.BP_Test_C")));
 		
 		UBlueprint* GeneratedBP = Cast<UBlueprint>(SpawnedActor);
-		if (!GeneratedBP) return;
+		if (!SpawnedActor) return;
 
 		UClass* SpawnedClass = SpawnedActor->StaticClass();
 		if (!SpawnedClass) return;
