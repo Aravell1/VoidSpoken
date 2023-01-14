@@ -100,21 +100,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SwapWeapons();
 
-	template <typename ObjClass>
-	static FORCEINLINE ObjClass* LoadObjFromPath(const FName& Path)
-	{
-		if (Path == NAME_None) return nullptr;
-
-		return Cast<ObjClass>(StaticLoadObject(ObjClass::StaticClass(), nullptr, *Path.ToString()));
-	}
-
-	static FORCEINLINE ABaseWeapon* LoadBaseWeaponFromPath(const FName& Path)
-	{
-		if (Path == NAME_None) return nullptr;
-
-		return LoadObjFromPath<ABaseWeapon>(Path);
-	}
-
 	#pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

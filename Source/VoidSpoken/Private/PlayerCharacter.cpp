@@ -156,21 +156,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 void APlayerCharacter::EquipFromInventory(int32 Index, FName EquippingSocket = "LeftWeaponSocket") {
 	if (WeaponInventory.IsValidIndex(Index)) {
-		FString PathName = TEXT("/Game/Blueprints/Weapons/") + WeaponInventory[Index]->GetName();
-		const TCHAR* CPath = *PathName;
-		
-		//UObject* SpawnedActor = Cast<UObject>(LoadObject<UObject>(NULL, CPath));
-		UObject* SpawnedActor = Cast<UObject>(StaticLoadObject(UObject::StaticClass(), NULL, TEXT("/Game/Blueprints/Weapons/BP_Test_C.BP_Test_C")));
-		
-		UBlueprint* GeneratedBP = Cast<UBlueprint>(SpawnedActor);
-		if (!SpawnedActor) return;
-
-		UClass* SpawnedClass = SpawnedActor->StaticClass();
-		if (!SpawnedClass) return;
-
 		if (!GetMesh()->DoesSocketExist(EquippingSocket)) return;
 
-		EquippedWeapon = GetWorld()->SpawnActor<ABaseWeapon>(GeneratedBP->GeneratedClass);
+		EquippedWeapon = GetWorld()->SpawnActor<ABaseWeapon>(WeaponInventory[Index]);
 		FAttachmentTransformRules TransformRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
 		EquippedWeapon->AttachToComponent(GetMesh(), TransformRules, EquippingSocket);
 
