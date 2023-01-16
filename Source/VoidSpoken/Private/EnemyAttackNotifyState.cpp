@@ -9,6 +9,8 @@ void UEnemyAttackNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComponent,
 
 	if (Enemy != nullptr && Enemy->EquippedWeapon != nullptr)
 		Enemy->EquippedWeapon->SetIsAttacking(true);
+	else if (Enemy != nullptr && Cast<AGhoul>(Enemy))
+		Cast<AGhoul>(Enemy)->SetAttacking(Cast<UAnimMontage>(Animation), true);
 }
 
 void UEnemyAttackNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation)
@@ -17,4 +19,6 @@ void UEnemyAttackNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComponent, U
 
 	if (Enemy != nullptr && Enemy->EquippedWeapon != nullptr)
 		Enemy->EquippedWeapon->SetIsAttacking(false);
+	else if (Enemy != nullptr && Cast<AGhoul>(Enemy))
+		Cast<AGhoul>(Enemy)->SetAttacking(Cast<UAnimMontage>(Animation), false);
 }

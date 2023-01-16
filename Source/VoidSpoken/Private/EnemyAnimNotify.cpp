@@ -8,5 +8,14 @@ void UEnemyAnimNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequen
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(MeshComponent->GetOwner());
 
 	if (Enemy != nullptr)
-		Enemy->AttackTrace(Cast<UAnimMontage>(Animation));
+	{
+		if (Cast<AGhoul>(Enemy))
+		{
+			Cast<AGhoul>(Enemy)->TriggerSpikes(Cast<UAnimMontage>(Animation));
+		}
+		else
+		{
+			Enemy->AttackTrace(Cast<UAnimMontage>(Animation));
+		}
+	}
 }

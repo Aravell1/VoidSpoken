@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "BaseEnemy.h"
+#include "Ghoul.h"
 #include "EnemyAnimNotify.generated.h"
 
 /**
