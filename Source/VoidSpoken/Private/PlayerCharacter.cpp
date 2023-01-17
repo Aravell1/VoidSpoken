@@ -29,6 +29,10 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
 
+	static ConstructorHelpers::FObjectFinder<UCurveFloat>C_DodgeCurve(TEXT("/Game/Blueprints/Player/Dodge.Dodge"));
+	if (C_DodgeCurve.Succeeded())
+		DodgingCurve = C_DodgeCurve.Object;
+
 	#pragma endregion
 
 	#pragma region Setup Camera
@@ -42,6 +46,12 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	FollowCamera->SetupAttachment(CameraArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	// CurveFloat'/Game/Blueprints/Player/Telekinesis/Zoom.Zoom'
+
+	static ConstructorHelpers::FObjectFinder<UCurveFloat>C_ZoomCurve(TEXT("/Game/Blueprints/Player/Telekinesis/Zoom.Zoom"));
+	if (C_ZoomCurve.Succeeded())
+		ZoomCurve = C_ZoomCurve.Object;
 
 	#pragma endregion
 

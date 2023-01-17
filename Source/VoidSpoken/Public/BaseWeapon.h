@@ -94,7 +94,7 @@ public:
 	UFUNCTION() 
 		float GetStaminaCost() {
 			if (ComboStaminaMultipliers.IsValidIndex(CurrentComboIndex)) return ComboStaminaMultipliers[CurrentComboIndex];
-			else return 0.0f;
+			else return 1.0f;
 		}
 
 	///Weapon Functions

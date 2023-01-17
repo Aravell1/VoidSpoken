@@ -292,8 +292,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Dodge Stamina Cost")
 		float fDodgeStaminaCost = 8.0f;
 
-
-
 	void SetDodging() { bIsDodging = !bIsDodging; if (!bIsDodging) DodgingTimer.Stop(); };
 	void SetDodging(bool State) { bIsDodging = State; };
 
