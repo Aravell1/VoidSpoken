@@ -40,37 +40,4 @@ void AVoidSpokenGameModeBase::SetStaminaItem(int stamina)
 	UE_LOG(LogTemp, Warning, TEXT("STAMINA Items: %d"), StaminaPickup);	
 }
 
-void AVoidSpokenGameModeBase::SpawnPlayersFromData()
-{
-	TArray<FPlayerData> PlayerDataInfo;
-	bool bReadSuccess = JsonLibrary->ReadPlayerData(PlayerDataInfo);
-
-	if (bReadSuccess)
-	{
-		if (PlayerDataInfo.Num() > 0)
-		{
-			FPlayerData PlayerData = PlayerDataInfo[0];
-			FVector SpawnLocation = PlayerData.CurrentLocation;
-
-			UWorld* World = GetWorld();
-			if (World)
-			{
-				TArray<AActor*> FoundActors;
-				UGameplayStatics::GetAllActorsOfClass(World, PlayerActorClass, FoundActors);
-
-				if (FoundActors.Num() > 0)
-				{
-					AActor* PlayerCharacter = FoundActors[0];
-					PlayerCharacter->SetActorLocation(SpawnLocation);
-				}
-				else
-				{
-					FActorSpawnParameters SpawnParams;
-					SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-					World->SpawnActor<AActor>(PlayerActorClass.Get(), SpawnLocation, FRotator::ZeroRotator, SpawnParams);
-				}
-			}
-		}
-	}
-}
 
