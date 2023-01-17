@@ -191,7 +191,7 @@ void AGhoul::CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeColli
 	if (UseSpikeCollision)
 		CreatedSpike->SetDamage(Attack);
 	else
-		CreatedSpike->SetDamage(0, false, 0.5f);
+		CreatedSpike->SetDamage(0, false, 0.25f);
 }
 
 void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)

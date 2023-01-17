@@ -23,8 +23,8 @@ ASpikeProjectile::ASpikeProjectile()
 	{
 		ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 		ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent);
-		ProjectileMovementComponent->InitialSpeed = 1000;
-		ProjectileMovementComponent->MaxSpeed = 1000;
+		ProjectileMovementComponent->InitialSpeed = 1500;
+		ProjectileMovementComponent->MaxSpeed = 1500;
 		ProjectileMovementComponent->bRotationFollowsVelocity = true;
 		ProjectileMovementComponent->bShouldBounce = false;
 		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
@@ -41,7 +41,7 @@ void ASpikeProjectile::SetDamage(float NewDamage, bool Collision, float LifeTime
 {
 	Damage = NewDamage;
 	UseCollision = Collision;
-	LifeSpan = LifeTime;
+	SetLifeSpan(LifeTime);
 }
 
 // Called when the game starts or when spawned
@@ -49,8 +49,6 @@ void ASpikeProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	SetLifeSpan(LifeSpan);
-
 	ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileMovementComponent->InitialSpeed;
 }
 
@@ -63,7 +61,7 @@ void ASpikeProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAct
 			UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, this, NULL);
 		}
 	}
-	//Destroy();
+	Destroy();
 }
 
 // Called every frame

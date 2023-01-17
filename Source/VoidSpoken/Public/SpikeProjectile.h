@@ -42,5 +42,4 @@ public:
 
 	float Damage = 3;
 	bool UseCollision = true;
-	float LifeSpan = 3;
 };
