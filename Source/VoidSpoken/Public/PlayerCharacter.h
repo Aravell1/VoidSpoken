@@ -135,7 +135,7 @@ protected:
 
 	#pragma region Telekinesis Variables and Prototypes
 
-	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities")
+	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities", DisplayName = "Telekinesis")
 		bool bTelekinesis = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Telekinetic Abilities")
@@ -182,7 +182,6 @@ protected:
 	/// Input Scalar Values (Sensitivity)
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Camera|Zoom Settings", DisplayName = "Input Yaw Scale")
 		float fInputYawScale = 2.5f;
-
 
 	#pragma region Telekinetic Function Prototypes 
 	UFUNCTION()
@@ -240,7 +239,7 @@ public:
 	FTimerHandle HealthRegenerationTimer;
 
 	/// Determines if the player can be damaged
-	UPROPERTY(EditDefaultsOnly, Category = "Stats", DisplayName = "Invincible")
+	UPROPERTY(VisibleAnywhere, Category = "Stats", DisplayName = "Invincible")
 		bool bInvincible = false;
 
 	#pragma endregion
@@ -254,7 +253,7 @@ public:
 
 	/// The Cost of the Telekinetic "Holding" Ability, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Telekinetic Abilities|Costs and Consumptions", DisplayName = "Holding Focus Rate ( /s )")
-		float fConstantFocusRate = 1.5f; // Depleation Rate (1/s)
+		float fConstantFocusRate = 0.75f; // Depleation Rate (1/s)
 
 	/// The Cost of the Telekinetic "Push" Ability, Flat Rate
 	UPROPERTY(EditDefaultsOnly, Category = "Telekinetic Abilities|Costs and Consumptions", DisplayName = "Push Focus Cost")

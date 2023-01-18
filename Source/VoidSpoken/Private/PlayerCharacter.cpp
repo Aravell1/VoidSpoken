@@ -386,14 +386,14 @@ void APlayerCharacter::RunStop() {
 
 void APlayerCharacter::Dodge() {
 	if (EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= fDodgeStaminaCost) {
-		GetMesh()->PlayAnimation(DodgeAnimation, false);
 		Stats->Stamina -= fDodgeStaminaCost;
+		SetDodging(true);
 	}
 }
 
 void APlayerCharacter::DodgingStarted() {
 	EMovementState = EMovementState::EMS_Dodging;
-	SetDodging(true);
+	bInvincible = true;
 
 	if (bTelekinesis) {
 		DodgingDirection = UKismetMathLibrary::GetDirectionUnitVector(GetActorForwardVector(), GetVelocity());
@@ -413,6 +413,7 @@ void APlayerCharacter::DodgingUpdate(const float Alpha) {
 
 void APlayerCharacter::DodgingFinished() {
 	EMovementState = EMovementState::EMS_Idle;
+	bInvincible = false;
 	SetDodging(false);
 
 	if (bTelekinesis) GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -431,8 +432,10 @@ void APlayerCharacter::DodgingFinished() {
 
 void APlayerCharacter::Attack() {
 	if (!bIsDodging) {
-		if (!bTelekinesis && EquippedWeapon && (Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay()))
+		if (!bTelekinesis && EquippedWeapon && (Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay())) {
+			GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
 			EquippedWeapon->Attack();
+		}
 		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference)) {
 			if (Stats->FocusPoints >= fPullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
 				ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference);
