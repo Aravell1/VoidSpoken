@@ -405,4 +405,7 @@ void AGhoul::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType
 	Super::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
 
 	UpdateHealthBar.Broadcast();
+
+	if (Stats->Health <= 0)
+		Death();
 }
