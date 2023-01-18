@@ -75,6 +75,7 @@ APlayerCharacter::APlayerCharacter()
 	TelekinesisSource->SetRelativeLocation(FVector(-190, 40, 147));
 	
 	#pragma endregion
+
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -142,6 +143,14 @@ void APlayerCharacter::BeginPlay()
 	DodgingTimer.AddInterpFloat(DodgingCurve, DodgingUpdate);
 
 	#pragma endregion
+
+	#pragma endregion
+
+	#pragma region Attacking Delegates Binding
+
+	if (EquippedWeapon) {
+		EquippedWeapon->OnAttackStarted.BindDynamic(this, );
+	}
 
 	#pragma endregion
 }
@@ -412,10 +421,8 @@ void APlayerCharacter::DodgingFinished() {
 
 void APlayerCharacter::Attack() {
 	if (!bIsDodging) {
-		if (!bTelekinesis && EquippedWeapon && (Stats->Stamina >= EquippedWeapon->GetStaminaCost())) {
-			Stats->Stamina -= EquippedWeapon->GetStaminaCost();
+		if (!bTelekinesis && EquippedWeapon && (Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay()))
 			EquippedWeapon->Attack();
-		}
 		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference)) {
 			if (Stats->FocusPoints >= fPullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
 				ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference);
@@ -467,6 +474,21 @@ void APlayerCharacter::AlternateAttack() {
 		}
 	}
 }
+
+#pragma region Attack Delegate Functions
+
+void APlayerCharacter::OnWeaponAttackStarted() {
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "I DID IT!");
+	Stats->Stamina -= EquippedWeapon->GetStaminaCost();
+}
+
+void APlayerCharacter::OnWeaponAttackEnded() {
+	GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
+	GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, fStaminaDelay);
+}
+
+#pragma endregion
+
 #pragma endregion
 
 #pragma region Stat Manipulation

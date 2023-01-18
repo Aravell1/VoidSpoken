@@ -211,6 +211,9 @@ public:
 	void Attack();
 	void AlternateAttack();
 
+	void OnWeaponAttackStarted();
+	void OnWeaponAttackEnded();
+
 	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
 
 	UFUNCTION()
