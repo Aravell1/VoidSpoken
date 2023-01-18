@@ -18,6 +18,8 @@ class VOIDSPOKEN_API AVoidSpokenGameModeBase : public AGameModeBase
 
 public:
 
+	AVoidSpokenGameModeBase();
+
 	void AddGatekeeperSpawn(AActor* EnemySpawn);
 	void KillGatekeeperSpawns();
 
@@ -26,7 +28,7 @@ public:
 	
 
 	UFUNCTION()
-	void SetHealItem(int heal);
+	void SetHealItem(int health);
 
 	UFUNCTION(BlueprintCallable)
 	int GetHealItem()
@@ -38,7 +40,7 @@ public:
 	void SetFocusItem(int focus);
 
 	UFUNCTION(BlueprintCallable)
-		int GetFocusItem()
+	int GetFocusItem()
 	{
 		return FocusPickup;
 	}
@@ -46,18 +48,27 @@ public:
 	UFUNCTION()
 	void SetStaminaItem(int stamina);
 
+
 	UFUNCTION(BlueprintCallable)
 	int GetStaminaItem()
 	{
-		return HealPickup;
+		return StaminaPickup;
 	}
 
+	UFUNCTION()
+	void PickupFull();
+
+	
+
+	int MaxHeal = 5;
+	int MaxFocus = 5;
+	int MaxStamina = 2;
 
 private:
 
-	int HealPickup;
-	int FocusPickup;
-	int StaminaPickup;
+	int HealPickup = 0;
+	int FocusPickup = 0;
+	int StaminaPickup = 0;
 
 public:
 
