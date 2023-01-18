@@ -87,12 +87,9 @@ void ABaseWeapon::SetCanUniqueAttack(const bool state) {
 
 #pragma endregion
 
-void ABaseWeapon::Equip() {
-	ACharacter* EquippingCharacter = Cast<ACharacter>(GetOwner());
-	if (EquippingCharacter) {
-		EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
-		EquippedCharacter = EquippingCharacter;
-	}
+void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
+	EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
+	EquippedCharacter = EquippingCharacter;
 }
 
 void ABaseWeapon::Attack() {

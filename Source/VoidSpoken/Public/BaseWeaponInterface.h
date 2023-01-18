@@ -39,9 +39,6 @@ class VOIDSPOKEN_API IBaseWeaponInterface
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Base Weapon")
-		void OnAttackStarted();
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Base Weapon")
-		void OnAttackEnded();
+		void Equip(ACharacter* EquippingCharacter);
 
 };

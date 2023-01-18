@@ -1,9 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-//https://forums.unrealengine.com/t/how-to-spawn-a-blueprint-actor-via-c/78121/5
-
-
 #include "PlayerCharacter.h"
 
 #pragma region Constructor and Inheritied Functions
@@ -149,7 +146,8 @@ void APlayerCharacter::BeginPlay()
 	#pragma region Attacking Delegates Binding
 
 	if (EquippedWeapon) {
-		EquippedWeapon->OnAttackStarted.BindDynamic(this, );
+		EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
+		EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
 	}
 
 	#pragma endregion
@@ -182,13 +180,25 @@ void APlayerCharacter::EquipFromInventory(int32 Index, FName EquippingSocket = "
 		EquippedWeapon->AttachToComponent(GetMesh(), TransformRules, EquippingSocket);
 
 		IBaseWeaponInterface* SpawnedWeaponInterface = Cast<IBaseWeaponInterface>(EquippedWeapon);
-		if (SpawnedWeaponInterface)
+		if (SpawnedWeaponInterface) {
 			SpawnedWeaponInterface->Execute_Equip(EquippedWeapon, this);
+			EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
+			EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
+		}
 	}
 }
 
 void APlayerCharacter::SwapWeapons() {
+	// Swap weapons and rebind delegates
 
+	#pragma region Attacking Delegates Binding
+
+	if (EquippedWeapon) {
+		EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
+		EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
+	}
+
+	#pragma endregion
 }
 
 #pragma endregion
@@ -478,7 +488,6 @@ void APlayerCharacter::AlternateAttack() {
 #pragma region Attack Delegate Functions
 
 void APlayerCharacter::OnWeaponAttackStarted() {
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "I DID IT!");
 	Stats->Stamina -= EquippedWeapon->GetStaminaCost();
 }
 

@@ -9,9 +9,9 @@
 #include "Components/BoxComponent.h"
 #include "StatsMasterClass.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "BaseWeaponInterface.h"
 #include "Engine.h"
 #include "Engine/EngineTypes.h"
-#include "BaseWeaponInterface.h"
 #include "BaseWeapon.generated.h"
 
 /*
@@ -23,6 +23,13 @@
 * Email:		Jan.Frank.Skucinski@gmail.com
 */
 
+#pragma region Macro Delegate Assignments
+
+DECLARE_DELEGATE(FOnAttackStartedDelegate);
+DECLARE_DELEGATE(FOnAttackEndedDelegate);
+
+#pragma endregion
+
 UENUM() 
 enum AttackType {
 	None,
@@ -31,15 +38,8 @@ enum AttackType {
 	UniqueAttack,
 };
 
-#pragma region Macro Delegate Assignments
-
-DECLARE_DELEGATE(FOnAttackStartedDelegate);
-DECLARE_DELEGATE(FOnAttackEndedDelegate);
-
-#pragma endregion
-
 UCLASS(Abstract)
-class VOIDSPOKEN_API ABaseWeapon : public AActor {
+class VOIDSPOKEN_API ABaseWeapon : public AActor, public IBaseWeaponInterface {
 	GENERATED_BODY()
 	
 public:	
@@ -100,8 +100,8 @@ public:
 
 	UFUNCTION() 
 		float GetStaminaCost() {
-			if (ComboStaminaMultipliers.IsValidIndex(CurrentComboIndex)) return ComboStaminaMultipliers[CurrentComboIndex];
-			else return 1.0f;
+			if (ComboStaminaMultipliers.IsValidIndex(CurrentComboIndex)) return BaseStamina * ComboStaminaMultipliers[CurrentComboIndex];
+			else return BaseStamina;
 		}
 
 	#pragma endregion
@@ -114,7 +114,7 @@ public:
 	///		-Initialises the UAnimInstance from the Default (At the time of this Equip(), what was the UAnimInstance the Character had)
 	///		-Initialises the UCharacterMovementComponent from the given EquippedCharacter 
 	UFUNCTION(BlueprintCallable)
-		void Equip();
+		void Equip_Implementation(ACharacter* EquippingCharacter) override;
 
 	/// Function: Attack()
 	///		-Momentarily disables player movement
@@ -235,7 +235,6 @@ public:
 
 	/// This Charged Attack Animation will be played if the Entity uses it
 	///		-This parameter can be uninitialized
-	///		-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Charged Attack")
 		UAnimMontage* ChargedAttackMontage = nullptr;
 
@@ -283,7 +282,7 @@ public:
 	///		-This is additive of the UniqueAttackMontage's play length (in seconds)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
 		float UniqueAttackCooldown = 0;
-
+	
 	///Boolean Handler for UniqueAttack()
 	bool UniqueAttackDelay = false;
 
@@ -347,11 +346,8 @@ public:
 	#pragma region Delegates and Events
 
 	public:
-	UPROPERTY(BlueprintAssignable)
-		FOnAttackStartedDelegate OnAttackStarted;
-
-	UPROPERTY(BlueprintAssignable)
-		FOnAttackEndedDelegate OnAttackEnded;
+	FOnAttackStartedDelegate OnAttackStarted;
+	FOnAttackEndedDelegate OnAttackEnded;
 
 	#pragma endregion
 };

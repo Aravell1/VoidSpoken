@@ -146,7 +146,7 @@ protected:
 
 	/// Determines how hard the "Push" Telkinetic ability can push a TelekineticProp object
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Push Force")
-		float fPushForce = 250.0f;
+		float fPushForce = 450.0f;
 	
 	/// Determines how large the SphereTrace of detecting TelekineticProps are
 	///		- Making it too large can make the player start constatly being triggered
@@ -272,7 +272,7 @@ public:
 
 	/// A delay to start regenerating stamina
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Stamina Delay (s)")
-		float fStaminaDelay =.75f;
+		float fStaminaDelay = 0.75f;
 
 	/// The regeneration rate of Stamina, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Stamina Regeneration Rate ( /s )")
