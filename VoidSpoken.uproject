@@ -11,7 +11,8 @@
 			"AdditionalDependencies": [
 				"UMG",
 				"Engine",
-				"AIModule"
+				"AIModule",
+				"CoreUObject"
 			]
 		}
 	],
@@ -39,6 +40,10 @@
 		},
 		{
 			"Name": "ElectraPlayer",
+			"Enabled": true
+		},
+		{
+			"Name": "AnimationWarping",
 			"Enabled": true
 		}
 	]

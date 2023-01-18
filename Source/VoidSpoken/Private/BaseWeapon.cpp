@@ -51,6 +51,8 @@ void ABaseWeapon::Tick(float DeltaTime)
 
 }
 
+#pragma region Getter and Setter
+
 float ABaseWeapon::GetBaseDamage() {
 	return BaseDamage;
 }
@@ -83,10 +85,13 @@ void ABaseWeapon::SetCanUniqueAttack(const bool state) {
 	CanUniqueAttack = state;
 }
 
-void ABaseWeapon::Equip(ACharacter* EquippingCharacter) {
-	EquippedCharacter = EquippingCharacter;
-	SetOwner(EquippingCharacter);
-	EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();	
+#pragma endregion
+
+void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
+	if (EquippingCharacter) {
+		EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
+		EquippedCharacter = EquippingCharacter;
+	}
 }
 
 void ABaseWeapon::Attack() {
@@ -107,19 +112,13 @@ void ABaseWeapon::Attack() {
 	}
 }
 
-void ABaseWeapon::ChargedAttack()
-{
-	if (!AttackDelay && !IsAttacking && CheckMovementMode()) {
-		if (ChargedAttackMontage && EquippedCharacter->FindComponentByClass<UStatsMasterClass>()->Stamina >= ChargedAttackConsumption) {
-			IsAttacking = true;
-
-			//Disabling Actors movement while attacking
-			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
-
-			AttackState = AttackType::ChargedAttack;
-			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
-		}
-	}
+void ABaseWeapon::NextAttack() {
+	//Re-Enabling Actors movement after attacking
+	IsAttacking = false;
+	AttackState = AttackType::None;
+	OverlappedActors.Empty();
+	EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
+	CurrentComboIndex++;
 }
 
 void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent) {
@@ -139,27 +138,6 @@ void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, cla
 	}
 	if (DamageMultipiler > 0)
 	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * DamageMultipiler, NULL, EquippedCharacter, NULL);
-}
-
-void ABaseWeapon::NextAttack() {
-	//Re-Enabling Actors movement after attacking
-	IsAttacking = false;
-	AttackState = AttackType::None;
-	OverlappedActors.Empty();
-	EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
-	CurrentComboIndex++;
-}
-
-
-[[deprecated]] void ABaseWeapon::UniqueAttack() {
-	//Vailidating the UniqueAttackMontage
-	if (!AttackDelay && UniqueAttackMontage) {
-		//Disabling Actors movement while attacking
-		EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
-
-		EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
-		GetWorldTimerManager().SetTimer(UniqueAttackDelayTimer, this, &ABaseWeapon::Reset, UniqueAttackMontage->GetPlayLength() + UniqueAttackCooldown, false);
-	}
 }
 
 bool ABaseWeapon::CheckMovementMode() {
@@ -184,9 +162,41 @@ void ABaseWeapon::Reset() {
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_Walking);
 }
 
+#pragma region Deprecated Functions / To be implemented
+
+[[deprecated]] void ABaseWeapon::ChargedAttack()
+{
+	if (!AttackDelay && !IsAttacking && CheckMovementMode()) {
+		if (ChargedAttackMontage && EquippedCharacter->FindComponentByClass<UStatsMasterClass>()->Stamina >= ChargedAttackConsumption) {
+			IsAttacking = true;
+
+			//Disabling Actors movement while attacking
+			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
+
+			AttackState = AttackType::ChargedAttack;
+			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
+		}
+	}
+}
+
+[[deprecated]] void ABaseWeapon::UniqueAttack() {
+	//Vailidating the UniqueAttackMontage
+	if (!AttackDelay && UniqueAttackMontage) {
+		//Disabling Actors movement while attacking
+		EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
+
+		EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
+		GetWorldTimerManager().SetTimer(UniqueAttackDelayTimer, this, &ABaseWeapon::Reset, UniqueAttackMontage->GetPlayLength() + UniqueAttackCooldown, false);
+	}
+}
+
 [[deprecated]] void ABaseWeapon::UniqueReset() {
 	GetWorldTimerManager().ClearTimer(UniqueAttackDelayTimer);
 }
+
+#pragma endregion
+
+#pragma region Collision Functions
 
 void ABaseWeapon::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -212,7 +222,11 @@ void ABaseWeapon::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent
 [[deprecated]] void ABaseWeapon::OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
 	if (IsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Hit: " + OtherActor->GetName()));
+		#if WITH_ENGINE
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Hit: " + OtherActor->GetName()));
+		#endif // WITH_ENGINE
 		DealDamage(OverlappedComponent, OtherActor, OtherComponent);
 	}
 }
+
+#pragma endregion

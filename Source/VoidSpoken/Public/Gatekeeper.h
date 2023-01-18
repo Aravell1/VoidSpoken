@@ -74,11 +74,11 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		float StompImpulseForce = 5000;
 
-		void AttackTrace(UAnimMontage* AnimTrigger) override;
+	void AttackTrace(UAnimMontage* AnimTrigger) override;
 protected:
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	virtual void Tick(float DeltaTime) override;
+	void BeginPlay() override;
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	void Tick(float DeltaTime) override;
 	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
 	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
 	UFUNCTION()

@@ -380,7 +380,7 @@ void AGatekeeper::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamag
 
 	UpdateHealthBar.Broadcast();
 
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, FString::FromInt((int)PortalCount));
+	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, FString::FromInt((int)PortalCount));
 
 	if (PortalCount > 0)
 	{
