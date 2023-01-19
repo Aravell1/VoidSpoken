@@ -40,6 +40,12 @@ void AVoidSpokenGameModeBase::SetStaminaItem(int stamina)
 	UE_LOG(LogTemp, Warning, TEXT("STAMINA Items: %d"), StaminaPickup);	
 }
 
+void AVoidSpokenGameModeBase::PickupFull()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Pickup full"));
+	return;
+}
+
 void AVoidSpokenGameModeBase::SpawnPlayersFromData()
 {
 	TArray<FPlayerData> PlayerDataInfo;
