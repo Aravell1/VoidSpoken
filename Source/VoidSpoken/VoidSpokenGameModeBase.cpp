@@ -3,6 +3,11 @@
 
 #include "VoidSpokenGameModeBase.h"
 
+AVoidSpokenGameModeBase::AVoidSpokenGameModeBase()
+{
+
+}
+
 void AVoidSpokenGameModeBase::AddGatekeeperSpawn(AActor* EnemySpawn)
 {
 	GatekeeperEnemySpawns.Add(EnemySpawn);
@@ -19,9 +24,9 @@ void AVoidSpokenGameModeBase::KillGatekeeperSpawns()
 	}
 }
 
-void AVoidSpokenGameModeBase::SetHealItem(int heal)
+void AVoidSpokenGameModeBase::SetHealItem(int health)
 {
-	HealPickup += heal;
+	HealPickup += health;
 
 	UE_LOG(LogTemp, Warning, TEXT("HEALING Items: %d"), HealPickup);
 }
