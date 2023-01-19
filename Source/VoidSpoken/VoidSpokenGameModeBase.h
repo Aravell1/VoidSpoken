@@ -18,8 +18,6 @@ class VOIDSPOKEN_API AVoidSpokenGameModeBase : public AGameModeBase
 
 public:
 
-	AVoidSpokenGameModeBase();
-
 	void AddGatekeeperSpawn(AActor* EnemySpawn);
 	void KillGatekeeperSpawns();
 
@@ -64,11 +62,12 @@ public:
 	int MaxFocus = 5;
 	int MaxStamina = 2;
 
-private:
-
 	int HealPickup = 0;
 	int FocusPickup = 0;
 	int StaminaPickup = 0;
+
+private:
+
 
 public:
 

@@ -231,6 +231,24 @@ public:
 	void SetInvincibility() { bInvincible = !bInvincible; };
 	void SetInvincibility(bool State) { bInvincible = State; };
 
+	UFUNCTION(BlueprintCallable)
+	void UseHealthConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseFocusConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseStaminaConsumable();
+
+	UPROPERTY()
+	float HealAmount;
+
+	UPROPERTY()
+	float FocusAmount;
+
+	UPROPERTY()
+	float StaminaAmount;
+
 	private:
 	void RegenerateHealth();
 	FTimerHandle InvincibilityTimer;
