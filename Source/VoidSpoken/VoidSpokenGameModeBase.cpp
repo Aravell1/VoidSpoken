@@ -3,11 +3,6 @@
 
 #include "VoidSpokenGameModeBase.h"
 
-AVoidSpokenGameModeBase::AVoidSpokenGameModeBase()
-{
-
-}
-
 void AVoidSpokenGameModeBase::AddGatekeeperSpawn(AActor* EnemySpawn)
 {
 	GatekeeperEnemySpawns.Add(EnemySpawn);

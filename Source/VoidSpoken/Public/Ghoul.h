@@ -50,6 +50,8 @@ public:
 	UFUNCTION(BlueprintPure)
 		enum EGhoulType GetType();
 
+	void SetGhoulType(EGhoulType type);
+
 	void BehaviourStateEvent();
 
 	void SetAttacking(UAnimMontage* Montage, bool Attacking);
@@ -61,8 +63,7 @@ public:
 	void SpikeThrow();
 	void CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision);
 
-	UFUNCTION()
-		void OnSeePawn(APawn* OtherPawn);
+	void OnSeePawn(APawn* OtherPawn) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* Attack1Montage = nullptr;
@@ -92,7 +93,7 @@ public:
 protected:
 
 	void BeginPlay() override;
-	void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
 	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
 	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
 	UFUNCTION()
@@ -116,10 +117,10 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		TEnumAsByte<EGhoulState> GhState = EGhoulState::Idle;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 		TEnumAsByte<EGhoulType> GhType = EGhoulType::Melee;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 		TArray<UAnimMontage*> MontageArray;
 
 	AGhoulAIController* AIController;

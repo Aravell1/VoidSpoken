@@ -45,8 +45,7 @@ public:
 
 	void BehaviourStateEvent();
 
-	UFUNCTION()
-		void OnSeePawn(APawn* OtherPawn);
+	void OnSeePawn(APawn* OtherPawn) override;
 
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<APortalSpawn> Portal;

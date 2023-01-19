@@ -5,6 +5,8 @@
 
 AGhoul::AGhoul()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	RootComponent = GetCapsuleComponent();
 	GetMesh()->SetupAttachment(GetCapsuleComponent());
 
@@ -12,7 +14,7 @@ AGhoul::AGhoul()
 	if (GetAttack() <= 0)
 		SetAttack(3);
 	Stats->Defense = 10;
-	Stats->SetMaxHealth(15);
+	Stats->SetMaxHealth(30);
 	Stats->Health = Stats->GetMaxHealth();
 
 	//Initialize Character Movement Stats
@@ -47,6 +49,11 @@ void AGhoul::SetState(EGhoulState state)
 EGhoulType AGhoul::GetType()
 {
 	return GhType;
+}
+
+void AGhoul::SetGhoulType(EGhoulType type)
+{
+	GhType = type;
 }
 
 void AGhoul::BehaviourStateEvent()
@@ -279,6 +286,8 @@ void AGhoul::OnSeePawn(APawn* OtherPawn)
 	AttackTarget = OtherPawn;
 	AIController->SeePlayer(AttackTarget);
 
+	UpdateHealthBar.Broadcast();
+
 	SetSpeed();
 
 	SetState(EGhoulState::Attack);
@@ -336,6 +345,8 @@ void AGhoul::BeginPlay()
 
 void AGhoul::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+
 	/*if ((GhState == EGhoulState::Attack && FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation()) > ReachTargetDistance) 
 		|| (GhState == EGhoulState::Patrol && FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation()) > MeleeTargetDistance))
 	{
