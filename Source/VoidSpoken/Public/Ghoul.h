@@ -145,4 +145,7 @@ private:
 	bool AttackingLeft = false;
 	bool AttackReset = true;
 	bool LockState = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "True"))
+	bool bIsDead = false;
 };

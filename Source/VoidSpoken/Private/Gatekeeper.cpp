@@ -306,6 +306,7 @@ void AGatekeeper::Death()
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->MaxWalkSpeed = 0;
 	Attacking = false;
+	bIsDead = true;
 	SetState(GatekeeperState::Dead);
 
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())

@@ -394,6 +394,7 @@ void AGhoul::Death()
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->MaxWalkSpeed = 0;
 	SetState(EGhoulState::Dead);
+	bIsDead = true;
 
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 	{

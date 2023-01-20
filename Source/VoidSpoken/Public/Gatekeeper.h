@@ -123,5 +123,6 @@ private:
 	bool Enraged = false;
 	bool LockState = false;
 
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "True"))
+	bool bIsDead = false;
 };
