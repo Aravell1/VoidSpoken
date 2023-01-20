@@ -1,9 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-//https://forums.unrealengine.com/t/how-to-spawn-a-blueprint-actor-via-c/78121/5
-
-
 #include "PlayerCharacter.h"
 
 #pragma region Constructor and Inheritied Functions
@@ -79,6 +76,7 @@ APlayerCharacter::APlayerCharacter()
 	TelekinesisSource->SetRelativeLocation(FVector(-190, 40, 147));
 	
 	#pragma endregion
+
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -151,6 +149,15 @@ void APlayerCharacter::BeginPlay()
 	#pragma endregion
 
 	#pragma endregion
+
+	#pragma region Attacking Delegates Binding
+
+	if (EquippedWeapon) {
+		EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
+		EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
+	}
+
+	#pragma endregion
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -180,13 +187,25 @@ void APlayerCharacter::EquipFromInventory(int32 Index, FName EquippingSocket = "
 		EquippedWeapon->AttachToComponent(GetMesh(), TransformRules, EquippingSocket);
 
 		IBaseWeaponInterface* SpawnedWeaponInterface = Cast<IBaseWeaponInterface>(EquippedWeapon);
-		if (SpawnedWeaponInterface)
+		if (SpawnedWeaponInterface) {
 			SpawnedWeaponInterface->Execute_Equip(EquippedWeapon, this);
+			EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
+			EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
+		}
 	}
 }
 
 void APlayerCharacter::SwapWeapons() {
+	// Swap weapons and rebind delegates
 
+	#pragma region Attacking Delegates Binding
+
+	if (EquippedWeapon) {
+		EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
+		EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
+	}
+
+	#pragma endregion
 }
 
 #pragma endregion
@@ -313,35 +332,31 @@ void APlayerCharacter::DetectTelekineticObject() {
 #pragma region Character Movement
 
 void APlayerCharacter::MoveForward(float Axis) {
-	if (!bIsDodging) {
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		if (bIsRunning)
-			GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
-		else
-			GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
+	if (bIsRunning)
+		GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
+	else
+		GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		AddMovementInput(Direction, Axis);
-	}
+	AddMovementInput(Direction, Axis);
 }
 
 void APlayerCharacter::MoveRight(float Axis) {
-	if (!bIsDodging) {
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		if (bIsRunning)
-			GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
-		else
-			GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
+	if (bIsRunning)
+		GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
+	else
+		GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		AddMovementInput(Direction, Axis);
-	}
+	AddMovementInput(Direction, Axis);
 }
 
 void APlayerCharacter::DetermineMovementState() {
@@ -374,14 +389,14 @@ void APlayerCharacter::RunStop() {
 
 void APlayerCharacter::Dodge() {
 	if (EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= fDodgeStaminaCost) {
-		GetMesh()->PlayAnimation(DodgeAnimation, false);
 		Stats->Stamina -= fDodgeStaminaCost;
+		SetDodging(true);
 	}
 }
 
 void APlayerCharacter::DodgingStarted() {
 	EMovementState = EMovementState::EMS_Dodging;
-	SetDodging(true);
+	bInvincible = true;
 
 	if (bTelekinesis) {
 		DodgingDirection = UKismetMathLibrary::GetDirectionUnitVector(GetActorForwardVector(), GetVelocity());
@@ -389,26 +404,30 @@ void APlayerCharacter::DodgingStarted() {
 	}
 	else DodgingDirection = GetActorForwardVector();
 
-	GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
-
 	DodgingTimer.PlayFromStart();
 	GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
 }
 
 void APlayerCharacter::DodgingUpdate(const float Alpha) {
-	AddMovementInput(DodgingDirection * fRunSpeed, Alpha * 2.25f);
+	AddMovementInput(DodgingDirection * fRunSpeed * 2, 20);
 }
 
 void APlayerCharacter::DodgingFinished() {
 	EMovementState = EMovementState::EMS_Idle;
+	bInvincible = false;
 	SetDodging(false);
 
 	if (bTelekinesis) GetCharacterMovement()->bOrientRotationToMovement = false;
 	else GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	DodgingDirection = FVector::Zero();
-	GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
-	GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, fStaminaDelay);
+	DodgingTimer.Stop();
+
+	if (bIsRunning) {
+		GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
+		GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::DepleteStamina, 0.1f, true);
+	}
+	else GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, fStaminaDelay);
 }
 
 #pragma endregion
@@ -419,8 +438,8 @@ void APlayerCharacter::DodgingFinished() {
 
 void APlayerCharacter::Attack() {
 	if (!bIsDodging) {
-		if (!bTelekinesis && EquippedWeapon && (Stats->Stamina >= EquippedWeapon->GetStaminaCost())) {
-			Stats->Stamina -= EquippedWeapon->GetStaminaCost();
+		if (!bTelekinesis && EquippedWeapon && (Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay())) {
+			GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
 			EquippedWeapon->Attack();
 		}
 		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference)) {
@@ -474,6 +493,20 @@ void APlayerCharacter::AlternateAttack() {
 		}
 	}
 }
+
+#pragma region Attack Delegate Functions
+
+void APlayerCharacter::OnWeaponAttackStarted() {
+	Stats->Stamina -= EquippedWeapon->GetStaminaCost();
+}
+
+void APlayerCharacter::OnWeaponAttackEnded() {
+	GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
+	GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, fStaminaDelay);
+}
+
+#pragma endregion
+
 #pragma endregion
 
 #pragma region Stat Manipulation
