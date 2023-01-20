@@ -325,35 +325,31 @@ void APlayerCharacter::DetectTelekineticObject() {
 #pragma region Character Movement
 
 void APlayerCharacter::MoveForward(float Axis) {
-	if (!bIsDodging) {
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		if (bIsRunning)
-			GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
-		else
-			GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
+	if (bIsRunning)
+		GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
+	else
+		GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		AddMovementInput(Direction, Axis);
-	}
+	AddMovementInput(Direction, Axis);
 }
 
 void APlayerCharacter::MoveRight(float Axis) {
-	if (!bIsDodging) {
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		if (bIsRunning)
-			GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
-		else
-			GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
+	if (bIsRunning)
+		GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
+	else
+		GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		AddMovementInput(Direction, Axis);
-	}
+	AddMovementInput(Direction, Axis);
 }
 
 void APlayerCharacter::DetermineMovementState() {
@@ -401,14 +397,12 @@ void APlayerCharacter::DodgingStarted() {
 	}
 	else DodgingDirection = GetActorForwardVector();
 
-	GetCharacterMovement()->MaxWalkSpeed = fRunSpeed;
-
 	DodgingTimer.PlayFromStart();
 	GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
 }
 
 void APlayerCharacter::DodgingUpdate(const float Alpha) {
-	AddMovementInput(DodgingDirection * fRunSpeed, Alpha * 2.25f);
+	AddMovementInput(DodgingDirection * fRunSpeed * 2, 20);
 }
 
 void APlayerCharacter::DodgingFinished() {
@@ -420,8 +414,13 @@ void APlayerCharacter::DodgingFinished() {
 	else GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	DodgingDirection = FVector::Zero();
-	GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
-	GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, fStaminaDelay);
+	DodgingTimer.Stop();
+
+	if (bIsRunning) {
+		GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
+		GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::DepleteStamina, 0.1f, true);
+	}
+	else GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, fStaminaDelay);
 }
 
 #pragma endregion
