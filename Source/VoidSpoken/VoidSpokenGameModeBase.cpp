@@ -48,7 +48,7 @@ void AVoidSpokenGameModeBase::PickupFull()
 
 void AVoidSpokenGameModeBase::SpawnPlayersFromData()
 {
-	TArray<FPlayerData> PlayerDataInfo;
+	/*TArray<FPlayerData> PlayerDataInfo;
 	bool bReadSuccess = JsonLibrary->ReadPlayerData(PlayerDataInfo);
 
 	if (bReadSuccess)
@@ -77,6 +77,6 @@ void AVoidSpokenGameModeBase::SpawnPlayersFromData()
 				}
 			}
 		}
-	}
+	}*/
 }
 
