@@ -40,40 +40,40 @@ void ACheckPoints::Tick(float DeltaTime)
 void ACheckPoints::OnPlayerCollide(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit)
 {
 	// Create an array of FPlayerData structs
-	//TArray<FPlayerData> PlayerDataInfo;
+	TArray<FPlayerData> PlayerDataInfo;
 
-	//// Populate the struct with the player's data
-	//FPlayerData PlayerData;
+	// Populate the struct with the player's data
+	FPlayerData PlayerData;
 
-	//// Check if the overlapped actor is the player
-	//APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
-	//if (Player != nullptr)
-	//{
-	//	PlayerData.isActive = true;
-	//	PlayerData.UserName = Player->GetName();
-	//	PlayerData.Locations.Add(Player->GetActorLocation());
-	//	PlayerData.CurrentLocation = Player->GetActorLocation();
+	// Check if the overlapped actor is the player
+	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+	if (Player != nullptr)
+	{
+		PlayerData.isActive = true;
+		PlayerData.UserName = Player->GetName();
+		PlayerData.Locations.Add(Player->GetActorLocation());
+		PlayerData.CurrentLocation = Player->GetActorLocation();
 
-	//	// Add the player data to the array
-	//	PlayerDataInfo.Add(PlayerData);
+		// Add the player data to the array
+		PlayerDataInfo.Add(PlayerData);
 
-	//	// Call the WritePlayerData function to save the player data to a json file
-	//	UJsonLibrary::WritePlayerData(PlayerDataInfo);
+		// Call the WritePlayerData function to save the player data to a json file
+		UJsonLibrary::WritePlayerData(PlayerDataInfo);
 
-	//	// Notify the player that their data has been saved
-	//	//Player->NotifySaved();
-	//}
+		// Notify the player that their data has been saved
+		//Player->NotifySaved();
+	}
 
-	//UStatsMasterClass* PlayerStats = Cast<UStatsMasterClass>(OtherActor);
-	//if (PlayerStats != nullptr)
-	//{
-	//	PlayerData.Health = PlayerStats->Health;
+	UStatsMasterClass* PlayerStats = Cast<UStatsMasterClass>(OtherActor);
+	if (PlayerStats != nullptr)
+	{
+		PlayerData.Health = PlayerStats->Health;
 
-	//	// Add the player data to the array
-	//	PlayerDataInfo.Add(PlayerData);
+		// Add the player data to the array
+		PlayerDataInfo.Add(PlayerData);
 
-	//	// Call the WritePlayerData function to save the player data to a json file
-	//	UJsonLibrary::WritePlayerData(PlayerDataInfo);
-	//}
+		// Call the WritePlayerData function to save the player data to a json file
+		UJsonLibrary::WritePlayerData(PlayerDataInfo);
+	}
 }
 

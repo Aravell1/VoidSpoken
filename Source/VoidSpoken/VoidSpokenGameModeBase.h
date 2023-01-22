@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-//#include "JsonLibrary.h"
+#include "JsonLibrary.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "VoidSpokenGameModeBase.generated.h"
@@ -74,8 +74,8 @@ public:
 	/// <summary>
 	/// Get Reference to the JsonLibrary
 	/// </summary>
-	/*UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "JSON")
-	UJsonLibrary* JsonLibrary;*/
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "JSON")
+	UJsonLibrary* JsonLibrary;
 
 	/// <summary>
 	/// An actor class that can be spawn in the scene, Note: Setup needed in the editor
