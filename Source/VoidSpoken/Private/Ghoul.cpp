@@ -69,6 +69,8 @@ void AGhoul::BehaviourStateEvent()
 	case EGhoulState::Patrol:
 		if (PatrolPoints.Num() > 1 && TestPathExists(PatrolPoints[PatrolIndex]))
 			AIController->MoveToActor(PatrolPoints[PatrolIndex], MeleeTargetDistance);
+		else if (PatrolPoints.Num() == 1 && TestPathExists(PatrolPoints[0]) && FVector::Distance(GetActorLocation(), PatrolPoints[0]->GetActorLocation()) > MeleeTargetDistance)
+			AIController->MoveToActor(PatrolPoints[0], MeleeTargetDistance);
 		break;
 	case EGhoulState::Attack:
 		if (TestPathExists(AttackTarget))
@@ -472,12 +474,16 @@ void AGhoul::PatrolReset()
 
 bool AGhoul::GetHasLineOfSight()
 {
-	FVector StartLocation = HeadLocation->GetComponentLocation();
+	FVector StartLocation = HeadLocation->GetComponentLocation() + GetActorForwardVector() * 50;
 	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	FVector PlayerLocation = Player->GetActorLocation();
-	PlayerLocation.Z *= 2;
+	PlayerLocation.Z += Player->GetCapsuleComponent()->GetLocalBounds().BoxExtent.Z;
 	FVector EndLocation = StartLocation + (PlayerLocation - StartLocation).GetSafeNormal() * PatrolResetDistance;
 	FHitResult OutHit;
+
+	/*DrawDebugSphere(GetWorld(), StartLocation, 10, 16, FColor::Green, false, 1.0f);
+	DrawDebugSphere(GetWorld(), PlayerLocation, 10, 16, FColor::Blue, false, 1.0f);
+	DrawDebugSphere(GetWorld(), EndLocation, 10, 16, FColor::Red, false, 1.0f);*/
 
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), Spike, FoundActors);
