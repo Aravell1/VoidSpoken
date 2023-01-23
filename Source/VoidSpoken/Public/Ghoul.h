@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerCharacter.h"
 #include "BaseEnemy.h"
 #include "Animation/AnimMontage.h" 
 #include "Animation/AnimInstance.h"
@@ -12,6 +13,7 @@
 #include "GameFramework/Actor.h" 
 #include "Components/BoxComponent.h" 
 #include "Kismet/KismetSystemLibrary.h" 
+#include "NavigationSystem.h"
 #include "Ghoul.generated.h"
 
 /**
@@ -113,6 +115,12 @@ private:
 	void IdleDelay();
 	void StopMovement();
 	void Death();
+	void AttackCooldown();
+
+	void CheckPatrolReset();
+	void PatrolReset();
+	bool GetHasLineOfSight();
+	bool TestPathExists(AActor* Target);
 
 	UPROPERTY(VisibleAnywhere)
 		TEnumAsByte<EGhoulState> GhState = EGhoulState::Idle;
@@ -128,18 +136,24 @@ private:
 	FTimerHandle TimerHandle;
 
 	float ReachTargetDistance = 0;
-	float MeleeTargetDistance = 100.0f;
-	float RangedTargetDistance = 1500.0f;
+	const float MeleeTargetDistance = 100.0f;
+	const float RangedTargetDistance = 2000.0f;
 
-	float BackUpSpeed = 100.0f;
-	float BackOffRange = 500.0f;
-	float BackUpDistance = 300.0f;
+	FTimerHandle PatrolTimerHandle;
+	const float PTHandleInterval = 1.0f;
+	const float PatrolResetDistance = 4000.0f;
+	const float PatrolResetTime = 15.0f;
+	float PResetTimer = 0;
 
-	float IdleTime = 4.0f;
-	float AttackCD = 2.5f;
+	const float BackUpSpeed = 100.0f;
+	const float BackOffRange = 500.0f;
+	const float BackUpDistance = 300.0f;
 
-	float BurstSpikeSpawnDistance = 50.0f;
-	float BurstRadius = 500.0f;
+	const float IdleTime = 4.0f;
+	const float AttackCD = 2.5f;
+
+	const float BurstSpikeSpawnDistance = 50.0f;
+	const float BurstRadius = 500.0f;
 
 	bool AttackingRight = false;
 	bool AttackingLeft = false;
