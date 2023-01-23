@@ -14,6 +14,7 @@
 #include "Components/BoxComponent.h" 
 #include "Kismet/KismetSystemLibrary.h" 
 #include "NavigationSystem.h"
+#include "PatrolPoint.h"
 #include "Ghoul.generated.h"
 
 /**
@@ -106,7 +107,7 @@ protected:
 private:
 
 	UPROPERTY(EditAnywhere)
-		TArray<AActor*> PatrolPoints;
+		TArray<APatrolPoint*> PatrolPoints;
 
 	int PatrolIndex = 0;
 
@@ -140,7 +141,7 @@ private:
 	const float RangedTargetDistance = 2000.0f;
 
 	FTimerHandle PatrolTimerHandle;
-	const float PTHandleInterval = 1.0f;
+	const float PTHandleInterval = 0.5f;
 	const float PatrolResetDistance = 4000.0f;
 	const float PatrolResetTime = 15.0f;
 	float PResetTimer = 0;

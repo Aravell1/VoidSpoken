@@ -349,9 +349,9 @@ void AGhoul::Tick(float DeltaTime)
 
 void AGhoul::SetSpeed()
 {
-	if (GetState() == EGhoulState::Idle || GetState() == EGhoulState::Patrol)
+	if (GetState() == EGhoulState::Idle || GetState() == EGhoulState::Patrol || GetState() == EGhoulState::AttackCooldown)
 		GetCharacterMovement()->MaxWalkSpeed = GetWalkSpeed();
-	else if (GetState() == EGhoulState::Attack || GetState() == EGhoulState::AttackCooldown)
+	else if (GetState() == EGhoulState::Attack)
 		GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
 	else
 		GetCharacterMovement()->MaxWalkSpeed = 0;
