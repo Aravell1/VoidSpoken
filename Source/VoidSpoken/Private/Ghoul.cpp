@@ -325,15 +325,6 @@ void AGhoul::BeginPlay()
 	if (HitBoxLeft)
 		HitBoxLeft->OnComponentBeginOverlap.AddDynamic(this, &AGhoul::OnComponentBeginOverlap);
 
-	/*if (HitBoxRight)
-		UE_LOG(LogTemp, Warning, TEXT("Right Box Found****************"));
-	if (HitBoxLeft)
-		UE_LOG(LogTemp, Warning, TEXT("Left Box Found****************"));
-	if (HeadLocation)
-		UE_LOG(LogTemp, Warning, TEXT("Head Box Found****************"));
-	if (ThrowPoint)
-		UE_LOG(LogTemp, Warning, TEXT("Throw Box Found****************"));*/
-
 	SetState(EGhoulState::Idle);
 }
 
@@ -416,8 +407,6 @@ void AGhoul::AttackCooldown()
 		float DistToPlayer = FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation());
 		if (GetType() == EGhoulType::Melee || DistToPlayer <= BackOffRange)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Backing Up"));
-
 			FVector3d BackUpTargetPos = GetActorLocation() - AttackTarget->GetActorLocation();
 			BackUpTargetPos.Z = 0;
 			BackUpTargetPos = GetActorLocation() + BackUpTargetPos.GetSafeNormal() * BackUpDistance;
@@ -427,16 +416,12 @@ void AGhoul::AttackCooldown()
 		}
 		else if (DistToPlayer > ReachTargetDistance)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Distance greater than Reach Distance"));
-
 			SetSpeed();
 			if (TestPathExists(AttackTarget))
 				AIController->MoveToActor(AttackTarget, ReachTargetDistance);
 		}
 		else if (!GetHasLineOfSight())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AC No LOS"));
-
 			SetSpeed();
 			if (TestPathExists(AttackTarget))
 				AIController->MoveToActor(AttackTarget, MeleeTargetDistance);
@@ -501,15 +486,6 @@ bool AGhoul::GetHasLineOfSight()
 	Params.AddIgnoredActors(FoundActors);
 
 	GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECollisionChannel::ECC_Camera, Params);
-
-	if (Cast<APlayerCharacter>(OutHit.GetActor()) || OutHit.GetActor() == Player->EquippedWeapon)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("LOS"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No LOS"));
-	}
 
 	return Cast<APlayerCharacter>(OutHit.GetActor()) || OutHit.GetActor() == Player->EquippedWeapon;
 }
