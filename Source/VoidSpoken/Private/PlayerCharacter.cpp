@@ -95,7 +95,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("Turn / Mouse", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("Turn / Gamepad", this, &APlayerCharacter::TurnRate);
 	PlayerInputComponent->BindAxis("Look up/down Mouse", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("Look up/down Gamepad", this, &APlayerCharacter::TurnRate);
+	PlayerInputComponent->BindAxis("Look up/down Gamepad", this, &APlayerCharacter::LookUpRate);
 
 	// Moving the character
 	PlayerInputComponent->BindAxis("Move Forward/Backward", this, &APlayerCharacter::MoveForward);
