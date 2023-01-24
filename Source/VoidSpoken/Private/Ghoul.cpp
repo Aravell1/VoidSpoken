@@ -84,6 +84,18 @@ void AGhoul::BehaviourStateEvent()
 			&AGhoul::AttackDelay,
 			FMath::RandRange(AttackCD * 0.8f, AttackCD * 1.2f));
 		break;
+	case EGhoulState::Staggered:
+		AIController->ClearFocus(EAIFocusPriority::Gameplay);
+		AttackReset = true;
+		if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+			GetMesh()->GetAnimInstance()->StopAllMontages(false);
+		if (StaggerMontage)
+		{
+			GetMesh()->GetAnimInstance()->Montage_Play(StaggerMontage);
+			GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, StaggerMontage);
+		}
+		StopMovement();
+		break;
 	case EGhoulState::Dead:
 		LockState = true;
 		break;
@@ -263,6 +275,11 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 			if (GhState == EGhoulState::Attack)
 				SetState(EGhoulState::AttackCooldown);
 		}
+		else if (Montage == StaggerMontage)
+		{
+			AIController->SetFocus(AttackTarget);
+			SetState(EGhoulState::Attack);
+		}
 	}
 }
 
@@ -289,6 +306,13 @@ void AGhoul::OnSeePawn(APawn* OtherPawn)
 	SetState(EGhoulState::Attack);
 
 	PawnSensing->SetSensingUpdatesEnabled(false);
+}
+
+void AGhoul::OnStaggered()
+{
+	Super::OnStaggered();
+
+	SetState(EGhoulState::Staggered);
 }
 
 void AGhoul::BeginPlay()

@@ -26,6 +26,7 @@ enum EGhoulState
 	Patrol	UMETA(DisplayName = "Patrol"),
 	Attack	UMETA(DisplayName = "Attack"),
 	AttackCooldown	UMETA(DisplayName = "AttackCooldown"),
+	Staggered UMETA(DisplayName = "Staggered"),
 	Dead	UMETA(DisplayName = "Dead")
 };
 
@@ -66,6 +67,7 @@ public:
 	void CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision);
 
 	void OnSeePawn(APawn* OtherPawn) override;
+	void OnStaggered() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* Attack1Montage = nullptr;
@@ -77,6 +79,8 @@ public:
 		UAnimMontage* RangedAttackMontage = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* BurstMontage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		UAnimMontage* StaggerMontage = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 

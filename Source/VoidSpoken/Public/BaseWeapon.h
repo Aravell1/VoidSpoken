@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BaseWeaponInterface.h"
 #include "Engine.h"
+#include "DamageTypeStagger.h"
 #include "Engine/EngineTypes.h"
 #include "BaseWeapon.generated.h"
 
