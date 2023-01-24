@@ -7,6 +7,7 @@
 #include "Perception/PawnSensingComponent.h"
 #include "Components/CapsuleComponent.h" 
 #include "EnemyWeapon.h"
+#include "PatrolPoint.h"
 #include "BaseEnemy.generated.h"
 
 
@@ -62,6 +63,9 @@ public:
 
 	UFUNCTION()
 		virtual void OnSeePawn(APawn* OtherPawn);
+
+	UPROPERTY(EditAnywhere)
+		TArray<APatrolPoint*> PatrolPoints;
 
 private:
 

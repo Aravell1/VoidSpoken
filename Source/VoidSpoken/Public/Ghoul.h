@@ -14,7 +14,6 @@
 #include "Components/BoxComponent.h" 
 #include "Kismet/KismetSystemLibrary.h" 
 #include "NavigationSystem.h"
-#include "PatrolPoint.h"
 #include "Ghoul.generated.h"
 
 /**
@@ -105,9 +104,6 @@ protected:
 		void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 private:
-
-	UPROPERTY(EditAnywhere)
-		TArray<APatrolPoint*> PatrolPoints;
 
 	int PatrolIndex = 0;
 

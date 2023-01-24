@@ -346,7 +346,6 @@ void AGhoul::Tick(float DeltaTime)
 			&AGhoul::CheckPatrolReset,
 			PTHandleInterval);
 	}
-
 }
 
 void AGhoul::SetSpeed()
@@ -489,6 +488,8 @@ bool AGhoul::GetHasLineOfSight()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), Spike, FoundActors);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActors(FoundActors);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGhoul::StaticClass(), FoundActors);
 	Params.AddIgnoredActors(FoundActors);
 
 	GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECollisionChannel::ECC_Camera, Params);
