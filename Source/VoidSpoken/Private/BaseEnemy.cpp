@@ -57,3 +57,7 @@ void ABaseEnemy::OnSeePawn(APawn* OtherPawn)
 {
 }
 
+void ABaseEnemy::TriggerAttack()
+{
+}
+

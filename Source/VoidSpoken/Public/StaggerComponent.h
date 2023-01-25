@@ -34,6 +34,11 @@ public:
 
 	void ResetStaggerCooldown();
 
+	UFUNCTION(BlueprintPure)
+		float GetStaggerGauge();
+	
+	bool bCanGainStagger = true;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -52,6 +57,5 @@ private:
 	const float StaggerDrainTimer = 2.5f;
 	const float PercentStaggerDrainRate = 0.2f;
 	bool bDrainStagger = false;
-	bool bCanGainStagger = true;
 		
 };

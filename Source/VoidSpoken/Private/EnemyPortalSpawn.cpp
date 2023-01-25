@@ -18,6 +18,12 @@ void AEnemyPortalSpawn::BeginPlay()
 	
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
+	TArray<AActor*> FoundDirectors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACombatDirector::StaticClass(), FoundDirectors);
+	if (Cast<ACombatDirector>(FoundDirectors[0]))
+	{
+		CombatDirector = Cast<ACombatDirector>(FoundDirectors[0]);
+	}
 }
 
 // Called every frame
@@ -74,6 +80,8 @@ void AEnemyPortalSpawn::SpawnEnemy()
 
 		ABaseEnemy* SpawnedEnemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyType, SpawnLocation, SpawnRotation, SpawnInfo);
 		SpawnedEnemy->PatrolPoints = PatrolPoints;
+
+		CombatDirector->AddToMap(SpawnedEnemy);
 	}
 }
 

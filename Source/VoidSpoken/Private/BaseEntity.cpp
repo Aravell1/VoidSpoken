@@ -30,6 +30,9 @@ void ABaseEntity::BeginPlay()
 	
 	if (StaggerComponent->bCanStagger)
 		StaggerComponent->StaggerTrigger.AddDynamic(this, &ABaseEntity::OnStaggered);
+
+	if (Stats->Health > Stats->GetMaxHealth())
+		Stats->SetMaxHealth(Stats->Health);
 }
 
 // Called every frame

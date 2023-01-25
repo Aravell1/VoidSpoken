@@ -72,6 +72,10 @@ void AGhoul::BehaviourStateEvent()
 		else if (PatrolPoints.Num() == 1 && TestPathExists(PatrolPoints[0]) && FVector::Distance(GetActorLocation(), PatrolPoints[0]->GetActorLocation()) > MeleeTargetDistance)
 			AIController->MoveToActor(PatrolPoints[0], MeleeTargetDistance);
 		break;
+	case EGhoulState::Chase:
+		if (TestPathExists(AttackTarget))
+			AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+		break;
 	case EGhoulState::Attack:
 		if (TestPathExists(AttackTarget))
 			AIController->MoveToActor(AttackTarget, ReachTargetDistance);
@@ -79,10 +83,10 @@ void AGhoul::BehaviourStateEvent()
 	case EGhoulState::AttackCooldown:
 		AttackCooldown();
 
-		GetWorldTimerManager().SetTimer(TimerHandle,
+		/*GetWorldTimerManager().SetTimer(TimerHandle,
 			this,
 			&AGhoul::AttackDelay,
-			FMath::RandRange(AttackCD * 0.8f, AttackCD * 1.2f));
+			FMath::RandRange(AttackCD * 0.8f, AttackCD * 1.2f));*/
 		break;
 	case EGhoulState::Staggered:
 		AIController->ClearFocus(EAIFocusPriority::Gameplay);
@@ -126,6 +130,12 @@ void AGhoul::SetAttackingRight(bool right)
 void AGhoul::SetAttackingLeft(bool left)
 {
 	AttackingLeft = left;
+}
+
+void AGhoul::TriggerAttack()
+{
+	SetState(EGhoulState::Attack);
+
 }
 
 void AGhoul::TriggerSpikes(UAnimMontage* Montage)
@@ -215,6 +225,9 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 	{
 		switch (GhState)
 		{
+		case (EGhoulState::Chase):
+			SetState(EGhoulState::AttackCooldown);
+			break;
 		case EGhoulState::Attack:
 			if (GhType == EGhoulType::Melee)
 			{
@@ -233,6 +246,8 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 						GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, RandomMontage);
 					}
 					StopMovement();
+
+					TimeOfLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld());
 				}
 			}
 			else
@@ -251,6 +266,8 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 						GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, RangedAttackMontage);
 					}
 					StopMovement();
+
+					TimeOfLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld());
 				}
 			}
 			break;
@@ -278,7 +295,7 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 		else if (Montage == StaggerMontage)
 		{
 			AIController->SetFocus(AttackTarget);
-			SetState(EGhoulState::Attack);
+			SetState(EGhoulState::Chase);
 		}
 	}
 }
@@ -298,12 +315,13 @@ void AGhoul::OnSeePawn(APawn* OtherPawn)
 {
 	AttackTarget = OtherPawn;
 	AIController->SeePlayer(AttackTarget);
+	bInCombat = true;
 
 	UpdateHealthBar.Broadcast();
 
 	SetSpeed();
 
-	SetState(EGhoulState::Attack);
+	SetState(EGhoulState::Chase);
 
 	PawnSensing->SetSensingUpdatesEnabled(false);
 }
@@ -376,7 +394,7 @@ void AGhoul::SetSpeed()
 {
 	if (GetState() == EGhoulState::Idle || GetState() == EGhoulState::Patrol || GetState() == EGhoulState::AttackCooldown)
 		GetCharacterMovement()->MaxWalkSpeed = GetWalkSpeed();
-	else if (GetState() == EGhoulState::Attack)
+	else if (GetState() == EGhoulState::Attack || GetState() == EGhoulState::Chase)
 		GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
 	else
 		GetCharacterMovement()->MaxWalkSpeed = 0;
@@ -387,7 +405,7 @@ void AGhoul::AttackDelay()
 	AttackReset = true;
 	SetSpeed();
 	if (GetState() == EGhoulState::AttackCooldown)
-		SetState(EGhoulState::Attack);
+		SetState(EGhoulState::Chase);
 }
 
 void AGhoul::IdleDelay()
@@ -454,6 +472,28 @@ void AGhoul::AttackCooldown()
 	}
 }
 
+void AGhoul::EnterCombat(APawn* OtherPawn, bool Cooldown)
+{
+	AttackTarget = OtherPawn;
+	bInCombat = true;
+
+	UpdateHealthBar.Broadcast();
+
+	SetSpeed();
+
+	if (StaggerComponent->bCanGainStagger)
+	{
+		AIController->SeePlayer(AttackTarget);
+
+		if (Cooldown)
+			SetState(EGhoulState::AttackCooldown);
+		else
+			SetState(EGhoulState::Chase);
+	}
+
+	PawnSensing->SetSensingUpdatesEnabled(false);
+}
+
 void AGhoul::CheckPatrolReset()
 {
 	if ((GhState == EGhoulState::Attack || GhState == EGhoulState::AttackCooldown) && AttackTarget)
@@ -486,6 +526,7 @@ void AGhoul::PatrolReset()
 	AttackTarget = nullptr;
 	AIController->ClearFocus(EAIFocusPriority::Gameplay);
 	AttackReset = true;
+	bInCombat = false;
 
 	Stats->Health = Stats->GetMaxHealth();
 	UpdateHealthBar.Broadcast();
@@ -539,7 +580,7 @@ void AGhoul::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType
 	Super::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
 
 	if (!AttackTarget)
-		OnSeePawn(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+		EnterCombat(UGameplayStatics::GetPlayerPawn(GetWorld(), 0), true);
 
 	UpdateHealthBar.Broadcast();
 

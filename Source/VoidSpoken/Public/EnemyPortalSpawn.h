@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BaseEnemy.h"
+#include "CombatDirector.h"
 #include "EnemyPortalSpawn.generated.h"
 
 UCLASS()
@@ -49,5 +50,5 @@ private:
 	const float DistanceCheckInterval = 1.0f;
 	const float DelayPortalToEnemy = 2.5f;
 
-
+	ACombatDirector* CombatDirector;
 };

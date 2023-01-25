@@ -24,7 +24,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stats")
 		class UStatsMasterClass* Stats;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stagger Component")
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Stagger Component")
 		class UStaggerComponent* StaggerComponent;
 
 	UFUNCTION()

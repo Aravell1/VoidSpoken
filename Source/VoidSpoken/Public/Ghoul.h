@@ -24,6 +24,7 @@ enum EGhoulState
 {
 	Idle	UMETA(DisplayName = "Idle"),
 	Patrol	UMETA(DisplayName = "Patrol"),
+	Chase	UMETA(DisplayName = "Chase"),
 	Attack	UMETA(DisplayName = "Attack"),
 	AttackCooldown	UMETA(DisplayName = "AttackCooldown"),
 	Staggered UMETA(DisplayName = "Staggered"),
@@ -60,6 +61,8 @@ public:
 	void SetAttacking(UAnimMontage* Montage, bool Attacking);
 	void SetAttackingRight(bool right);
 	void SetAttackingLeft(bool left);
+
+	void TriggerAttack() override;
 
 	void TriggerSpikes(UAnimMontage* Montage);
 	void SpikeBurst();
@@ -117,6 +120,7 @@ private:
 	void StopMovement();
 	void Death();
 	void AttackCooldown();
+	void EnterCombat(APawn* OtherPawn, bool Cooldown);
 
 	void CheckPatrolReset();
 	void PatrolReset();

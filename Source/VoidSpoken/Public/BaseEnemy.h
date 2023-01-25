@@ -67,6 +67,12 @@ public:
 	UPROPERTY(EditAnywhere)
 		TArray<APatrolPoint*> PatrolPoints;
 
+	float TimeOfLastAttack = 0;
+
+	virtual void TriggerAttack();
+
+	bool bInCombat = false;
+
 private:
 
 	float WalkSpeed = 0;

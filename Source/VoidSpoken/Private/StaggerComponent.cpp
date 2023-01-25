@@ -59,6 +59,11 @@ void UStaggerComponent::ResetStaggerCooldown()
 	bCanGainStagger = true;
 }
 
+float UStaggerComponent::GetStaggerGauge()
+{
+	return StaggerGauge;
+}
+
 // Called when the game starts
 void UStaggerComponent::BeginPlay()
 {
