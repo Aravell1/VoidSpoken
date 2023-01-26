@@ -18,7 +18,7 @@
 * Script Name:	BaseWeapon.h
 * Description:
 *		Creating a generic weapon class with required functions and variables. Intended for 
-*	creating sub-classes deriving from this class to have their own unqiue features.
+*	creating sub-classes deriving from this class to have their own unique features.
 * Author:		YunYun (Jan Skucinski)
 * Email:		Jan.Frank.Skucinski@gmail.com
 */
@@ -31,11 +31,10 @@ DECLARE_DELEGATE(FOnAttackEndedDelegate);
 #pragma endregion
 
 UENUM() 
-enum AttackType {
-	None,
-	NormalAttack,
-	ChargedAttack,
-	UniqueAttack,
+enum EAttackType {
+	EAT_None,
+	EAT_NormalAttack,
+	EAT_ChargedAttack,
 };
 
 UCLASS(Abstract)
@@ -56,50 +55,45 @@ public:
 	/// Function: GetBaseDamage()
 	///		-Returns the float BaseDamage
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		float GetBaseDamage();
+		float GetBaseDamage() { return BaseDamage; };
 
 	/// Function: GetCurrentComboIndex()
 	///		-Returns the int CurrentComboIndex
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		int GetCurrentComboIndex();
+		int GetCurrentComboIndex() { return CurrentComboIndex; };
 
 	/// Function: GetComboLength()
 	///		-Returns an int of the Max() of Elements inside the ComboAnimationMontage
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		int GetComboLength();
+		int GetComboLength() { return ComboAnimationMontage.Max(); };
 
 	/// Function: GetEquippedCharacter() 
 	///		-Returns a ACharacter* of the variable EquippedCharacter
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		ACharacter* GetEquippedCharacter();
+		ACharacter* GetEquippedCharacter() { return EquippedCharacter; };
 	
 	/// Function: GetAttackDelay()
 	///		-Returns the bool AttackDelay
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		bool GetAttackDelay();
+		bool GetAttackDelay() { return bAttackDelay; };
 
 	/// Function: SetAttackDelay()
 	///		-Sets the boolean AttackDelay to {state}
 	UFUNCTION(BlueprintCallable)
-		void SetAttackDelay(const bool state);
+		void SetAttackDelay(const bool State) { bAttackDelay = State; };
 
 	/// Function: GetAttackDelay()
-	///		-Returns the boolean CanUniqueAttack
+	///		-Returns the bool AttackDelay
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		bool GetCanUniqueAttack();
-
-	/// Function: SetCanUniqueAttack()
-	///		-Sets the boolean CanUniqueAttack to {state}
-	UFUNCTION(BlueprintCallable)
-		void SetCanUniqueAttack(const bool state);
+		bool GetIsAttacking() const { return bIsAttacking; };
 
 	/// Function: CheckMovementMode()
 	///		-Fetches the current MovementMode from the EquippedCharacter, and compares if it's a valid mode to attack in
 	UFUNCTION()
-		bool CheckMovementMode();
+		bool CheckMovementMode() const;
 
 	UFUNCTION() 
-		float GetStaminaCost() {
+		float GetStaminaCost() const {
 			if (ComboStaminaMultipliers.IsValidIndex(CurrentComboIndex)) return BaseStamina * ComboStaminaMultipliers[CurrentComboIndex];
 			else return BaseStamina;
 		}
@@ -154,23 +148,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void Reset();
 
-	#pragma region Unique Attacks
-
-	/// Function: UniqueAttack()
-	///		-Disables the player movement
-	///		-Plays the UniqueAnimationMontage
-	///		-After UniqueAnimationMontage is done, then Plays the UniqueBlendingMontage
-	///		-Sets Timer (UniqueAttackDelay)
+	/// Function: Clear()
+	///		-Clears the OVerlapped Actors array Mid Attack
 	UFUNCTION(BlueprintCallable)
-		virtual void UniqueAttack();
-
-	/// Function: UniqueReset()
-	///		-Gets called after the timer UniqueAttackDelayTimer has expired.
-	///		-Sets the UniqueAttackDelay bool to false
-	UFUNCTION(BlueprintCallable)
-		virtual void UniqueReset();
-
-	#pragma endregion
+		virtual void Clear();
 
 	#pragma endregion
 
@@ -252,50 +233,6 @@ public:
 
 	#pragma endregion
 
-	#pragma region Unique Attack
-	
-	/// This Unique Animation will be played if given the opportunity
-	///		-Given at the desired index (Unique Attack Index), will interrupt the current attacks animation
-	///		-This parameter can be uninitialized (not all weapons need a unique attack)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
-		UAnimMontage* UniqueAttackMontage = nullptr;
-
-	/// Where will this window of opportunity  be opened at
-	///		-This can happen anywhere from 0 to ComboMontage - 1.
-	///		-Will not play if UniqueAnimationMontage is null, or uninitialized
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
-		int UniqueAttackIndex = 0;
-
-	/// This value will dictate how much of the Base Damage is accounted for
-	///		-Normalized Value (%)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
-		float UniqueAttackComboMultiplier = 0;
-
-	/// How much Focus is comsumed
-	///		-Will not player if Player doesn't have enough resources
-	///		-This is a subtractive value
-	///		-This value substracts from the Stats->Focus
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
-		float UniqueAttackConsumption = 0;
-
-	/// The cooldown (in seconds) after the attack has been initiated
-	///		-This is additive of the UniqueAttackMontage's play length (in seconds)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
-		float UniqueAttackCooldown = 0;
-	
-	///Boolean Handler for UniqueAttack()
-	bool UniqueAttackDelay = false;
-
-	///Boolean for the Unique Attack call
-	bool CanUniqueAttack = false;
-
-	///Timer Handles
-
-	///This TimerHandler is to insure that after some time has passed, the function 
-	FTimerHandle UniqueAttackDelayTimer;
-
-	#pragma endregion
-
 	#pragma region Components of this class
 	
 	/// Mesh of this weapon
@@ -316,17 +253,21 @@ public:
 
 	#pragma region Combo States and Booleans
 
+	public:
+
 	/// This keeps track of the current Attack to be executed.
 	///		-Cannot be edited by blueprints to prevent any unwanted behaviours
 	///		-Will only increment to the length of the ComboMontage - 1
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
-		TEnumAsByte<AttackType> AttackState = None;
+		TEnumAsByte<EAttackType> EAttackState = EAT_None;
 
-	///Boolean for when the attack started (prevent spamming attack inputs)
-	bool IsAttacking = false;
+	/// Boolean for when the attack started (prevent spamming attack inputs)
+	UPROPERTY(VisibleAnywhere, DisplayName = "Is Attacking")
+		bool bIsAttacking = false;
 
-	///Boolean Handler for NextAttack(), and to prevent the player attacking again
-	bool AttackDelay = false;
+	/// Boolean Handler for NextAttack(), and to prevent the player attacking again
+	UPROPERTY(VisibleAnywhere, DisplayName = "Attacking Delay")
+		bool bAttackDelay = false;
 
 	#pragma endregion
 
