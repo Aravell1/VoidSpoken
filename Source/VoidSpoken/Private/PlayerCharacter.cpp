@@ -5,6 +5,9 @@
 
 
 #include "PlayerCharacter.h"
+#include "FocusPickup.h"
+#include "HealthPickup.h"
+#include "StaminaPickup.h"
 
 #pragma region Constructor and Inheritied Functions
 
@@ -79,6 +82,8 @@ APlayerCharacter::APlayerCharacter()
 	TelekinesisSource->SetRelativeLocation(FVector(-190, 40, 147));
 	
 	#pragma endregion
+
+	bIsFDown = false;
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -92,6 +97,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Running
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &APlayerCharacter::RunStart);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &APlayerCharacter::RunStop);
+
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::On_F_Down);
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &APlayerCharacter::On_F_Release);
 
 	// Turning and moving camera
 	PlayerInputComponent->BindAxis("Turn / Mouse", this, &APawn::AddControllerYawInput);
@@ -399,6 +407,8 @@ void APlayerCharacter::DodgingUpdate(const float Alpha) {
 	AddMovementInput(DodgingDirection * fRunSpeed, Alpha * 2.25f);
 }
 
+
+
 void APlayerCharacter::DodgingFinished() {
 	EMovementState = EMovementState::EMS_Idle;
 	SetDodging(false);
@@ -552,6 +562,40 @@ void APlayerCharacter::UseHealthConsumable()
 	}
 	else
 		return;
+}
+
+
+void APlayerCharacter::On_F_Down()
+{
+	bIsFDown = true;
+
+	if (OverlappingItem)
+	{
+		AFocusPickup* PickupF = Cast<AFocusPickup>(OverlappingItem);
+		AHealthPickup* PickupH = Cast<AHealthPickup>(OverlappingItem);
+		AStaminaPickup* PickupS = Cast<AStaminaPickup>(OverlappingItem);
+
+		if (PickupF)
+		{
+			PickupF->PickupFocus();
+			SetOverlappingItem(nullptr);
+		}
+		else if (PickupH)
+		{
+			PickupH->PickupHealth();
+			SetOverlappingItem(nullptr);
+		}
+		else if (PickupS)
+		{
+			PickupS->PickupStamina();
+			SetOverlappingItem(nullptr);
+		}
+	}
+}
+
+void APlayerCharacter::On_F_Release()
+{
+	bIsFDown = false;
 }
 
 void APlayerCharacter::UseFocusConsumable()
