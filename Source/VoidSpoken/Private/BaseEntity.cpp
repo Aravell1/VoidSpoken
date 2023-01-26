@@ -12,6 +12,15 @@ ABaseEntity::ABaseEntity()
 	Stats = CreateDefaultSubobject<UStatsMasterClass>("Stats");
 
 	OnTakeAnyDamage.AddDynamic(this, &ABaseEntity::TakeAnyDamage);
+
+	if (!StaggerComponent)
+	{
+		StaggerComponent = CreateDefaultSubobject<UStaggerComponent>(TEXT("Stagger Component"));
+	}
+}
+
+void ABaseEntity::OnStaggered()
+{
 }
 
 // Called when the game starts or when spawned
@@ -19,6 +28,11 @@ void ABaseEntity::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (StaggerComponent->bCanStagger)
+		StaggerComponent->StaggerTrigger.AddDynamic(this, &ABaseEntity::OnStaggered);
+
+	if (Stats->Health > Stats->GetMaxHealth())
+		Stats->SetMaxHealth(Stats->Health);
 }
 
 // Called every frame
@@ -37,7 +51,13 @@ void ABaseEntity::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ABaseEntity::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	Stats->Health -= FMath::Floor(Damage * (25 / (25 + Stats->Defense)));
+	Damage = FMath::Floor(Damage * (25 / (25 + Stats->Defense)));
+	Stats->Health -= Damage;
+
+	if (Cast<UDamageTypeStagger>(DamageType) && StaggerComponent->bCanStagger)
+	{
+		StaggerComponent->AddToStaggerGauge(Damage);
+	}
 }
 
 

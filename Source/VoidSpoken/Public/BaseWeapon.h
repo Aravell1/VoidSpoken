@@ -9,9 +9,10 @@
 #include "Components/BoxComponent.h"
 #include "StatsMasterClass.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Engine.h"
-#include "Engine/EngineTypes.h"
 #include "BaseWeaponInterface.h"
+#include "Engine.h"
+#include "DamageTypeStagger.h"
+#include "Engine/EngineTypes.h"
 #include "BaseWeapon.generated.h"
 
 /*
@@ -22,6 +23,13 @@
 * Author:		YunYun (Jan Skucinski)
 * Email:		Jan.Frank.Skucinski@gmail.com
 */
+
+#pragma region Macro Delegate Assignments
+
+DECLARE_DELEGATE(FOnAttackStartedDelegate);
+DECLARE_DELEGATE(FOnAttackEndedDelegate);
+
+#pragma endregion
 
 UENUM() 
 enum AttackType {
@@ -44,7 +52,7 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
-	///Getter Statements
+	#pragma region Getter Statements
 
 	/// Function: GetBaseDamage()
 	///		-Returns the float BaseDamage
@@ -93,22 +101,21 @@ public:
 
 	UFUNCTION() 
 		float GetStaminaCost() {
-			if (ComboStaminaMultipliers.IsValidIndex(CurrentComboIndex)) return ComboStaminaMultipliers[CurrentComboIndex];
-			else return 1.0f;
+			if (ComboStaminaMultipliers.IsValidIndex(CurrentComboIndex)) return BaseStamina * ComboStaminaMultipliers[CurrentComboIndex];
+			else return BaseStamina;
 		}
 
-	///Weapon Functions
+	#pragma endregion
 
-	#pragma region IBaseWeaponInterface Implementation
+	#pragma region Weapon Functions
+
 	/// Function: Equip(ACharacter* EquippingCharacter) 
 	///		-This functions sets the variable EquippedCharacter
 	///		-Will Also set this Weapon's owner as EquippedCharacter
 	///		-Initialises the UAnimInstance from the Default (At the time of this Equip(), what was the UAnimInstance the Character had)
 	///		-Initialises the UCharacterMovementComponent from the given EquippedCharacter 
-	
-	void Equip_Implementation(ACharacter* EquippingCharacter) override;
-
-	#pragma endregion
+	UFUNCTION(BlueprintCallable)
+		void Equip_Implementation(ACharacter* EquippingCharacter) override;
 
 	/// Function: Attack()
 	///		-Momentarily disables player movement
@@ -125,13 +132,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void ChargedAttack();
 
-	/// Function: DealDamage()
-	///		-Checks if the Attached Box Collider is overlapping any Actors (Preferably if their from a BaseEntity class)
-	///		-Length of this function is determined in each of the ComboAnimationMontage
-	///		-Uses the Notify and NotifyState systems in each Animation
-	UFUNCTION(BlueprintCallable)
-		virtual void DealDamage(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent);
-
 	/// Function: NextAttack()
 	///		-Re-Enables the player movement
 	///		-Gets called after Weapon Attack Notify (On End())
@@ -139,13 +139,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void NextAttack();
 
-	/// Function: UniqueAttack()
-	///		-Disables the player movement
-	///		-Plays the UniqueAnimationMontage
-	///		-After UniqueAnimationMontage is done, then Plays the UniqueBlendingMontage
-	///		-Sets Timer (UniqueAttackDelay)
+	/// Function: DealDamage()
+	///		-Checks if the Attached Box Collider is overlapping any Actors (Preferably if their from a BaseEntity class)
+	///		-Length of this function is determined in each of the ComboAnimationMontage
+	///		-Uses the Notify and NotifyState systems in each Animation
 	UFUNCTION(BlueprintCallable)
-		virtual void UniqueAttack();
+		virtual void DealDamage(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent);
 
 	/// Function: Reset() 
 	///		-Resets the player back into their Default Animation Instance
@@ -156,17 +155,31 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void Reset();
 
+	#pragma region Unique Attacks
+
+	/// Function: UniqueAttack()
+	///		-Disables the player movement
+	///		-Plays the UniqueAnimationMontage
+	///		-After UniqueAnimationMontage is done, then Plays the UniqueBlendingMontage
+	///		-Sets Timer (UniqueAttackDelay)
+	UFUNCTION(BlueprintCallable)
+		virtual void UniqueAttack();
+
 	/// Function: UniqueReset()
 	///		-Gets called after the timer UniqueAttackDelayTimer has expired.
 	///		-Sets the UniqueAttackDelay bool to false
 	UFUNCTION(BlueprintCallable)
 		virtual void UniqueReset();
 
-protected:
+	#pragma endregion
+
+	#pragma endregion
+
+	protected:
 	/// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	//Weapon Parameters
+	#pragma region Weapon Parameters
 
 	/// Base Damage of this Weapon
 	///		-Any scaling involving the damage of the Attack, this value will influence
@@ -191,7 +204,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
 		TArray<AActor*> OverlappedActors = {};
 
-	//Normal Combo Parameters
+	#pragma endregion
+
+	#pragma region Normal Combo Parameters
 
 	/// This Array contains all the Animation Montages for the Attack of this weapon.
 	///		-This cannot be uninitialized
@@ -215,17 +230,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter), Category = "Normal Attack")
 		int CurrentComboIndex = 0;
 
-	/// This keeps track of the current Attack to be executed.
-	///		-Cannot be edited by blueprints to prevent any unwanted behaviours
-	///		-Will only increment to the length of the ComboMontage - 1
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
-		TEnumAsByte<AttackType> AttackState = None;
+	#pragma endregion
 
-	// Charged Attack
+	#pragma region Charged Attack
 
 	/// This Charged Attack Animation will be played if the Entity uses it
 	///		-This parameter can be uninitialized
-	///		-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Charged Attack")
 		UAnimMontage* ChargedAttackMontage = nullptr;
 
@@ -241,7 +251,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Charged Attack")
 		float ChargedAttackConsumption = 0;
 
-	// Unique Attack
+	#pragma endregion
+
+	#pragma region Unique Attack
 	
 	/// This Unique Animation will be played if given the opportunity
 	///		-Given at the desired index (Unique Attack Index), will interrupt the current attacks animation
@@ -271,8 +283,21 @@ protected:
 	///		-This is additive of the UniqueAttackMontage's play length (in seconds)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Unique Attack")
 		float UniqueAttackCooldown = 0;
+	
+	///Boolean Handler for UniqueAttack()
+	bool UniqueAttackDelay = false;
 
-	/// Components of this class
+	///Boolean for the Unique Attack call
+	bool CanUniqueAttack = false;
+
+	///Timer Handles
+
+	///This TimerHandler is to insure that after some time has passed, the function 
+	FTimerHandle UniqueAttackDelayTimer;
+
+	#pragma endregion
+
+	#pragma region Components of this class
 	
 	/// Mesh of this weapon
 	///		-Can be uninitialized, although not recommended
@@ -288,7 +313,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		class UCharacterMovementComponent* EquippedCharacterMovementComponent = nullptr;
 
-	//Combo Booleans
+	#pragma endregion
+
+	#pragma region Combo States and Booleans
+
+	/// This keeps track of the current Attack to be executed.
+	///		-Cannot be edited by blueprints to prevent any unwanted behaviours
+	///		-Will only increment to the length of the ComboMontage - 1
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
+		TEnumAsByte<AttackType> AttackState = None;
 
 	///Boolean for when the attack started (prevent spamming attack inputs)
 	bool IsAttacking = false;
@@ -296,16 +329,7 @@ protected:
 	///Boolean Handler for NextAttack(), and to prevent the player attacking again
 	bool AttackDelay = false;
 
-	///Boolean Handler for UniqueAttack()
-	bool UniqueAttackDelay = false;
-
-	///Boolean for the Unique Attack call
-	bool CanUniqueAttack = false;
-
-	///Timer Handles
-
-	///This TimerHandler is to insure that after some time has passed, the function 
-	FTimerHandle UniqueAttackDelayTimer;
+	#pragma endregion
 
 	#pragma region Collision Delegates
 	
@@ -318,5 +342,13 @@ protected:
 	UFUNCTION()
 		virtual void OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit); 
 	
+	#pragma endregion
+
+	#pragma region Delegates and Events
+
+	public:
+	FOnAttackStartedDelegate OnAttackStarted;
+	FOnAttackEndedDelegate OnAttackEnded;
+
 	#pragma endregion
 };

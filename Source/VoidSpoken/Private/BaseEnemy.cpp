@@ -53,3 +53,11 @@ void ABaseEnemy::AttackTrace(UAnimMontage* AnimTrigger)
 {
 }
 
+void ABaseEnemy::OnSeePawn(APawn* OtherPawn)
+{
+}
+
+void ABaseEnemy::TriggerAttack()
+{
+}
+

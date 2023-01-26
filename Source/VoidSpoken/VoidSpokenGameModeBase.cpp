@@ -3,8 +3,6 @@
 
 #include "VoidSpokenGameModeBase.h"
 
-
-
 void AVoidSpokenGameModeBase::AddGatekeeperSpawn(AActor* EnemySpawn)
 {
 	GatekeeperEnemySpawns.Add(EnemySpawn);
@@ -50,7 +48,7 @@ void AVoidSpokenGameModeBase::PickupFull()
 
 void AVoidSpokenGameModeBase::SpawnPlayersFromData()
 {
-	TArray<FPlayerData> PlayerDataInfo;
+	/*TArray<FPlayerData> PlayerDataInfo;
 	bool bReadSuccess = JsonLibrary->ReadPlayerData(PlayerDataInfo);
 
 	if (bReadSuccess)
@@ -79,6 +77,6 @@ void AVoidSpokenGameModeBase::SpawnPlayersFromData()
 				}
 			}
 		}
-	}
+	}*/
 }
 

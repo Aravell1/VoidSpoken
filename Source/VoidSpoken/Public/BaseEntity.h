@@ -7,6 +7,8 @@
 #include "StatsMasterClass.h"
 #include "BaseWeapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "DamageTypeStagger.h"
+#include "StaggerComponent.h" 
 #include "BaseEntity.generated.h"
 
 
@@ -21,6 +23,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stats")
 		class UStatsMasterClass* Stats;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Stagger Component")
+		class UStaggerComponent* StaggerComponent;
+
+	UFUNCTION()
+		virtual void OnStaggered();
 
 protected:
 	// Called when the game starts or when spawned

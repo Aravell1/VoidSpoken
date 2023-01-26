@@ -5,6 +5,8 @@
 
 AGhoul::AGhoul()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	RootComponent = GetCapsuleComponent();
 	GetMesh()->SetupAttachment(GetCapsuleComponent());
 
@@ -12,7 +14,7 @@ AGhoul::AGhoul()
 	if (GetAttack() <= 0)
 		SetAttack(3);
 	Stats->Defense = 10;
-	Stats->SetMaxHealth(15);
+	Stats->SetMaxHealth(30);
 	Stats->Health = Stats->GetMaxHealth();
 
 	//Initialize Character Movement Stats
@@ -49,6 +51,11 @@ EGhoulType AGhoul::GetType()
 	return GhType;
 }
 
+void AGhoul::SetGhoulType(EGhoulType type)
+{
+	GhType = type;
+}
+
 void AGhoul::BehaviourStateEvent()
 {
 	switch (GhState)
@@ -60,26 +67,38 @@ void AGhoul::BehaviourStateEvent()
 			FMath::RandRange(IdleTime * 0.8f, IdleTime * 1.2f));
 		break;
 	case EGhoulState::Patrol:
-		if (PatrolPoints.Num() > 1)
+		if (PatrolPoints.Num() > 1 && TestPathExists(PatrolPoints[PatrolIndex]))
 			AIController->MoveToActor(PatrolPoints[PatrolIndex], MeleeTargetDistance);
+		else if (PatrolPoints.Num() == 1 && TestPathExists(PatrolPoints[0]) && FVector::Distance(GetActorLocation(), PatrolPoints[0]->GetActorLocation()) > MeleeTargetDistance)
+			AIController->MoveToActor(PatrolPoints[0], MeleeTargetDistance);
 		break;
-	case EGhoulState::Attack:		
-		AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+	case EGhoulState::Chase:
+		if (TestPathExists(AttackTarget))
+			AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+		break;
+	case EGhoulState::Attack:
+		if (TestPathExists(AttackTarget))
+			AIController->MoveToActor(AttackTarget, ReachTargetDistance);
 		break;
 	case EGhoulState::AttackCooldown:
-		if (GetType() == EGhoulType::Melee || FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) <= BackOffRange)
-		{
-			FVector3d BackUpTargetPos = GetActorLocation() - AttackTarget->GetActorLocation();
-			BackUpTargetPos.Z = 0;
-			BackUpTargetPos = GetActorLocation() + BackUpTargetPos.GetSafeNormal() * BackUpDistance;
+		AttackCooldown();
 
-			AIController->MoveToLocation(BackUpTargetPos, 0);
-		}
-
-		GetWorldTimerManager().SetTimer(TimerHandle,
+		/*GetWorldTimerManager().SetTimer(TimerHandle,
 			this,
 			&AGhoul::AttackDelay,
-			FMath::RandRange(AttackCD * 0.8f, AttackCD * 1.2f));
+			FMath::RandRange(AttackCD * 0.8f, AttackCD * 1.2f));*/
+		break;
+	case EGhoulState::Staggered:
+		AIController->ClearFocus(EAIFocusPriority::Gameplay);
+		AttackReset = true;
+		if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+			GetMesh()->GetAnimInstance()->StopAllMontages(false);
+		if (StaggerMontage)
+		{
+			GetMesh()->GetAnimInstance()->Montage_Play(StaggerMontage);
+			GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, StaggerMontage);
+		}
+		StopMovement();
 		break;
 	case EGhoulState::Dead:
 		LockState = true;
@@ -97,10 +116,10 @@ void AGhoul::SetAttacking(UAnimMontage* Montage, bool Attacking)
 	{
 		AttackingRight = Attacking;
 	}
-	/*else if (Montage == Attack3Montage)
+	else if (Montage == Attack3Montage)
 	{
 
-	}*/
+	}
 }
 
 void AGhoul::SetAttackingRight(bool right)
@@ -111,6 +130,12 @@ void AGhoul::SetAttackingRight(bool right)
 void AGhoul::SetAttackingLeft(bool left)
 {
 	AttackingLeft = left;
+}
+
+void AGhoul::TriggerAttack()
+{
+	SetState(EGhoulState::Attack);
+
 }
 
 void AGhoul::TriggerSpikes(UAnimMontage* Montage)
@@ -200,6 +225,9 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 	{
 		switch (GhState)
 		{
+		case (EGhoulState::Chase):
+			SetState(EGhoulState::AttackCooldown);
+			break;
 		case EGhoulState::Attack:
 			if (GhType == EGhoulType::Melee)
 			{
@@ -218,6 +246,8 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 						GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, RandomMontage);
 					}
 					StopMovement();
+
+					TimeOfLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld());
 				}
 			}
 			else
@@ -236,10 +266,11 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 						GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, RangedAttackMontage);
 					}
 					StopMovement();
+
+					TimeOfLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld());
 				}
 			}
 			break;
-
 		case EGhoulState::Patrol:
 			if (PatrolIndex < PatrolPoints.Num() - 1)
 				PatrolIndex++;
@@ -258,7 +289,13 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 	{
 		if (MontageArray.Contains(Montage) || Montage == RangedAttackMontage || Montage == BurstMontage)
 		{
-			SetState(EGhoulState::AttackCooldown);
+			if (GhState == EGhoulState::Attack)
+				SetState(EGhoulState::AttackCooldown);
+		}
+		else if (Montage == StaggerMontage)
+		{
+			AIController->SetFocus(AttackTarget);
+			SetState(EGhoulState::Chase);
 		}
 	}
 }
@@ -278,12 +315,22 @@ void AGhoul::OnSeePawn(APawn* OtherPawn)
 {
 	AttackTarget = OtherPawn;
 	AIController->SeePlayer(AttackTarget);
+	bInCombat = true;
+
+	UpdateHealthBar.Broadcast();
 
 	SetSpeed();
 
-	SetState(EGhoulState::Attack);
+	SetState(EGhoulState::Chase);
 
 	PawnSensing->SetSensingUpdatesEnabled(false);
+}
+
+void AGhoul::OnStaggered()
+{
+	Super::OnStaggered();
+
+	SetState(EGhoulState::Staggered);
 }
 
 void AGhoul::BeginPlay()
@@ -322,37 +369,32 @@ void AGhoul::BeginPlay()
 	if (HitBoxLeft)
 		HitBoxLeft->OnComponentBeginOverlap.AddDynamic(this, &AGhoul::OnComponentBeginOverlap);
 
-	/*if (HitBoxRight)
-		UE_LOG(LogTemp, Warning, TEXT("Right Box Found****************"));
-	if (HitBoxLeft)
-		UE_LOG(LogTemp, Warning, TEXT("Left Box Found****************"));
-	if (HeadLocation)
-		UE_LOG(LogTemp, Warning, TEXT("Head Box Found****************"));
-	if (ThrowPoint)
-		UE_LOG(LogTemp, Warning, TEXT("Throw Box Found****************"));*/
-
 	SetState(EGhoulState::Idle);
 }
 
 void AGhoul::Tick(float DeltaTime)
 {
-	/*if ((GhState == EGhoulState::Attack && FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation()) > ReachTargetDistance) 
-		|| (GhState == EGhoulState::Patrol && FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation()) > MeleeTargetDistance))
+	Super::Tick(DeltaTime);
+
+	if (!GetWorldTimerManager().IsTimerActive(TimerHandle) && !GetMesh()->GetAnimInstance()->IsAnyMontagePlaying() && !AIController->IsFollowingAPath())
 	{
-		if (!GetWorldTimerManager().IsTimerActive(TimerHandle) && !GetMesh()->GetAnimInstance()->IsAnyMontagePlaying() && !AIController->IsFollowingAPath())
-		{
-			BehaviourStateEvent();
-		}
-	}*/
+		BehaviourStateEvent();
+	}
+
+	if (!GetWorldTimerManager().IsTimerActive(PatrolTimerHandle) && (GhState == EGhoulState::Attack || GhState == EGhoulState::AttackCooldown))
+	{
+		GetWorldTimerManager().SetTimer(PatrolTimerHandle,
+			this,
+			&AGhoul::CheckPatrolReset,
+			PTHandleInterval);
+	}
 }
 
 void AGhoul::SetSpeed()
 {
-	if (GetState() == EGhoulState::Idle || GetState() == EGhoulState::Patrol)
+	if (GetState() == EGhoulState::Idle || GetState() == EGhoulState::Patrol || GetState() == EGhoulState::AttackCooldown)
 		GetCharacterMovement()->MaxWalkSpeed = GetWalkSpeed();
-	else if (GetState() == EGhoulState::AttackCooldown)
-		GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
-	else if (GetState() == EGhoulState::Attack)
+	else if (GetState() == EGhoulState::Attack || GetState() == EGhoulState::Chase)
 		GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
 	else
 		GetCharacterMovement()->MaxWalkSpeed = 0;
@@ -363,7 +405,7 @@ void AGhoul::AttackDelay()
 	AttackReset = true;
 	SetSpeed();
 	if (GetState() == EGhoulState::AttackCooldown)
-		SetState(EGhoulState::Attack);
+		SetState(EGhoulState::Chase);
 }
 
 void AGhoul::IdleDelay()
@@ -383,6 +425,7 @@ void AGhoul::Death()
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->MaxWalkSpeed = 0;
 	SetState(EGhoulState::Dead);
+	bIsDead = true;
 
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 	{
@@ -400,9 +443,144 @@ void AGhoul::Death()
 	SetLifeSpan(10);
 }
 
+void AGhoul::AttackCooldown()
+{
+	if (AttackTarget)
+	{
+		float DistToPlayer = FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation());
+		if (GetType() == EGhoulType::Melee || DistToPlayer <= BackOffRange)
+		{
+			FVector3d BackUpTargetPos = GetActorLocation() - AttackTarget->GetActorLocation();
+			BackUpTargetPos.Z = 0;
+			BackUpTargetPos = GetActorLocation() + BackUpTargetPos.GetSafeNormal() * BackUpDistance;
+			GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
+
+			AIController->MoveToLocation(BackUpTargetPos, 0);
+		}
+		else if (DistToPlayer > ReachTargetDistance)
+		{
+			SetSpeed();
+			if (TestPathExists(AttackTarget))
+				AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+		}
+		else if (!GetHasLineOfSight())
+		{
+			SetSpeed();
+			if (TestPathExists(AttackTarget))
+				AIController->MoveToActor(AttackTarget, MeleeTargetDistance);
+		}
+	}
+}
+
+void AGhoul::EnterCombat(APawn* OtherPawn, bool Cooldown)
+{
+	AttackTarget = OtherPawn;
+	bInCombat = true;
+
+	UpdateHealthBar.Broadcast();
+
+	SetSpeed();
+
+	if (StaggerComponent->bCanGainStagger)
+	{
+		AIController->SeePlayer(AttackTarget);
+
+		if (Cooldown)
+			SetState(EGhoulState::AttackCooldown);
+		else
+			SetState(EGhoulState::Chase);
+	}
+
+	PawnSensing->SetSensingUpdatesEnabled(false);
+}
+
+void AGhoul::CheckPatrolReset()
+{
+	if ((GhState == EGhoulState::Attack || GhState == EGhoulState::AttackCooldown) && AttackTarget)
+	{
+		if (!GetHasLineOfSight() || !TestPathExists(AttackTarget))
+		{
+			PResetTimer += PTHandleInterval;
+		}
+		else
+		{
+			PResetTimer = 0;
+		}
+
+		if (PResetTimer >= PatrolResetTime)
+		{
+			PResetTimer = 0;
+			PatrolReset();
+		}
+	}
+	else
+	{
+		PResetTimer = 0;
+	}
+}
+
+void AGhoul::PatrolReset()
+{
+	GetWorldTimerManager().ClearAllTimersForObject(this);
+
+	AttackTarget = nullptr;
+	AIController->ClearFocus(EAIFocusPriority::Gameplay);
+	AttackReset = true;
+	bInCombat = false;
+
+	Stats->Health = Stats->GetMaxHealth();
+	UpdateHealthBar.Broadcast();
+
+	SetState(EGhoulState::Idle);
+
+	PawnSensing->SetSensingUpdatesEnabled(true);
+}
+
+bool AGhoul::GetHasLineOfSight()
+{
+	FVector StartLocation = HeadLocation->GetComponentLocation() + GetActorForwardVector() * 50;
+	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	FVector PlayerLocation = Player->GetActorLocation();
+	PlayerLocation.Z += Player->GetCapsuleComponent()->GetLocalBounds().BoxExtent.Z;
+	FVector EndLocation = StartLocation + (PlayerLocation - StartLocation).GetSafeNormal() * PatrolResetDistance;
+	FHitResult OutHit;
+
+	/*DrawDebugSphere(GetWorld(), StartLocation, 10, 16, FColor::Green, false, 1.0f);
+	DrawDebugSphere(GetWorld(), PlayerLocation, 10, 16, FColor::Blue, false, 1.0f);
+	DrawDebugSphere(GetWorld(), EndLocation, 10, 16, FColor::Red, false, 1.0f);*/
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), Spike, FoundActors);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActors(FoundActors);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGhoul::StaticClass(), FoundActors);
+	Params.AddIgnoredActors(FoundActors);
+
+	GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECollisionChannel::ECC_Camera, Params);
+
+	return Cast<APlayerCharacter>(OutHit.GetActor()) || OutHit.GetActor() == Player->EquippedWeapon;
+}
+
+bool AGhoul::TestPathExists(AActor* Target)
+{
+	const UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+	const ANavigationData* NavData = NavSys->GetNavDataForProps(GetNavAgentPropertiesRef());
+	if (NavData && Target)
+	{
+		FPathFindingQuery MyAIQuery = FPathFindingQuery(this, *NavData, GetActorLocation(), Target->GetActorLocation());
+		return NavSys->TestPathSync(MyAIQuery);
+	}
+	
+	return false;
+}
+
 void AGhoul::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	Super::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
+
+	if (!AttackTarget)
+		EnterCombat(UGameplayStatics::GetPlayerPawn(GetWorld(), 0), true);
 
 	UpdateHealthBar.Broadcast();
 

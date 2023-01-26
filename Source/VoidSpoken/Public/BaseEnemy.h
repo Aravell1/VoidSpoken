@@ -7,6 +7,7 @@
 #include "Perception/PawnSensingComponent.h"
 #include "Components/CapsuleComponent.h" 
 #include "EnemyWeapon.h"
+#include "PatrolPoint.h"
 #include "BaseEnemy.generated.h"
 
 
@@ -59,6 +60,18 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		float Attack = 0;
+
+	UFUNCTION()
+		virtual void OnSeePawn(APawn* OtherPawn);
+
+	UPROPERTY(EditAnywhere)
+		TArray<APatrolPoint*> PatrolPoints;
+
+	float TimeOfLastAttack = 0;
+
+	virtual void TriggerAttack();
+
+	bool bInCombat = false;
 
 private:
 

@@ -18,6 +18,13 @@ void APortalSpawn::BeginPlay()
 	
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle,	this, &APortalSpawn::SpawnEnemy, 1.5f);
+
+	TArray<AActor*> FoundDirectors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACombatDirector::StaticClass(), FoundDirectors);
+	if (Cast<ACombatDirector>(FoundDirectors[0]))
+	{
+		CombatDirector = Cast<ACombatDirector>(FoundDirectors[0]);
+	}
 }
 
 // Called every frame
@@ -33,17 +40,17 @@ void APortalSpawn::SpawnEnemy()
 	{
 		int EnemyIndex = FMath::RandRange(0, EnemyArray.Num() - 1);
 
-		FVector SpawnLocation = FVector(GetActorLocation().X + FMath::RandRange(-150.0f, 50.0f), GetActorLocation().Y + FMath::RandRange(-150.0f, 150.0f), GetActorLocation().Z + 200);
+		FVector SpawnLocation = FVector(GetActorLocation().X + FMath::RandRange(-150.0f, 50.0f), GetActorLocation().Y + FMath::RandRange(-150.0f, 150.0f), GetActorLocation().Z);
 		float zLook = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation()).Yaw;
-		FRotator SpawnRotation = FRotator(0, 0, zLook);
+		FRotator SpawnRotation = FRotator(0, zLook, 0);
 		FActorSpawnParameters SpawnInfo;
 		EnemyClass = EnemyArray[EnemyIndex];
 		
-		ABaseEnemy* Enemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyClass, FVector(0, 0, -50000), SpawnRotation, SpawnInfo);
-		Enemy->SetActorLocation(SpawnLocation + FVector(0, 0, 100));
-		//Make enemy chase player
-		Enemy->AttackTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+		ABaseEnemy* Enemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyClass, SpawnLocation, SpawnRotation, SpawnInfo);
+		Enemy->OnSeePawn(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()))->AddGatekeeperSpawn(Enemy);
+
+		CombatDirector->AddToMap(Enemy);
 
 		SetLifeSpan(7);
 	}

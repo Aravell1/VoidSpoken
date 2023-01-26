@@ -15,7 +15,7 @@
 ABaseWeapon::ABaseWeapon()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	WeaponMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Mesh Component"));
 	WeaponCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Collision Box"));
 	WeaponMeshComponent->SetHiddenInGame(false, true);
@@ -88,14 +88,15 @@ void ABaseWeapon::SetCanUniqueAttack(const bool state) {
 #pragma endregion
 
 void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
-	if (EquippingCharacter) {
-		EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
-		EquippedCharacter = EquippingCharacter;
-	}
+	EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
+	EquippedCharacter = EquippingCharacter;
 }
 
 void ABaseWeapon::Attack() {
 	if (!AttackDelay && !IsAttacking && CheckMovementMode()) {
+		// On Attack Started
+		OnAttackStarted.ExecuteIfBound();
+
 		if (GetComboLength() > 0) {
 			IsAttacking = true;
 
@@ -113,7 +114,9 @@ void ABaseWeapon::Attack() {
 }
 
 void ABaseWeapon::NextAttack() {
-	//Re-Enabling Actors movement after attacking
+	// On Attack Ended
+	OnAttackEnded.ExecuteIfBound();
+
 	IsAttacking = false;
 	AttackState = AttackType::None;
 	OverlappedActors.Empty();
@@ -137,7 +140,7 @@ void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, cla
 		break;
 	}
 	if (DamageMultipiler > 0)
-	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * DamageMultipiler, NULL, EquippedCharacter, NULL);
+	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * DamageMultipiler, NULL, EquippedCharacter, UDamageTypeStagger::StaticClass());
 }
 
 bool ABaseWeapon::CheckMovementMode() {
