@@ -10,18 +10,29 @@ AFocusPickup::AFocusPickup()
 
 void AFocusPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor != this && OtherActor->IsA<APlayerCharacter>())
+	if (OtherActor)
 	{
-		//Focus Pickup++
-		AVoidSpokenGameModeBase* GM;
-		GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-		if (GM->GetFocusItem() < GM->MaxFocus)
+		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+
+		if (Player)
 		{
-			GM->SetFocusItem(1);
-			Destroy();
+			Player->SetOverlappingItem(this);
+			//UE_LOG(LogTemp, Warning, TEXT("Focus Overlap"));
 		}
-		GM->PickupFull();
+	}
+}
+
+void AFocusPickup::PickupFocus()
+{
+	AVoidSpokenGameModeBase* GM;
+	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	
+	if (GM->GetFocusItem() < GM->MaxFocus)
+	{
+		GM->SetFocusItem(1);
+		Destroy();
 	}
 	else
-		return;
+		GM->PickupFull();
 }
+

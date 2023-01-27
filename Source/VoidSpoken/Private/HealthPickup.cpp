@@ -10,20 +10,29 @@ AHealthPickup::AHealthPickup()
 
 void AHealthPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor != this && OtherActor->IsA<APlayerCharacter>())
+	if (OtherActor)
 	{
-		//Heal Pickup++
-		AVoidSpokenGameModeBase* GM;
+		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
-		GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-		if (GM->GetHealItem() < GM->MaxHeal)
+		if (Player)
 		{
-			GM->SetHealItem(1);
-			Destroy();
+			Player->SetOverlappingItem(this);
+			//UE_LOG(LogTemp, Warning, TEXT("Health Overlap"));
 		}
-		else
-			GM->PickupFull();
+	}
+}
+
+void AHealthPickup::PickupHealth()
+{
+	AVoidSpokenGameModeBase* GM;
+
+	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if (GM->GetHealItem() < GM->MaxHeal)
+	{
+		GM->SetHealItem(1);
+		Destroy();
 	}
 	else
-		return;
+		GM->PickupFull();
 }

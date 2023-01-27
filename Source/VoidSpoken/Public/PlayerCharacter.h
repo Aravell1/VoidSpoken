@@ -62,6 +62,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		class UCameraComponent* FollowCamera;
 
+	class UCapsuleComponent* PlayerCapsule;
+	class USkeletalMeshComponent* PlayerMesh;
+
 	#pragma region Movement / Camera Functions and Variables
 private:
 	void MoveForward(float Axis);
@@ -353,6 +356,25 @@ public:
 
 	#pragma endregion
 	
+	#pragma endregion
+
+	#pragma region Pickup Interaction
+
+	public:
+
+	void On_F_Down();
+	void On_F_Release();
+
+	bool bIsFDown;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
+	class ABaseItem* OverlappingItem;
+
+	FORCEINLINE void SetOverlappingItem(ABaseItem* OverlapItem)
+	{
+		OverlappingItem = OverlapItem;
+	}
+
 	#pragma endregion
 
 };
