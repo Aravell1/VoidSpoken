@@ -15,7 +15,6 @@ struct FEnemyData
 
 	ABaseEnemy* Enemy = nullptr;
 	float EnemyValue = 0;
-	float EnemyAngle = 0;
 };
 
 UCLASS()
@@ -28,6 +27,8 @@ public:
 	ACombatDirector();
 
 	void AddToMap(ABaseEnemy* Enemy);
+	UFUNCTION()
+		void RemoveEnemy(AActor* Enemy);
 
 	UPROPERTY(EditAnywhere)
 		bool bDebugMode = false;
@@ -45,15 +46,13 @@ private:
 	APlayerCharacter* Player;
 
 	void CalculateEnemyActions();
+	float GetEnemyAngle(int Index);
 	ABaseEnemy* GetBestEnemy(float &Value);
-	void SortByAngle(ABaseEnemy* AttackingEnemy);
 
-	void TriggerEnemyMove(ABaseEnemy* EnemyToMove, FVector Destination);
 	void TriggerEnemyAttack();
 
 	FTimerHandle CombatAttackTimer;
 	const float MinTimeBetweenAttacks = 5.0f;
-	const float MinAngleBetweenEnemies = 30.0f;
 
 	float EnemiesInCombat = 0;
 

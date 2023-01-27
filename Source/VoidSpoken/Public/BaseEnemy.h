@@ -70,11 +70,12 @@ public:
 	float TimeOfLastAttack = 0;
 
 	virtual void TriggerAttack();
-	virtual void TriggerMove(FVector Position);
 	virtual void EnterCombat(APawn* OtherPawn, bool Cooldown);
 
-	bool bInCombat = false;
-	bool bCanAttack = false;
+	UPROPERTY(VisibleAnywhere)
+		bool bInCombat = false;
+	UPROPERTY(VisibleAnywhere)
+		bool bCanAttack = false;
 
 private:
 

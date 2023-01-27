@@ -26,13 +26,27 @@ void ACombatDirector::CalculateEnemyActions()
 
 	for (int i = 0; i < Enemies.Num(); i++)
 	{
-		if (!Enemies[i].Enemy)
+		if (Enemies[i].Enemy->bInCombat && Enemies[i].Enemy->bCanAttack)
 		{
-			Enemies.RemoveAt(i);
-		}
-		else if (Enemies[i].Enemy->bInCombat && Enemies[i].Enemy->bCanAttack)
-		{
-			Enemies[i].EnemyValue = UGameplayStatics::GetTimeSeconds(GetWorld()) - Enemies[i].Enemy->TimeOfLastAttack;
+			Enemies[i].EnemyValue = 0;
+
+			float TimeSinceLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld()) - Enemies[i].Enemy->TimeOfLastAttack;
+			if (TimeSinceLastAttack > MinTimeBetweenAttacks)
+			{
+				Enemies[i].EnemyValue += (TimeSinceLastAttack) * 10;
+
+				float Angle = GetEnemyAngle(i);
+
+				if (Angle >= 1)
+					Enemies[i].EnemyValue += 50 / Angle;
+				else
+					Enemies[i].EnemyValue += 50;
+			}
+			else
+			{
+				Enemies[i].EnemyValue = -1;
+			}
+
 			EnemiesInCombat++;
 		}
 		else
@@ -40,6 +54,20 @@ void ACombatDirector::CalculateEnemyActions()
 			Enemies[i].EnemyValue = -1;
 		}
 	}
+}
+
+float ACombatDirector::GetEnemyAngle(int Index)
+{
+	FVector PlayerToEnemy = (Enemies[Index].Enemy->GetActorLocation() - Player->GetActorLocation()).GetSafeNormal();
+	FVector PlayerForward = Player->GetActorForwardVector();
+
+	float VectorDot = FVector::DotProduct(PlayerForward, PlayerToEnemy);
+	float Angle = FMath::RadiansToDegrees(FMath::Acos(VectorDot));
+
+	if (Angle > 180)
+		Angle = FMath::Abs(Angle - 360);
+
+	return Angle;
 }
 
 ABaseEnemy* ACombatDirector::GetBestEnemy(float &EnemyValue)
@@ -52,15 +80,11 @@ ABaseEnemy* ACombatDirector::GetBestEnemy(float &EnemyValue)
 	{
 		if (bDebugMode && GEngine)
 		{
-			//GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Blue, "HVE: " + HighestValueEnemy->GetName() + ": " + FString::SanitizeFloat(Enemies[HighestValueIndex].EnemyValue));
-			//GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Red, "Compare: " + Enemies[i].Enemy->GetName() + ": " + FString::SanitizeFloat(Enemies[i].EnemyValue));
+			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Blue, "HVE: " + HighestValueEnemy->GetName() + ": " + FString::SanitizeFloat(Enemies[HighestValueIndex].EnemyValue));
+			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Red, "Compare: " + Enemies[i].Enemy->GetName() + ": " + FString::SanitizeFloat(Enemies[i].EnemyValue));
 		}
 		
-		if (!Enemies[i].Enemy)
-		{
-			Enemies.RemoveAt(i);
-		}
-		else if (Enemies[i].EnemyValue > Enemies[HighestValueIndex].EnemyValue)
+		if (Enemies[i].EnemyValue > Enemies[HighestValueIndex].EnemyValue)
 		{
 			HighestValueIndex = i;
 			EnemyValue = Enemies[i].EnemyValue;
@@ -69,74 +93,6 @@ ABaseEnemy* ACombatDirector::GetBestEnemy(float &EnemyValue)
 	HighestValueEnemy = Enemies[HighestValueIndex].Enemy;
 
 	return HighestValueEnemy;
-}
-
-void ACombatDirector::SortByAngle(ABaseEnemy* AttackingEnemy)
-{
-	for (int i = 0; i < Enemies.Num(); i++)
-	{
-		if (Enemies[i].Enemy->bInCombat)
-		{
-			FVector PlayerToEnemy = (Enemies[i].Enemy->GetActorLocation() - Player->GetActorLocation()).GetSafeNormal();
-			FVector PlayerForward = Player->GetActorForwardVector();
-
-			float VectorDot = FVector::DotProduct(PlayerForward, PlayerToEnemy);
-			float Angle = FMath::RadiansToDegrees(FMath::Acos(VectorDot));
-			Angle += 30;
-			if (Angle > 360)
-				Angle -= 360;
-
-			Enemies[i].EnemyAngle = Angle;
-		}
-		else
-		{
-			Enemies[i].EnemyAngle = 500;
-		}
-	}
-
-	Enemies.Sort([](FEnemyData A, FEnemyData B)
-	{
-		return A.EnemyAngle < B.EnemyAngle;
-	});
-
-	if (bDebugMode && GEngine)
-	{
-		for (int i = 0; i < Enemies.Num(); i++)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Blue, "HVE: " + Enemies[i].Enemy->GetName() + ": " + FString::SanitizeFloat(Enemies[i].EnemyAngle));
-		}
-	}
-
-	for (int i = 1; i < Enemies.Num(); i++)
-	{
-		if (Enemies[i].EnemyAngle > 360)
-			return;
-
-		if (bDebugMode && GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Yellow, "HVE: " + Enemies[i].Enemy->GetName() + ": " + FString::SanitizeFloat(Enemies[i].EnemyAngle));
-		}
-
-		if (Enemies[i].Enemy->bInCombat && Enemies[i].Enemy->bCanAttack && Enemies[i].Enemy != AttackingEnemy)
-		{
-			if (Enemies[i].EnemyAngle - Enemies[i - 1].EnemyAngle < MinAngleBetweenEnemies && Enemies[i].Enemy != AttackingEnemy)
-			{
-				float DistToEnemy = FVector::Distance(Player->GetActorLocation(), Enemies[i].Enemy->GetActorLocation());
-
-				FVector Direction = (Enemies[i - 1].Enemy->GetActorLocation() - Player->GetActorLocation()).GetSafeNormal();
-				Direction.RotateAngleAxis(35, FVector::UpVector);
-
-				FVector Destination = Player->GetActorLocation() + Direction * DistToEnemy;
-
-				TriggerEnemyMove(Enemies[i].Enemy, Destination);
-			}
-		}
-	}
-}
-
-void ACombatDirector::TriggerEnemyMove(ABaseEnemy* EnemyToMove, FVector Destination)
-{
-	EnemyToMove->TriggerMove(Destination);
 }
 
 void ACombatDirector::TriggerEnemyAttack()
@@ -150,18 +106,13 @@ void ACombatDirector::TriggerEnemyAttack()
 			float HighestEnemyValue = 0;
 			ABaseEnemy* HighestValueEnemy = GetBestEnemy(HighestEnemyValue);
 
-			/*if (bDebugMode && GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Green, "HVE: " + HighestValueEnemy->GetName() + ": " + FString::SanitizeFloat(HighestEnemyValue));*/
+			if (bDebugMode && GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Green, "HVE: " + HighestValueEnemy->GetName() + ": " + FString::SanitizeFloat(HighestEnemyValue));
 
-			if (HighestEnemyValue > MinTimeBetweenAttacks)
+			if (HighestEnemyValue > 0)
 				HighestValueEnemy->TriggerAttack();
 			else
 				HighestValueEnemy = nullptr;
-
-			if (EnemiesInCombat > 1)
-			{
-				SortByAngle(HighestValueEnemy);
-			}
 		}
 	}
 
@@ -173,5 +124,19 @@ void ACombatDirector::AddToMap(ABaseEnemy* Enemy)
 	FEnemyData NewEnemy;
 	NewEnemy.Enemy = Enemy;
 
+	Enemy->OnDestroyed.AddDynamic(this, &ACombatDirector::RemoveEnemy);
+
 	Enemies.Add(NewEnemy);
+}
+
+void ACombatDirector::RemoveEnemy(AActor* Enemy)
+{
+	for (int i = 0; i < Enemies.Num(); i++)
+	{
+		if (Enemies[i].Enemy == Enemy)
+		{
+			Enemies.RemoveAt(i);
+			return;
+		}
+	}
 }

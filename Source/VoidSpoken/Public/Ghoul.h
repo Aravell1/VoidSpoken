@@ -28,7 +28,6 @@ enum EGhoulState
 	Chase	UMETA(DisplayName = "Chase"),
 	Attack	UMETA(DisplayName = "Attack"),
 	AttackCooldown	UMETA(DisplayName = "AttackCooldown"),
-	AdjustPosition	UMETA(DisplayName = "AdjustPosition"),
 	Staggered UMETA(DisplayName = "Staggered"),
 	Dead	UMETA(DisplayName = "Dead")
 };
@@ -65,12 +64,12 @@ public:
 	void SetAttackingLeft(bool left);
 
 	void TriggerAttack() override;
-	void TriggerMove(FVector Position) override;
+	void BeginAttack();
 
 	void TriggerSpikes(UAnimMontage* Montage);
 	void SpikeBurst();
 	void SpikeThrow();
-	void CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision);
+	void CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision, float InitVel = 0);
 
 	void OnSeePawn(APawn* OtherPawn) override;
 	void OnStaggered() override;
@@ -129,7 +128,7 @@ private:
 
 	void CheckPatrolReset();
 	void PatrolReset();
-	bool GetHasLineOfSight();
+	bool GetHasLineOfSight(ACharacter* Target);
 	bool TestPathExists(AActor* Target);
 	bool TestPathExists(FVector Target);
 
@@ -165,6 +164,10 @@ private:
 
 	const float BurstSpikeSpawnDistance = 50.0f;
 	const float BurstRadius = 500.0f;
+	const float ProjectileSpeed = 1500.0f;
+
+	const float CallAlliesRange = 1000.0f;
+	const float MeleeSpreadRange = 250.0f;
 
 	bool AttackingRight = false;
 	bool AttackingLeft = false;
