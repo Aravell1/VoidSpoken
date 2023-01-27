@@ -61,3 +61,11 @@ void ABaseEnemy::TriggerAttack()
 {
 }
 
+void ABaseEnemy::TriggerMove(FVector Position)
+{
+}
+
+void ABaseEnemy::EnterCombat(APawn* OtherPawn, bool Cooldown)
+{
+}
+
