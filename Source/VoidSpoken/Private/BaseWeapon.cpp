@@ -140,7 +140,7 @@ void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, cla
 		break;
 	}
 	if (DamageMultipiler > 0)
-	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * DamageMultipiler, NULL, EquippedCharacter, NULL);
+	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * DamageMultipiler, NULL, EquippedCharacter, UDamageTypeStagger::StaticClass());
 }
 
 bool ABaseWeapon::CheckMovementMode() {
