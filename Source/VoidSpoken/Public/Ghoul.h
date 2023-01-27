@@ -24,9 +24,11 @@ enum EGhoulState
 {
 	Idle	UMETA(DisplayName = "Idle"),
 	Patrol	UMETA(DisplayName = "Patrol"),
+	CallAllies	UMETA(DisplayName = "CallAllies"),
 	Chase	UMETA(DisplayName = "Chase"),
 	Attack	UMETA(DisplayName = "Attack"),
 	AttackCooldown	UMETA(DisplayName = "AttackCooldown"),
+	AdjustPosition	UMETA(DisplayName = "AdjustPosition"),
 	Staggered UMETA(DisplayName = "Staggered"),
 	Dead	UMETA(DisplayName = "Dead")
 };
@@ -63,6 +65,7 @@ public:
 	void SetAttackingLeft(bool left);
 
 	void TriggerAttack() override;
+	void TriggerMove(FVector Position) override;
 
 	void TriggerSpikes(UAnimMontage* Montage);
 	void SpikeBurst();
@@ -84,6 +87,8 @@ public:
 		UAnimMontage* BurstMontage = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* StaggerMontage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		UAnimMontage* ScreechMontage = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 
@@ -120,12 +125,13 @@ private:
 	void StopMovement();
 	void Death();
 	void AttackCooldown();
-	void EnterCombat(APawn* OtherPawn, bool Cooldown);
+	void EnterCombat(APawn* OtherPawn, bool Cooldown) override;
 
 	void CheckPatrolReset();
 	void PatrolReset();
 	bool GetHasLineOfSight();
 	bool TestPathExists(AActor* Target);
+	bool TestPathExists(FVector Target);
 
 	UPROPERTY(VisibleAnywhere)
 		TEnumAsByte<EGhoulState> GhState = EGhoulState::Idle;

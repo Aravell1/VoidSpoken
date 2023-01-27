@@ -5,7 +5,18 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BaseEnemy.h"
+#include "PlayerCharacter.h"
 #include "CombatDirector.generated.h"
+
+USTRUCT()
+struct FEnemyData
+{
+	GENERATED_USTRUCT_BODY()
+
+	ABaseEnemy* Enemy = nullptr;
+	float EnemyValue = 0;
+	float EnemyAngle = 0;
+};
 
 UCLASS()
 class VOIDSPOKEN_API ACombatDirector : public AActor
@@ -30,14 +41,20 @@ protected:
 
 private:
 	
-	TMap<ABaseEnemy*, float> Enemies;
+	TArray<FEnemyData> Enemies;
+	APlayerCharacter* Player;
 
 	void CalculateEnemyActions();
 	ABaseEnemy* GetBestEnemy(float &Value);
+	void SortByAngle(ABaseEnemy* AttackingEnemy);
 
+	void TriggerEnemyMove(ABaseEnemy* EnemyToMove, FVector Destination);
 	void TriggerEnemyAttack();
 
 	FTimerHandle CombatAttackTimer;
 	const float MinTimeBetweenAttacks = 5.0f;
+	const float MinAngleBetweenEnemies = 30.0f;
+
+	float EnemiesInCombat = 0;
 
 };
