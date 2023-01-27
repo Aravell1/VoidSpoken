@@ -15,7 +15,7 @@
 ABaseWeapon::ABaseWeapon()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	WeaponMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Mesh Component"));
 	WeaponCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Collision Box"));
 	WeaponMeshComponent->SetHiddenInGame(false, true);
@@ -45,10 +45,11 @@ void ABaseWeapon::PostInitializeComponents() {
 }
 
 // Called every frame
-void ABaseWeapon::Tick(const float DeltaTime)
-{
+void ABaseWeapon::Tick(const float DeltaTime) {
 	Super::Tick(DeltaTime);
-
+	
+	if (bIsAttacking)
+		EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0));
 }
 
 void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
@@ -58,7 +59,7 @@ void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
 
 void ABaseWeapon::Attack() {
 	if (!bAttackDelay && CheckMovementMode()) {
-		if (GetComboLength() > 0) {
+		if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0) {
 			// On Attack Started
 			OnAttackStarted.ExecuteIfBound();
 			bIsAttacking = true;
@@ -71,7 +72,7 @@ void ABaseWeapon::Attack() {
 
 			bAttackDelay = true;
 			EAttackState = EAT_NormalAttack;
-			//if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex)) EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
+			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
 		}
 	}
 }
@@ -80,7 +81,7 @@ void ABaseWeapon::NextAttack() {
 	// On Attack Ended
 	OnAttackEnded.ExecuteIfBound();
 
-	bIsAttacking = false;
+	bAttackDelay = false;
 	EAttackState = EAT_None;
 	OverlappedActors.Empty();
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
@@ -88,7 +89,7 @@ void ABaseWeapon::NextAttack() {
 }
 
 void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent) {
-	float DamageMultiplier = 0;
+	float DamageMultiplier;
 	switch (EAttackState) {
 	case (EAT_NormalAttack):
 		if (ComboAttackMultipliers.IsValidIndex(CurrentComboIndex))
@@ -120,11 +121,9 @@ void ABaseWeapon::Clear() {
 }
 
 void ABaseWeapon::Reset() {
-	SetAttackDelay(false);
 	bIsAttacking = false;
 	EAttackState = EAT_None;
 	CurrentComboIndex = 0;
-
 	OverlappedActors.Empty();
 
 	//Re-Enabling Actors movement just in case the attacks do not reset the characters movement

@@ -30,12 +30,24 @@ DECLARE_DELEGATE(FOnAttackEndedDelegate);
 
 #pragma endregion
 
+#pragma region Enums
+
+UENUM()
+enum EWeaponType
+{
+	EWT_None	UMETA(DisplayName = "None"),
+	EWT_Sword	UMETA(DisplayName = "Sword"),
+	EWT_Axe		UMETA(DisplayName = "Axe"),
+};
+
 UENUM() 
 enum EAttackType {
-	EAT_None,
-	EAT_NormalAttack,
-	EAT_ChargedAttack,
+	EAT_None			UMETA(DisplayName = "None"),
+	EAT_NormalAttack	UMETA(DisplayName = "Normal Attack"),
+	EAT_ChargedAttack	UMETA(DisplayName = "Charged Attack"),
 };
+
+#pragma endregion 
 
 UCLASS(Abstract)
 class VOIDSPOKEN_API ABaseWeapon : public AActor, public IBaseWeaponInterface {
@@ -165,24 +177,24 @@ public:
 	///		-Any scaling involving the damage of the Attack, this value will influence
 	///		-Can be set to any float value (although not negative, may produce unwanted results)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (NoGetter))
-		float BaseDamage = 0;
+	float BaseDamage = 0;
 
 	/// Base Stamina of this Weapon
 	///		-How much each Attack costs within the ComboAttackString
 	///		-Cannot Attack if the player doesn't have enough stamina
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (NoGetter))
-		float BaseStamina = 0;
+	float BaseStamina = 0;
 
 	/// The Actor that has equipped this weapon
 	///		-For purposes of unwanted self damage infliction
 	///		-This will also be used to equip to this Actor
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-		ACharacter* EquippedCharacter;
+	ACharacter* EquippedCharacter;
 
 	/// The List of Actors that are being overlapped to make sure we dont hit again.
 	///		-This is called everytime a overlap beings
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
-		TArray<AActor*> OverlappedActors = {};
+	TArray<AActor*> OverlappedActors = {};
 
 	#pragma endregion
 
@@ -260,6 +272,10 @@ public:
 	///		-Will only increment to the length of the ComboMontage - 1
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
 		TEnumAsByte<EAttackType> EAttackState = EAT_None;
+
+	/// Ensures the the right animations will play for the player to iterate through
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Weapon Type")
+	TEnumAsByte<EWeaponType> EWeaponType = EWT_None;
 
 	/// Boolean for when the attack started (prevent spamming attack inputs)
 	UPROPERTY(VisibleAnywhere, DisplayName = "Is Attacking")
