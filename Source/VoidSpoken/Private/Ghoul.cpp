@@ -254,7 +254,7 @@ void AGhoul::SpikeBurst()
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Camera));
 
 	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), HeadLocation->GetComponentLocation(), BurstRadius, ObjectTypes, nullptr, ActorsToIgnore, OutActors);
-	if (OutActors.Num() > 0)
+	if (!OutActors.IsEmpty())
 	{
 		float Damage = FMath::Floor(GetAttack() * FMath::RandRange(1.8f, 2.2f));
 		for (int i = 0; i < OutActors.Num(); i++)
@@ -350,7 +350,7 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 			TArray<AActor*> OutActors;
 			UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetActorLocation(), CallAlliesRange, ObjectTypes, SeekClass, ActorsToIgnore, OutActors);
 
-			if (OutActors.Num() > 0)
+			if (!OutActors.IsEmpty())
 			{
 				for (int i = 0; i < OutActors.Num(); i++)
 				{
@@ -531,51 +531,62 @@ void AGhoul::Death()
 
 void AGhoul::AttackCooldown()
 {
-	if (AttackTarget && GetType() == EGhoulType::Ranged)
+	if (AttackTarget)
 	{
-		float DistToPlayer = FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation());
-		if (DistToPlayer <= BackOffRange)
+		if (GetType() == EGhoulType::Ranged)
 		{
-			FVector3d BackUpTargetPos = GetActorLocation() - AttackTarget->GetActorLocation();
-			BackUpTargetPos.Z = 0;
-			BackUpTargetPos = GetActorLocation() + BackUpTargetPos.GetSafeNormal() * BackUpDistance;
-			GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
+			float DistToPlayer = FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation());
+			if (DistToPlayer <= BackOffRange)
+			{
+				FVector3d BackUpTargetPos = GetActorLocation() - AttackTarget->GetActorLocation();
+				BackUpTargetPos.Z = 0;
+				BackUpTargetPos = GetActorLocation() + BackUpTargetPos.GetSafeNormal() * BackUpDistance;
+				GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
 
-			AIController->MoveToLocation(BackUpTargetPos, 0);
+				AIController->MoveToLocation(BackUpTargetPos, 0);
+			}
+			else if (DistToPlayer > ReachTargetDistance)
+			{
+				SetSpeed();
+				if (TestPathExists(AttackTarget))
+					AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+			}
+			else if (!GetHasLineOfSight(Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))))
+			{
+				SetSpeed();
+				if (TestPathExists(AttackTarget))
+					AIController->MoveToActor(AttackTarget, MeleeTargetDistance);
+			}
 		}
-		else if (DistToPlayer > ReachTargetDistance)
+		else if (GetType() == EGhoulType::Melee)
 		{
-			SetSpeed();
-			if (TestPathExists(AttackTarget))
-				AIController->MoveToActor(AttackTarget, ReachTargetDistance);
-		}
-		else if (!GetHasLineOfSight(Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))))
-		{
-			SetSpeed();
-			if (TestPathExists(AttackTarget))
-				AIController->MoveToActor(AttackTarget, MeleeTargetDistance);
-		}
-	}
-	else if (AttackTarget && GetType() == EGhoulType::Melee)
-	{
-		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Camera));
-		UClass* SeekClass = ABaseEnemy::StaticClass();
-		TArray<AActor*> ActorsToIgnore = { this };
-		TArray<AActor*> OutActors;
-		UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetActorLocation(), MeleeSpreadRange, ObjectTypes, SeekClass, ActorsToIgnore, OutActors);
+			TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+			ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Camera));
+			UClass* SeekClass = ABaseEnemy::StaticClass();
+			TArray<AActor*> ActorsToIgnore = { this };
+			TArray<AActor*> OutActors;
+			UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetActorLocation(), MeleeSpreadRange, ObjectTypes, SeekClass, ActorsToIgnore, OutActors);
 
-		FVector TargetPosition;
+			if (!OutActors.IsEmpty())
+			{
+				FVector TargetDirection;
+				for (int i = 0; i < OutActors.Num(); i++)
+					TargetDirection += (GetActorLocation() - OutActors[i]->GetActorLocation()).GetSafeNormal() * MeleeSpreadRange / FVector::Distance(OutActors[i]->GetActorLocation(), GetActorLocation());
+				if (FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation()) < MeleeSpreadRange)
+					TargetDirection += (GetActorLocation() - AttackTarget->GetActorLocation()).GetSafeNormal() * MeleeSpreadRange / (FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation()) * 2);
 
-		if (OutActors.Num() > 0)
-		{
-			TargetPosition = OutActors[0]->GetActorLocation() + (GetActorLocation() - OutActors[0]->GetActorLocation()).GetSafeNormal() * MeleeSpreadRange;
+				FVector TargetPosition;
+				if (TargetDirection.Length() > MeleeSpreadRange)
+					TargetPosition = GetActorLocation() + TargetDirection.GetSafeNormal() * MeleeSpreadRange;
+				else
+					TargetPosition = GetActorLocation() + TargetDirection;
 
-			if (TestPathExists(TargetPosition))
-				AIController->MoveToLocation(TargetPosition, 0);
+				if (TestPathExists(TargetPosition))
+					AIController->MoveToLocation(TargetPosition, 0);
+			}
+			else if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) > MeleeSpreadRange)
+				SetState(EGhoulState::Chase);
 		}
-		else if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) > ReachTargetDistance)
-			SetState(EGhoulState::Chase);
 	}
 }
 
