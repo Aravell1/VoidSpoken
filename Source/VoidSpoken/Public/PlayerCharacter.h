@@ -20,7 +20,6 @@
 #include "UObject/ConstructorHelpers.h"
 #include "TelekinesisInterface.h"
 #include "BaseWeapon.h"
-#include "InventorySystem.h"
 
 #include "UObject/UObjectGlobals.h"
 
@@ -237,6 +236,24 @@ public:
 	void SetInvincibility() { bInvincible = !bInvincible; };
 	void SetInvincibility(bool State) { bInvincible = State; };
 
+	UFUNCTION(BlueprintCallable)
+	void UseHealthConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseFocusConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseStaminaConsumable();
+
+	UPROPERTY()
+	float HealAmount;
+
+	UPROPERTY()
+	float FocusAmount;
+
+	UPROPERTY()
+	float StaminaAmount;
+
 	private:
 	void RegenerateHealth();
 	FTimerHandle InvincibilityTimer;
@@ -350,36 +367,6 @@ public:
 
 	bool bIsFDown;
 
-	void On_E_Down();
-	void On_E_Release();
-
-	bool bIsEDown;
-
-	UFUNCTION()
-	void ScrollUp();
-	
-	bool bScrollUp;
-
-	UFUNCTION()
-	void ScrollDown();
-
-	bool bScrollDown;
-
-	FORCEINLINE void GetCurrentItem(ABaseItem* pickup)
-	{
-		CurrentItem = pickup;
-
-		//UE_LOG(LogTemp, Warning, TEXT("Current pickup is: %s"), *pickup->GetName())
-	}
-
-	void SetCurrentItem();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
-	class ABaseItem* CurrentItem;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
-	class UInventorySystem* Inventory;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
 	class ABaseItem* OverlappingItem;
 
@@ -387,12 +374,6 @@ public:
 	{
 		OverlappingItem = OverlapItem;
 	}
-
-	//int ItemTypeIndex = 0;
-
-	private:
-
-
 
 	#pragma endregion
 

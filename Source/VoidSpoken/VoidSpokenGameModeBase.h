@@ -6,7 +6,6 @@
 //#include "JsonLibrary.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "BaseItem.h"
 #include "VoidSpokenGameModeBase.generated.h"
 
 /**
@@ -57,14 +56,8 @@ public:
 	UFUNCTION()
 	void PickupFull();
 
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TArray<TSubclassOf<ABaseItem>> ItemTypes;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int ItemTypeIndex = 0;
-
 	
+
 	int MaxHeal = 5;
 	int MaxFocus = 5;
 	int MaxStamina = 2;

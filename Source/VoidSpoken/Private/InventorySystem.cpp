@@ -11,9 +11,13 @@ UInventorySystem::UInventorySystem()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
-	HealAmount = 10.f;
-	FocusAmount = 25.f;
-	StaminaAmount = 12.5f;
+	HealPickup = 0;
+	FocusPickup = 0;
+	StaminaPickup = 0;
+
+	HealLimit = 5;
+	FocusLimit = 5;
+	StaminaLimit = 2;
 
 }
 
@@ -25,8 +29,6 @@ void UInventorySystem::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-
-	
 	
 }
 
@@ -40,68 +42,31 @@ void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 }
 
 
-void UInventorySystem::UseHealthConsumable()
+void UInventorySystem::SetHealItem(int heal)
 {
-	AVoidSpokenGameModeBase* GM;
-	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if (GM->HealPickup > 0)
+	if (HealPickup >= HealLimit)
 	{
-		if (Stats->Health < Stats->GetMaxHealth())
-		{
-			Stats->Health += HealAmount;
-			GM->HealPickup -= 1;
-
-			if (Stats->Health >= Stats->GetMaxHealth())
-			{
-				Stats->Health = Stats->GetMaxHealth();
-			}
-		}
+		UE_LOG(LogTemp, Warning, TEXT("HEALING Full"));
+		return;
 	}
 	else
-		return;
+	{
+		HealPickup += heal;
+
+		UE_LOG(LogTemp, Warning, TEXT("HEALING Items: %d"), HealPickup);
+	}
 }
 
-void UInventorySystem::UseFocusConsumable()
+void UInventorySystem::SetFocusItem(int focus)
 {
-	AVoidSpokenGameModeBase* GM;
-	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	FocusPickup += focus;
 
-	if (GM->FocusPickup > 0)
-	{
-		if (Stats->FocusPoints < Stats->GetMaxFocus())
-		{
-			Stats->FocusPoints += FocusAmount;
-			GM->FocusPickup -= 1;
-
-			if (Stats->FocusPoints >= Stats->GetMaxFocus())
-			{
-				Stats->FocusPoints = Stats->GetMaxFocus();
-			}
-		}
-	}
-	else
-		return;
+	UE_LOG(LogTemp, Warning, TEXT("FOCUS Items: %d"), FocusPickup);
 }
 
-void UInventorySystem::UseStaminaConsumable()
+void UInventorySystem::SetStaminaItem(int stamina)
 {
-	AVoidSpokenGameModeBase* GM;
-	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	StaminaPickup += stamina;
 
-	if (GM->StaminaPickup > 0)
-	{
-		if (Stats->Stamina < Stats->GetMaxStamina())
-		{
-			Stats->Stamina += StaminaAmount;
-			GM->StaminaPickup -= 1;
-
-			if (Stats->Stamina >= Stats->GetMaxStamina())
-			{
-				Stats->Stamina = Stats->GetMaxStamina();
-			}
-		}
-	}
-	else
-		return;
+	UE_LOG(LogTemp, Warning, TEXT("STAMINA Items: %d"), StaminaPickup);
 }

@@ -2,9 +2,6 @@
 
 
 #include "PlayerCharacter.h"
-#include "FocusPickup.h"
-#include "HealthPickup.h"
-#include "StaminaPickup.h"
 
 #pragma region Constructor and Inheritied Functions
 
@@ -66,7 +63,9 @@ APlayerCharacter::APlayerCharacter()
 	Stats->SetBaseStamina(50.f);
 	Stats->GetBaseStamina();
 
-	
+	HealAmount = 10.f;
+	FocusAmount = 25.f;
+	StaminaAmount = 12.5f;
 
 	#pragma endregion
 
@@ -78,17 +77,6 @@ APlayerCharacter::APlayerCharacter()
 	
 	#pragma endregion
 
-	bIsFDown = false;
-	bIsEDown = false;
-	bScrollUp = false;
-	bScrollDown = false;
-
-
-	if (!Inventory)
-	{
-		Inventory = CreateDefaultSubobject<UInventorySystem>(TEXT("Inventory"));
-		Inventory->Stats = Stats;
-	}
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -102,18 +90,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Running
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &APlayerCharacter::RunStart);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &APlayerCharacter::RunStop);
-
-	//Item pickup
-	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::On_F_Down);
-	PlayerInputComponent->BindAction("Interact", IE_Released, this, &APlayerCharacter::On_F_Release);
-
-	//Item use
-	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &APlayerCharacter::On_E_Down);
-	PlayerInputComponent->BindAction("Use", IE_Released, this, &APlayerCharacter::On_E_Release);
-
-	//Item switch
-	PlayerInputComponent->BindAction("Scroll UP", IE_Pressed, this, &APlayerCharacter::ScrollUp);
-	PlayerInputComponent->BindAction("Scroll DOWN", IE_Pressed, this, &APlayerCharacter::ScrollDown);
 
 	// Turning and moving camera
 	PlayerInputComponent->BindAxis("Turn / Mouse", this, &APawn::AddControllerYawInput);
@@ -135,6 +111,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Dodging
 	PlayerInputComponent->BindAction("Dodge", IE_Pressed, this, &APlayerCharacter::Dodge);
 
+	//Use Item
+	//PlayerInputComponent->BindAction("Use", IE_Pressed, this, &APlayerCharacter::);
 }
 
 void APlayerCharacter::BeginPlay()
@@ -587,6 +565,71 @@ void APlayerCharacter::RegenerateHealth() {
 	}
 }
 
+void APlayerCharacter::UseHealthConsumable()
+{
+	AVoidSpokenGameModeBase* GM;
+	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if (GM->HealPickup > 0)
+	{
+		if (Stats->Health < Stats->GetMaxHealth())
+		{
+			Stats->Health += HealAmount;
+			GM->HealPickup -= 1;
+
+			if (Stats->Health >= Stats->GetMaxHealth())
+			{
+				Stats->Health = Stats->GetMaxHealth();
+			}
+		}
+	}
+	else
+		return;
+}
+
+void APlayerCharacter::UseFocusConsumable()
+{
+	AVoidSpokenGameModeBase* GM;
+	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if (GM->FocusPickup > 0)
+	{
+		if (Stats->FocusPoints < Stats->GetMaxFocus())
+		{
+			Stats->FocusPoints += FocusAmount;
+			GM->FocusPickup -= 1;
+
+			if (Stats->FocusPoints >= Stats->GetMaxFocus())
+			{
+				Stats->FocusPoints = Stats->GetMaxFocus();
+			}
+		}
+	}
+	else
+		return;
+}
+
+void APlayerCharacter::UseStaminaConsumable()
+{
+	AVoidSpokenGameModeBase* GM;
+	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if (GM->StaminaPickup > 0)
+	{
+		if (Stats->Stamina < Stats->GetMaxStamina())
+		{
+			Stats->Stamina += StaminaAmount;
+			GM->StaminaPickup -= 1;
+
+			if (Stats->Stamina >= Stats->GetMaxStamina())
+			{
+				Stats->Stamina = Stats->GetMaxStamina();
+			}
+		}
+	}
+	else
+		return;
+}
 
 void APlayerCharacter::RegenerateStamina() {
 	Stats->Stamina += fStaminaRate * 0.1f;
@@ -598,137 +641,5 @@ void APlayerCharacter::RegenerateStamina() {
 }
 
 
-#pragma endregion
-
-
-#pragma region Pickups
-
-void APlayerCharacter::On_F_Down()
-{
-	bIsFDown = true;
-
-	if (OverlappingItem)
-	{
-		AFocusPickup* PickupF = Cast<AFocusPickup>(OverlappingItem);
-		AHealthPickup* PickupH = Cast<AHealthPickup>(OverlappingItem);
-		AStaminaPickup* PickupS = Cast<AStaminaPickup>(OverlappingItem);
-
-		if (PickupF)
-		{
-			PickupF->PickupFocus();
-			SetOverlappingItem(nullptr);
-		}
-		else if (PickupH)
-		{
-			PickupH->PickupHealth();
-			SetOverlappingItem(nullptr);
-		}
-		else if (PickupS)
-		{
-			PickupS->PickupStamina();
-			SetOverlappingItem(nullptr);
-		}
-	}
-}
-
-void APlayerCharacter::On_F_Release()
-{
-	bIsFDown = false;
-}
-
-void APlayerCharacter::On_E_Down()
-{
-	bIsEDown = true;
-
-	//Use currrent Item in UI
-}
-
-void APlayerCharacter::On_E_Release()
-{
-	bIsEDown = false;
-}
-
-void APlayerCharacter::ScrollUp()
-{
-	bScrollUp = true;
-	SetCurrentItem();
-}
-
-void APlayerCharacter::ScrollDown()
-{
-	bScrollDown = true;
-	SetCurrentItem();
-}
-
-
-void APlayerCharacter::SetCurrentItem()
-{
-	AFocusPickup* PickupF = Cast<AFocusPickup>(CurrentItem);
-	AHealthPickup* PickupH = Cast<AHealthPickup>(CurrentItem);
-	AStaminaPickup* PickupS = Cast<AStaminaPickup>(CurrentItem);
-
-	for (int i = 0; i < 3; i++)
-	{ 
-		
-		GetCurrentItem(CurrentItem);
-
-		if (i == 0)
-		{
-			GetCurrentItem(PickupF);
-			UE_LOG(LogTemp, Warning, TEXT("current pickup = Focus"))
-
-			if (bScrollUp == true)
-			{
-				i++;
-				bScrollUp = false;
-			}
-			else if (bScrollDown == true)
-			{
-				i = 2;
-				bScrollDown = false;
-			}
-			else
-				return;
-		}
-
-		if (i == 1)
-		{
-			GetCurrentItem(PickupH);
-			UE_LOG(LogTemp, Warning, TEXT("current pickup = Health"))
-
-			if (bScrollUp == true)
-			{
-				i++;
-				bScrollUp = false;
-			}
-			else if (bScrollDown == true)
-			{
-				i--;
-				bScrollDown = false;
-			}
-			else 
-				return;
-		}
-
-		if (i == 2)
-		{
-			GetCurrentItem(PickupS);
-			UE_LOG(LogTemp, Warning, TEXT("current pickup = Stamina"))
-
-			if (bScrollUp == true)
-			{
-				i = 0;
-				bScrollUp = false;
-			}
-			else if (bScrollDown == true)
-			{
-				i--;
-				bScrollDown = false;
-			}
-			else
-				return;
-		}
-	}
-}
 
 #pragma endregion
