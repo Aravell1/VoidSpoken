@@ -11,6 +11,9 @@ ABaseItem::ABaseItem()
 
 	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision Sphere"));
 	RootComponent = Collision;
+
+	Particles = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Item Particles"));
+	Particles->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
