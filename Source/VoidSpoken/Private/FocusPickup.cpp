@@ -17,6 +17,7 @@ void AFocusPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 		if (Player)
 		{
 			Player->SetOverlappingItem(this);
+			//Player->GetCurrentItem(this);
 			//UE_LOG(LogTemp, Warning, TEXT("Focus Overlap"));
 		}
 	}

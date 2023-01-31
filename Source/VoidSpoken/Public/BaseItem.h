@@ -5,7 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "BaseItem.generated.h"
+
 
 UCLASS()
 class VOIDSPOKEN_API ABaseItem : public AActor
@@ -18,6 +22,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item | Collision")
 	class USphereComponent* Collision;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item | Particles")
+	class UNiagaraComponent* Particles;
 
 protected:
 	// Called when the game starts or when spawned
