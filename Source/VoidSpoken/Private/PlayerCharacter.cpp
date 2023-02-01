@@ -28,7 +28,7 @@ APlayerCharacter::APlayerCharacter()
 
 	DodgingTrailComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Dodge Trail Component"));
 
-	static ConstructorHelpers::FObjectFinder<UCurveFloat>C_DodgeCurve(TEXT("/Game/Blueprints/Player/Dodge.Dodge"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat>C_DodgeCurve(TEXT("/Game/Blueprints/Player/Animations/Sequences/Dodging/Dodge.Dodge"));
 	if (C_DodgeCurve.Succeeded())
 		DodgingCurve = C_DodgeCurve.Object;
 
@@ -131,6 +131,7 @@ void APlayerCharacter::BeginPlay()
 	Stats->InitializeMainStats();
 
 	EquipFromInventory(0, "LeftWeaponSocket");
+	DodgingMaterialInterface = GetMesh()->GetMaterial(0);
 	DodgingTrailComponent->Deactivate();
 
 	#pragma region Timeline Bindings
@@ -168,9 +169,14 @@ void APlayerCharacter::BeginPlay()
 	#pragma endregion
 }
 
-void APlayerCharacter::Tick(float DeltaTime)
-{
+void APlayerCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+	
+	/// Add "Relative" Movement endings to the character when in Telekinesis
+	if (EMovementState == EMovementState::EMS_Stopping)
+		/// Change this to AddMovementInput
+		AddActorLocalOffset(FVector(GetMesh()->GetAnimInstance()->GetCurveValue("Movement Delta (Forward)"), 0.0f, 0.0f));
+	else DetermineMovementState();
 
 	ZoomTimeline.TickTimeline(DeltaTime);
 	if (bTelekinesis)
@@ -178,8 +184,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	if (bIsDodging)
 		DodgingTimer.TickTimeline(DeltaTime);
-
-	DetermineMovementState();
 }
 
 #pragma endregion
@@ -231,13 +235,14 @@ void APlayerCharacter::LookUpRate(const float Rate) {
 }
 
 #pragma region Telekinetic Camera Functions
+
 void APlayerCharacter::SetCameraOffset() const {
 	const FVector RightVector = UKismetMathLibrary::GetRightVector(Controller->GetControlRotation());
 	CameraArm->TargetOffset = UKismetMathLibrary::Add_VectorVector(RightVector, CameraOffset);
 }
 
 void APlayerCharacter::ZoomUpdate(const float Alpha) const {
-	const FVector NewLocation = FMath::Lerp(FVector(0.0f, 0.0f, 0.0f), CameraOffset, Alpha);
+	const FVector NewLocation = FMath::Lerp(FVector::ZeroVector, CameraOffset, Alpha);
 	FollowCamera->SetRelativeLocation(NewLocation);
 	
 	const int32 NewArmLength = FMath::Lerp(300, 125, Alpha);
@@ -363,6 +368,8 @@ void APlayerCharacter::DetermineMovementState() {
 	const float PlayerVelocityLength = GetCharacterMovement()->Velocity.Size();
 	if (bIsDodging)
 		EMovementState = EMovementState::EMS_Dodging;
+	else if ((EMovementState == EMovementState::EMS_Running || EMovementState == EMovementState::EMS_Walking) && PlayerVelocityLength == 0.0f)
+		EMovementState = EMovementState::EMS_Stopping;
 	else if (PlayerVelocityLength <= 0)
 		EMovementState = EMovementState::EMS_Idle;
 	else if (!bIsRunning && (PlayerVelocityLength >= 0 && PlayerVelocityLength <= WalkSpeed))
@@ -388,16 +395,15 @@ void APlayerCharacter::RunStop() {
 #pragma region Dodging
 
 void APlayerCharacter::Dodge() {
-	if (EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
+	if (!bIsDodging && !EquippedWeapon->bIsAttacking && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
 		Stats->Stamina -= DodgeStaminaCost;
-		SetDodging(true);
+		bIsDodging = true;
 	}
 }
 
 void APlayerCharacter::DodgingStarted() {
 	EMovementState = EMovementState::EMS_Dodging;
 	bInvincible = true;
-
 	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
 
 	if (bTelekinesis) {
@@ -413,12 +419,16 @@ void APlayerCharacter::DodgingStarted() {
 
 void APlayerCharacter::DodgingUpdate(const float Alpha) {
 	AddMovementInput(DodgingDirection, 1.0f);
+	
+	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(DodgingMaterialInterface, GetMesh());
+	DynMaterial->SetScalarParameterValue("Dither", Alpha);
+	GetMesh()->SetMaterial(0, DynMaterial);
 }
 
 void APlayerCharacter::DodgingFinished() {
-	EMovementState = EMovementState::EMS_Idle;
+	bIsDodging = false;
 	bInvincible = false;
-	SetDodging(false);
+	EMovementState = EMovementState::EMS_Idle;
 	DodgingTrailComponent->Deactivate();
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
@@ -443,12 +453,12 @@ void APlayerCharacter::DodgingFinished() {
 
 void APlayerCharacter::Attack() {
 	if (!bIsDodging) {
-		if (!bTelekinesis && EquippedWeapon && (Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay()))
+		if (!bTelekinesis && EquippedWeapon && Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay()) 
 			EquippedWeapon->Attack();
 		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference)) {
 			if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
 				if (const ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference)) {
-					// Setting the Telekinesis Prop Reference and Pulling it
+					// Setting the Telekinesis Prop Reference and Pulling ithttps://www.youtube.com/watch?v=eFRqa-l5OTM
 					ETelekineticAttackState = ETelekinesisAttackState::ETA_Pull;
 					TelekineticPropReference = HighlightedReference;
 
@@ -510,7 +520,7 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 	
 	// Combat
 	GetWorldTimerManager().ClearTimer(CombatTimer);
-	GetWorldTimerManager().SetTimer(CombatTimer, this, &APlayerCharacter::SetCombatState, 0.0f, false, CombatDelay);
+	GetWorldTimerManager().SetTimer(CombatTimer, this, &APlayerCharacter::SetCombatState, 1.0f, false, CombatDelay);
 }
 
 #pragma endregion

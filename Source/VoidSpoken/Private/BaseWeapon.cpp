@@ -4,7 +4,7 @@
 * Script Name:	BaseWeapon.cpp
 * Description:
 *		Creating a generic weapon class with required functions and variables. Intended for
-*	creating sub-classes deriving from this class to have their own unqiue features.
+*	creating sub-classes deriving from this class to have their own unique features.
 * Author:		YunYun (Jan Skucinski)
 * Email:		Jan.Frank.Skucinski@gmail.com
 */

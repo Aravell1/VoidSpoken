@@ -32,14 +32,6 @@ DECLARE_DELEGATE(FOnAttackEndedDelegate);
 
 #pragma region Enums
 
-UENUM()
-enum EWeaponType
-{
-	EWT_None	UMETA(DisplayName = "None"),
-	EWT_Sword	UMETA(DisplayName = "Sword"),
-	EWT_Axe		UMETA(DisplayName = "Axe"),
-};
-
 UENUM() 
 enum EAttackType {
 	EAT_None			UMETA(DisplayName = "None"),
@@ -272,10 +264,6 @@ public:
 	///		-Will only increment to the length of the ComboMontage - 1
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
 		TEnumAsByte<EAttackType> EAttackState = EAT_None;
-
-	/// Ensures the the right animations will play for the player to iterate through
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Weapon Type")
-	TEnumAsByte<EWeaponType> EWeaponType = EWT_None;
 
 	/// Boolean for when the attack started (prevent spamming attack inputs)
 	UPROPERTY(VisibleAnywhere, DisplayName = "Is Attacking")

@@ -47,10 +47,11 @@ enum class ETelekinesisAttackState : uint8 {
 
 UENUM()
 enum class EMovementState : uint8 {
-	EMS_Idle = 0 UMETA(DisplayName = "Idle"),		// Idle
-	EMS_Walking = 1 UMETA(DisplayName = "Walking"),	// Walking
-	EMS_Running = 2 UMETA(DisplayName = "Running"),	// Running
-	EMS_Dodging = 3 UMETA(DisplayName = "Dodging"),	// Dodging
+	EMS_Idle = 0 UMETA(DisplayName = "Idle"),			// Idle
+	EMS_Walking = 1 UMETA(DisplayName = "Walking"),		// Walking
+	EMS_Running = 2 UMETA(DisplayName = "Running"),		// Running
+	EMS_Stopping = 2 UMETA(DisplayName = "Stopping"),	// Stopping
+	EMS_Dodging = 3 UMETA(DisplayName = "Dodging"),		// Dodging
 };
 
 #pragma endregion
@@ -380,6 +381,8 @@ public:
 	void DodgingFinished();
 
 	protected:
+
+	#pragma region VFXs
 	
 	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Dodging Trail Component")
 	UNiagaraComponent* DodgingTrailComponent;
@@ -387,6 +390,11 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Dodging Trail")
 	UNiagaraSystem* DodgingTrailSystem;
 
+	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Dodging Material")
+	UMaterialInterface* DodgingMaterialInterface;
+
+	#pragma endregion 
+	
 	/// Determines if the player is currently dodging, making the player invincible for a short duration of time
 	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Is Dodging")
 	bool bIsDodging = false;
