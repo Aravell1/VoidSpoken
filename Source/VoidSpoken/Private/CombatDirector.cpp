@@ -72,9 +72,8 @@ float ACombatDirector::GetEnemyAngle(int Index)
 	return Angle;
 }
 
-ABaseEnemy* ACombatDirector::GetBestEnemy(float &EnemyValue)
+int ACombatDirector::GetBestEnemy(float &EnemyValue)
 {
-	ABaseEnemy* HighestValueEnemy = Enemies[0].Enemy;
 	EnemyValue = Enemies[0].EnemyValue;
 	int HighestValueIndex = 0;
 
@@ -82,72 +81,18 @@ ABaseEnemy* ACombatDirector::GetBestEnemy(float &EnemyValue)
 	{
 		if (bDebugMode && GEngine)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Blue, "HVE: " + HighestValueEnemy->GetName() + ": " + FString::SanitizeFloat(Enemies[HighestValueIndex].EnemyValue));
+			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Blue, "HVE: " + Enemies[HighestValueIndex].Enemy->GetName() + ": " + FString::SanitizeFloat(Enemies[HighestValueIndex].EnemyValue));
 			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Red, "Compare: " + Enemies[i].Enemy->GetName() + ": " + FString::SanitizeFloat(Enemies[i].EnemyValue));
 		}
 		
-		if (Enemies[i].EnemyValue > Enemies[HighestValueIndex].EnemyValue)
+		if (Enemies[i].EnemyValue > Enemies[HighestValueIndex].EnemyValue && Enemies[i].Enemy->CheckLineOfSight(Player))
 		{
 			HighestValueIndex = i;
 			EnemyValue = Enemies[i].EnemyValue;
 		}
 	}
-	HighestValueEnemy = Enemies[HighestValueIndex].Enemy;
 
-	return HighestValueEnemy;
-}
-
-void ACombatDirector::CalculatePlayerPositions()
-{
-	float TotalAvailableAngle = 360;
-	float Segments = 8;
-
-	FVector PlayerLocation = Player->GetActorLocation();
-	FRotator Direction = FRotator::ZeroRotator;
-	FVector TargetLocation = PlayerLocation + Direction.Vector() * MeleeDistance;
-	FRotator StartingDirection = FRotator::ZeroRotator;
-
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(Player);
-	Params.AddIgnoredActor(Player->EquippedWeapon);
-	for (int i = 0; i < Enemies.Num(); i++)
-		Params.AddIgnoredActor(Enemies[i].Enemy);
-
-	FHitResult OutHit;
-
-	for (int i = 0; i < Segments; i++)
-	{
-		GetWorld()->LineTraceSingleByChannel(OutHit, PlayerLocation, TargetLocation, ECollisionChannel::ECC_Camera, Params);
-
-		if (OutHit.IsValidBlockingHit())
-		{
-			TotalAvailableAngle -= 360 / Segments;
-
-			StartingDirection = Direction;
-			StartingDirection.Yaw += 360 / Segments;
-		}
-
-		Direction.Yaw += 360 / Segments;
-		TargetLocation = PlayerLocation + Direction.Vector() * MeleeDistance;
-	}
-
-	float AngleBetweenPositions = TotalAvailableAngle / EnemiesInCombat;
-
-	EnemyPositions.Empty();
-
-	if (StartingDirection != FRotator::ZeroRotator)
-		Direction = StartingDirection;
-	else
-		Direction = FRotator::ZeroRotator;
-
-	for (int i = 0; i < EnemiesInCombat; i++)
-	{
-		EnemyPositions.Add(PlayerLocation + Direction.Vector() * MeleeDistance);
-		if (AngleBetweenPositions <= 45)
-			Direction.Yaw += AngleBetweenPositions;
-		else
-			Direction.Yaw += 45;
-	}
+	return HighestValueIndex;
 }
 
 void ACombatDirector::TriggerEnemyAttack()
@@ -159,38 +104,25 @@ void ACombatDirector::TriggerEnemyAttack()
 		if (EnemiesInCombat > 0)
 		{
 			float HighestEnemyValue = 0;
-			ABaseEnemy* HighestValueEnemy = GetBestEnemy(HighestEnemyValue);
+			int HighestValueIndex = GetBestEnemy(HighestEnemyValue);
 
 			if (bDebugMode && GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Green, "HVE: " + HighestValueEnemy->GetName() + ": " + FString::SanitizeFloat(HighestEnemyValue));
+				GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Green, "HVE: " + Enemies[HighestValueIndex].Enemy->GetName() + ": " + FString::SanitizeFloat(HighestEnemyValue));
 
-			if (HighestEnemyValue > 0)
-				HighestValueEnemy->TriggerAttack();
-			else
-				HighestValueEnemy = nullptr;
-
-			if (EnemiesInCombat > 1)
+			for (int i = 0; i < Enemies.Num(); i++)
 			{
-				CalculatePlayerPositions();
-
-				int j = 0;
-
-				for (int i = 0; i < Enemies.Num() && j < EnemiesInCombat; i++)
+				if (Enemies[i].Enemy->bInCombat)
 				{
-					if (Enemies[i].Enemy->bInCombat)
+					if (i == HighestValueIndex && HighestEnemyValue > 0)
 					{
-						Enemies[i].Enemy->SetTargetPosition(EnemyPositions[j]);
-						j++;
+						Enemies[i].Enemy->TriggerAttack();
 					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < Enemies.Num(); i++)
-				{
-					if (Enemies[i].Enemy->bInCombat)
+					else
 					{
-						Enemies[i].Enemy->SetTargetPosition(FVector::ZeroVector);
+						if (Enemies[i].MeleeType)
+							Enemies[i].Enemy->SetCirclePlayer();
+						else
+							Enemies[i].Enemy->SetCombatIdle();
 					}
 				}
 			}

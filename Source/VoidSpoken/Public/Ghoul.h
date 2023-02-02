@@ -24,10 +24,12 @@ enum EGhoulState
 {
 	Idle	UMETA(DisplayName = "Idle"),
 	Patrol	UMETA(DisplayName = "Patrol"),
-	CallAllies	UMETA(DisplayName = "CallAllies"),
+	CallAllies	UMETA(DisplayName = "Call Allies"),
 	Chase	UMETA(DisplayName = "Chase"),
 	Attack	UMETA(DisplayName = "Attack"),
-	AttackCooldown	UMETA(DisplayName = "AttackCooldown"),
+	AttackCooldown	UMETA(DisplayName = "Attack Cooldown"),
+	CombatIdle	UMETA(DisplayName = "Combat Idle"),
+	CirclePlayer	UMETA(DisplayName = "Circle Player"),
 	Staggered UMETA(DisplayName = "Staggered"),
 	Dead	UMETA(DisplayName = "Dead")
 };
@@ -61,6 +63,9 @@ public:
 
 	void OnSeePawn(APawn* OtherPawn) override;
 	void OnStaggered() override;
+	bool CheckLineOfSight(AActor* OtherActor) override;
+	void SetCombatIdle() override;
+	void SetCirclePlayer() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* Attack1Montage = nullptr;
@@ -107,12 +112,13 @@ private:
 	int PatrolIndex = 0;
 
 	void SetSpeed();
-	void AttackDelay();
 	void IdleDelay();
 	void StopMovement();
 	void Death();
 	void AttackCooldown();
 	void EnterCombat(APawn* OtherPawn, bool Cooldown) override;
+	void CirclePlayer();
+	void CombatIdle();
 
 	void CheckPatrolReset();
 	void PatrolReset();
@@ -128,6 +134,7 @@ private:
 	AGhoulAIController* AIController;
 	FOnMontageEnded MontageEndDelegate;
 	FTimerHandle TimerHandle;
+	FTimerHandle AttackCooldownTimer;
 
 	float ReachTargetDistance = 0;
 	const float MeleeTargetDistance = 100.0f;
@@ -151,7 +158,7 @@ private:
 	const float ProjectileSpeed = 1800.0f;
 
 	const float CallAlliesRange = 1200.0f;
-	const float MeleeSpreadRange = 250.0f;
+	const float MeleeSpreadRange = 500.0f;
 
 	bool AttackingRight = false;
 	bool AttackingLeft = false;

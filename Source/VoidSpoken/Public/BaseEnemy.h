@@ -39,9 +39,6 @@ public:
 
 	void SetEnemyType(EEnemyType type);
 
-	void SetTargetPosition(FVector Position);
-	FVector GetTargetPosition();
-
 	UFUNCTION(BlueprintCallable)
 		float GetAttack();
 	UFUNCTION(BlueprintCallable)
@@ -86,6 +83,9 @@ public:
 
 	virtual void TriggerAttack();
 	virtual void EnterCombat(APawn* OtherPawn, bool Cooldown);
+	virtual bool CheckLineOfSight(AActor* OtherActor);
+	virtual void SetCombatIdle();
+	virtual void SetCirclePlayer();
 
 	UPROPERTY(VisibleAnywhere)
 		bool bInCombat = false;
@@ -96,8 +96,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 		TEnumAsByte<EEnemyType> EType = EEnemyType::Melee;
-
-	FVector TargetPosition = FVector::ZeroVector;
 
 	float WalkSpeed = 0;
 	float RunSpeed = 0;
