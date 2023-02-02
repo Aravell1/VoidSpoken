@@ -50,7 +50,10 @@ void APortalSpawn::SpawnEnemy()
 		Enemy->OnSeePawn(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()))->AddGatekeeperSpawn(Enemy);
 
-		CombatDirector->AddToMap(Enemy);
+		if (Enemy->GetEnemyType() == EEnemyType::Melee)
+			CombatDirector->AddToMap(Enemy, true);
+		else
+			CombatDirector->AddToMap(Enemy, false);
 
 		SetLifeSpan(7);
 	}
