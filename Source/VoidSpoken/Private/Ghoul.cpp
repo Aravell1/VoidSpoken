@@ -427,13 +427,18 @@ void AGhoul::CirclePlayer()
 				GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
 
 			FRotator Direction = PlayerToEnemy.Rotation();
-			Direction.Yaw += 30;
+			if (!MoveRight)
+				Direction.Yaw += 30;
+			else
+				Direction.Yaw -= 30;
 
 			FVector TargetPosition;
 			TargetPosition = AttackTarget->GetActorLocation() + Direction.Vector() * MeleeSpreadRange;
 
 			if (TestPathExists(TargetPosition))
 				AIController->MoveToLocation(TargetPosition, MeleeTargetDistance);
+			else
+				MoveRight = !MoveRight;
 		}
 		else if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) > ReachTargetDistance)
 		{

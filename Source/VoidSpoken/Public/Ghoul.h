@@ -140,7 +140,7 @@ private:
 	const float GhoulRunSpeed = 300.0f;
 
 	float ReachTargetDistance = 0;
-	const float MeleeTargetDistance = 100.0f;
+	const float MeleeTargetDistance = 75.0f;
 	const float RangedTargetDistance = 2000.0f;
 
 	FTimerHandle PatrolTimerHandle;
@@ -167,6 +167,7 @@ private:
 	bool AttackingLeft = false;
 	bool AttackReset = true;
 	bool LockState = false;
+	bool MoveRight = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "True"))
 	bool bIsDead = false;
