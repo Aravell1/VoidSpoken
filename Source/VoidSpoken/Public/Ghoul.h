@@ -32,13 +32,6 @@ enum EGhoulState
 	Dead	UMETA(DisplayName = "Dead")
 };
 
-UENUM()
-enum EGhoulType
-{
-	Melee	UMETA(DisplayName = "Melee"),
-	Ranged	UMETA(DisplayName = "Ranged")
-};
-
 UCLASS()
 class VOIDSPOKEN_API AGhoul : public ABaseEnemy
 {
@@ -51,11 +44,6 @@ public:
 		enum EGhoulState GetState();
 
 	void SetState(EGhoulState state);
-
-	UFUNCTION(BlueprintPure)
-		enum EGhoulType GetType();
-
-	void SetGhoulType(EGhoulType type);
 
 	void BehaviourStateEvent();
 
@@ -128,15 +116,11 @@ private:
 
 	void CheckPatrolReset();
 	void PatrolReset();
-	bool GetHasLineOfSight(ACharacter* Target);
 	bool TestPathExists(AActor* Target);
 	bool TestPathExists(FVector Target);
 
 	UPROPERTY(VisibleAnywhere)
 		TEnumAsByte<EGhoulState> GhState = EGhoulState::Idle;
-
-	UPROPERTY(EditDefaultsOnly)
-		TEnumAsByte<EGhoulType> GhType = EGhoulType::Melee;
 
 	UPROPERTY()
 		TArray<UAnimMontage*> MontageArray;
@@ -164,9 +148,9 @@ private:
 
 	const float BurstSpikeSpawnDistance = 50.0f;
 	const float BurstRadius = 500.0f;
-	const float ProjectileSpeed = 1500.0f;
+	const float ProjectileSpeed = 1800.0f;
 
-	const float CallAlliesRange = 1000.0f;
+	const float CallAlliesRange = 1200.0f;
 	const float MeleeSpreadRange = 250.0f;
 
 	bool AttackingRight = false;
