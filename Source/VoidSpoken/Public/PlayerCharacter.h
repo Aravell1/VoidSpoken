@@ -345,37 +345,11 @@ public:
 
 	public:
 
+	// Pick up Items
 	void On_F_Down();
 	void On_F_Release();
 
 	bool bIsFDown;
-
-	void On_E_Down();
-	void On_E_Release();
-
-	bool bIsEDown;
-
-	UFUNCTION()
-	void ScrollUp();
-	
-	bool bScrollUp;
-
-	UFUNCTION()
-	void ScrollDown();
-
-	bool bScrollDown;
-
-	FORCEINLINE void GetCurrentItem(ABaseItem* pickup)
-	{
-		CurrentItem = pickup;
-
-		//UE_LOG(LogTemp, Warning, TEXT("Current pickup is: %s"), *pickup->GetName())
-	}
-
-	void SetCurrentItem();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
-	class ABaseItem* CurrentItem;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
 	class UInventorySystem* Inventory;
@@ -388,11 +362,7 @@ public:
 		OverlappingItem = OverlapItem;
 	}
 
-	//int ItemTypeIndex = 0;
-
 	private:
-
-
 
 	#pragma endregion
 

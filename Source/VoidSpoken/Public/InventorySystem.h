@@ -7,7 +7,6 @@
 #include "StatsMasterClass.h"
 #include "Kismet/GameplayStatics.h"
 #include "VoidSpoken/VoidSpokenGameModeBase.h"
-
 #include "InventorySystem.generated.h"
 
 
@@ -41,7 +40,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stats")
 	class UStatsMasterClass* Stats;
-
 
 private:
 

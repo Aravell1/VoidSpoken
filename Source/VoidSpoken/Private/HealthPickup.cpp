@@ -5,7 +5,22 @@
 
 AHealthPickup::AHealthPickup()
 {
+	Text = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Pickup Text"));
+	Text->SetupAttachment(RootComponent);
 
+	TextTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Text Trigger Box"));
+	TextTriggerBox->SetupAttachment(RootComponent);
+}
+
+void AHealthPickup::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (Text)
+		Text->SetVisibility(false);
+
+	TextTriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AHealthPickup::TextTriggerOverlapBegin);
+	TextTriggerBox->OnComponentEndOverlap.AddDynamic(this, &AHealthPickup::TextTriggerOverlapEnd);
 }
 
 void AHealthPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -17,7 +32,6 @@ void AHealthPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		if (Player)
 		{
 			Player->SetOverlappingItem(this);
-			//UE_LOG(LogTemp, Warning, TEXT("Health Overlap"));
 		}
 	}
 }
@@ -35,4 +49,36 @@ void AHealthPickup::PickupHealth()
 	}
 	else
 		GM->PickupFull();
+}
+
+void AHealthPickup::TextTriggerOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor)
+	{
+		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+
+		if (Player)
+		{
+			if (Text)
+			{
+				Text->SetVisibility(true);
+			}
+		}
+	}
+}
+
+void AHealthPickup::TextTriggerOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor)
+	{
+		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+
+		if (Player)
+		{
+			if (Text)
+			{
+				Text->SetVisibility(false);
+			}
+		}
+	}
 }

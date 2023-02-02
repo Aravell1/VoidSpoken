@@ -79,10 +79,6 @@ APlayerCharacter::APlayerCharacter()
 	#pragma endregion
 
 	bIsFDown = false;
-	bIsEDown = false;
-	bScrollUp = false;
-	bScrollDown = false;
-
 
 	if (!Inventory)
 	{
@@ -106,14 +102,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	//Item pickup
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::On_F_Down);
 	PlayerInputComponent->BindAction("Interact", IE_Released, this, &APlayerCharacter::On_F_Release);
-
-	//Item use
-	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &APlayerCharacter::On_E_Down);
-	PlayerInputComponent->BindAction("Use", IE_Released, this, &APlayerCharacter::On_E_Release);
-
-	//Item switch
-	PlayerInputComponent->BindAction("Scroll UP", IE_Pressed, this, &APlayerCharacter::ScrollUp);
-	PlayerInputComponent->BindAction("Scroll DOWN", IE_Pressed, this, &APlayerCharacter::ScrollDown);
 
 	// Turning and moving camera
 	PlayerInputComponent->BindAxis("Turn / Mouse", this, &APawn::AddControllerYawInput);
@@ -144,6 +132,8 @@ void APlayerCharacter::BeginPlay()
 	// Checks Player levels to initialize stats
 	Stats->InitializeMaxStats();
 	Stats->InitializeMainStats();
+
+	
 
 	EquipFromInventory(0, "LeftWeaponSocket");
 
@@ -634,101 +624,6 @@ void APlayerCharacter::On_F_Down()
 void APlayerCharacter::On_F_Release()
 {
 	bIsFDown = false;
-}
-
-void APlayerCharacter::On_E_Down()
-{
-	bIsEDown = true;
-
-	//Use currrent Item in UI
-}
-
-void APlayerCharacter::On_E_Release()
-{
-	bIsEDown = false;
-}
-
-void APlayerCharacter::ScrollUp()
-{
-	bScrollUp = true;
-	SetCurrentItem();
-}
-
-void APlayerCharacter::ScrollDown()
-{
-	bScrollDown = true;
-	SetCurrentItem();
-}
-
-
-void APlayerCharacter::SetCurrentItem()
-{
-	AFocusPickup* PickupF = Cast<AFocusPickup>(CurrentItem);
-	AHealthPickup* PickupH = Cast<AHealthPickup>(CurrentItem);
-	AStaminaPickup* PickupS = Cast<AStaminaPickup>(CurrentItem);
-
-	for (int i = 0; i < 3; i++)
-	{ 
-		
-		GetCurrentItem(CurrentItem);
-
-		if (i == 0)
-		{
-			GetCurrentItem(PickupF);
-			UE_LOG(LogTemp, Warning, TEXT("current pickup = Focus"))
-
-			if (bScrollUp == true)
-			{
-				i++;
-				bScrollUp = false;
-			}
-			else if (bScrollDown == true)
-			{
-				i = 2;
-				bScrollDown = false;
-			}
-			else
-				return;
-		}
-
-		if (i == 1)
-		{
-			GetCurrentItem(PickupH);
-			UE_LOG(LogTemp, Warning, TEXT("current pickup = Health"))
-
-			if (bScrollUp == true)
-			{
-				i++;
-				bScrollUp = false;
-			}
-			else if (bScrollDown == true)
-			{
-				i--;
-				bScrollDown = false;
-			}
-			else 
-				return;
-		}
-
-		if (i == 2)
-		{
-			GetCurrentItem(PickupS);
-			UE_LOG(LogTemp, Warning, TEXT("current pickup = Stamina"))
-
-			if (bScrollUp == true)
-			{
-				i = 0;
-				bScrollUp = false;
-			}
-			else if (bScrollDown == true)
-			{
-				i--;
-				bScrollDown = false;
-			}
-			else
-				return;
-		}
-	}
 }
 
 #pragma endregion

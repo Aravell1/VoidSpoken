@@ -25,9 +25,6 @@ void UInventorySystem::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-
-	
-	
 }
 
 
