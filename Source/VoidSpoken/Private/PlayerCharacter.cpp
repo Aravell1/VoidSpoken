@@ -173,10 +173,12 @@ void APlayerCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	
 	/// Add "Relative" Movement endings to the character when in Telekinesis
-	if (EMovementState == EMovementState::EMS_Stopping)
-		/// Change this to AddMovementInput
-		AddActorLocalOffset(FVector(GetMesh()->GetAnimInstance()->GetCurveValue("Movement Delta (Forward)"), 0.0f, 0.0f));
-	else DetermineMovementState();
+	/// Change this to AddMovementInput
+	//AddActorLocalOffset(FVector(GetMesh()->GetAnimInstance()->GetCurveValue("Movement Delta (Forward)"), 0.0f, 0.0f));
+	const FVector Direction = FRotationMatrix(FRotator(0, GetController()->GetControlRotation().Yaw, 0)).GetUnitAxis(EAxis::X);
+	AddMovementInput(Direction, GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+
+	DetermineMovementState();
 
 	ZoomTimeline.TickTimeline(DeltaTime);
 	if (bTelekinesis)
@@ -341,11 +343,10 @@ void APlayerCharacter::MoveForward(const float Axis) {
 			GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 		else
 			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, Axis);
 	}
-
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-	AddMovementInput(Direction, Axis);
 }
 
 void APlayerCharacter::MoveRight(const float Axis) {
@@ -357,19 +358,16 @@ void APlayerCharacter::MoveRight(const float Axis) {
 			GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 		else
 			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(Direction, Axis);
 	}
-
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	AddMovementInput(Direction, Axis);
 }
 
 void APlayerCharacter::DetermineMovementState() {
 	const float PlayerVelocityLength = GetCharacterMovement()->Velocity.Size();
 	if (bIsDodging)
 		EMovementState = EMovementState::EMS_Dodging;
-	else if ((EMovementState == EMovementState::EMS_Running || EMovementState == EMovementState::EMS_Walking) && PlayerVelocityLength == 0.0f)
-		EMovementState = EMovementState::EMS_Stopping;
 	else if (PlayerVelocityLength <= 0)
 		EMovementState = EMovementState::EMS_Idle;
 	else if (!bIsRunning && (PlayerVelocityLength >= 0 && PlayerVelocityLength <= WalkSpeed))
@@ -395,7 +393,8 @@ void APlayerCharacter::RunStop() {
 #pragma region Dodging
 
 void APlayerCharacter::Dodge() {
-	if (!bIsDodging && !EquippedWeapon->bIsAttacking && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
+	if (!bIsDodging && !EquippedWeapon->bAttackDelay && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
+		EquippedWeapon->Reset();
 		Stats->Stamina -= DodgeStaminaCost;
 		bIsDodging = true;
 	}
@@ -452,13 +451,13 @@ void APlayerCharacter::DodgingFinished() {
 #pragma region Combat
 
 void APlayerCharacter::Attack() {
-	if (!bIsDodging) {
+	if (EMovementState != EMovementState::EMS_Dodging) {
 		if (!bTelekinesis && EquippedWeapon && Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay()) 
 			EquippedWeapon->Attack();
 		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference)) {
 			if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
 				if (const ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference)) {
-					// Setting the Telekinesis Prop Reference and Pulling ithttps://www.youtube.com/watch?v=eFRqa-l5OTM
+					// Setting the Telekinesis Prop Reference and Pulling it
 					ETelekineticAttackState = ETelekinesisAttackState::ETA_Pull;
 					TelekineticPropReference = HighlightedReference;
 

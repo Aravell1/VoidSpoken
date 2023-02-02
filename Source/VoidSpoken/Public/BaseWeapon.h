@@ -54,7 +54,7 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
-	#pragma region Getter Statements
+	#pragma region Getter Functions
 
 	/// Function: GetBaseDamage()
 	///		-Returns the float BaseDamage

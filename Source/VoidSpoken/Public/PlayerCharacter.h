@@ -50,7 +50,6 @@ enum class EMovementState : uint8 {
 	EMS_Idle = 0 UMETA(DisplayName = "Idle"),			// Idle
 	EMS_Walking = 1 UMETA(DisplayName = "Walking"),		// Walking
 	EMS_Running = 2 UMETA(DisplayName = "Running"),		// Running
-	EMS_Stopping = 2 UMETA(DisplayName = "Stopping"),	// Stopping
 	EMS_Dodging = 3 UMETA(DisplayName = "Dodging"),		// Dodging
 };
 
@@ -136,6 +135,10 @@ public:
 	
 	protected:
 	virtual void BeginPlay() override;
+
+	FVector GetPlayerForwardDirection() const {
+		return FRotationMatrix(FRotator(0, Controller->GetControlRotation().Yaw, 0)).GetUnitAxis(EAxis::X);
+	};
 
 	#pragma endregion
 

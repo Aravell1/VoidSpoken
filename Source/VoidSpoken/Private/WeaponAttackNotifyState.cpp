@@ -23,6 +23,6 @@ void UWeaponAttackNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComponent
 void UWeaponAttackNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
 	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
 
-	if (Player != nullptr && Player->EquippedWeapon != nullptr) 
+	if (Player != nullptr && Player->EquippedWeapon != nullptr)
 		Player->EquippedWeapon->NextAttack();
 }

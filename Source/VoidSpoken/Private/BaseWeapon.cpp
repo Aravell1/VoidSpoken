@@ -11,6 +11,8 @@
 
 #include "BaseWeapon.h"
 
+#include "Kismet/KismetMathLibrary.h"
+
 // Sets default values
 ABaseWeapon::ABaseWeapon()
 {
@@ -47,9 +49,11 @@ void ABaseWeapon::PostInitializeComponents() {
 // Called every frame
 void ABaseWeapon::Tick(const float DeltaTime) {
 	Super::Tick(DeltaTime);
-	
-	if (bIsAttacking)
+
+	// Change for player based input, still moving into walls and such
+	if (bIsAttacking) {
 		EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0));
+	}
 }
 
 void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
@@ -58,7 +62,7 @@ void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
 }
 
 void ABaseWeapon::Attack() {
-	if (!bAttackDelay && CheckMovementMode()) {
+	if (!bIsAttacking && !bAttackDelay && CheckMovementMode()) {
 		if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0) {
 			// On Attack Started
 			OnAttackStarted.ExecuteIfBound();
@@ -69,8 +73,7 @@ void ABaseWeapon::Attack() {
 
 			//Disabling Actors movement while attacking
 			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
-
-			bAttackDelay = true;
+			
 			EAttackState = EAT_NormalAttack;
 			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
 		}
@@ -81,6 +84,7 @@ void ABaseWeapon::NextAttack() {
 	// On Attack Ended
 	OnAttackEnded.ExecuteIfBound();
 
+	bIsAttacking = false;
 	bAttackDelay = false;
 	EAttackState = EAT_None;
 	OverlappedActors.Empty();
