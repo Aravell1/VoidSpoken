@@ -54,8 +54,6 @@ void ACombatDirector::CalculateEnemyActions()
 			Enemies[i].EnemyValue = -1;
 		}
 	}
-
-	bInCombat = EnemiesInCombat > 0;
 }
 
 float ACombatDirector::GetEnemyAngle(int Index)
@@ -97,59 +95,6 @@ ABaseEnemy* ACombatDirector::GetBestEnemy(float &EnemyValue)
 	return HighestValueEnemy;
 }
 
-void ACombatDirector::CalculatePlayerPositions()
-{
-	float TotalAvailableAngle = 360;
-	float Segments = 8;
-
-	FVector PlayerLocation = Player->GetActorLocation();
-	FRotator Direction = FRotator::ZeroRotator;
-	FVector TargetLocation = PlayerLocation + Direction.Vector() * MeleeDistance;
-	FRotator StartingDirection = FRotator::ZeroRotator;
-
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(Player);
-	Params.AddIgnoredActor(Player->EquippedWeapon);
-	for (int i = 0; i < Enemies.Num(); i++)
-		Params.AddIgnoredActor(Enemies[i].Enemy);
-
-	FHitResult OutHit;
-
-	for (int i = 0; i < Segments; i++)
-	{
-		GetWorld()->LineTraceSingleByChannel(OutHit, PlayerLocation, TargetLocation, ECollisionChannel::ECC_Camera, Params);
-
-		if (OutHit.IsValidBlockingHit())
-		{
-			TotalAvailableAngle -= 360 / Segments;
-
-			StartingDirection = Direction;
-			StartingDirection.Yaw += 360 / Segments;
-		}
-
-		Direction.Yaw += 360 / Segments;
-		TargetLocation = PlayerLocation + Direction.Vector() * MeleeDistance;
-	}
-
-	float AngleBetweenPositions = TotalAvailableAngle / EnemiesInCombat;
-
-	EnemyPositions.Empty();
-
-	if (StartingDirection != FRotator::ZeroRotator)
-		Direction = StartingDirection;
-	else
-		Direction = FRotator::ZeroRotator;
-
-	for (int i = 0; i < EnemiesInCombat; i++)
-	{
-		EnemyPositions.Add(PlayerLocation + Direction.Vector() * MeleeDistance);
-		if (AngleBetweenPositions <= 45)
-			Direction.Yaw += AngleBetweenPositions;
-		else
-			Direction.Yaw += 45;
-	}
-}
-
 void ACombatDirector::TriggerEnemyAttack()
 {
 	if (Enemies.Num() > 0)
@@ -168,43 +113,16 @@ void ACombatDirector::TriggerEnemyAttack()
 				HighestValueEnemy->TriggerAttack();
 			else
 				HighestValueEnemy = nullptr;
-
-			if (EnemiesInCombat > 1)
-			{
-				CalculatePlayerPositions();
-
-				int j = 0;
-
-				for (int i = 0; i < Enemies.Num() && j < EnemiesInCombat; i++)
-				{
-					if (Enemies[i].Enemy->bInCombat)
-					{
-						Enemies[i].Enemy->SetTargetPosition(EnemyPositions[j]);
-						j++;
-					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < Enemies.Num(); i++)
-				{
-					if (Enemies[i].Enemy->bInCombat)
-					{
-						Enemies[i].Enemy->SetTargetPosition(FVector::ZeroVector);
-					}
-				}
-			}
 		}
 	}
 
 	GetWorldTimerManager().SetTimer(CombatAttackTimer, this, &ACombatDirector::TriggerEnemyAttack, AttackCheckInterval);
 }
 
-void ACombatDirector::AddToMap(ABaseEnemy* Enemy, bool MeleeType)
+void ACombatDirector::AddToMap(ABaseEnemy* Enemy)
 {
 	FEnemyData NewEnemy;
 	NewEnemy.Enemy = Enemy;
-	NewEnemy.MeleeType = MeleeType;
 
 	Enemy->OnDestroyed.AddDynamic(this, &ACombatDirector::RemoveEnemy);
 
@@ -221,9 +139,4 @@ void ACombatDirector::RemoveEnemy(AActor* Enemy)
 			return;
 		}
 	}
-}
-
-bool ACombatDirector::GetInCombat()
-{
-	return bInCombat;
 }

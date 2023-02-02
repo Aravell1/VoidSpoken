@@ -9,25 +9,6 @@ ABaseEnemy::ABaseEnemy()
 	
 }
 
-EEnemyType ABaseEnemy::GetEnemyType()
-{
-	return EType;
-}
-
-void ABaseEnemy::SetEnemyType(EEnemyType type)
-{
-	EType = type;
-
-void ABaseEnemy::SetTargetPosition(FVector Position)
-{
-	TargetPosition = Position;
-}
-
-FVector ABaseEnemy::GetTargetPosition()
-{
-	return TargetPosition;
-}
-
 float ABaseEnemy::GetAttack()
 {
 	return Attack;

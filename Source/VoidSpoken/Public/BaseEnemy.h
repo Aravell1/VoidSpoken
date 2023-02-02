@@ -16,13 +16,6 @@
  */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBroadcastDelegate);
 
-UENUM()
-enum EEnemyType
-{
-	Melee	UMETA(DisplayName = "Melee"),
-	Ranged	UMETA(DisplayName = "Ranged")
-};
-
 UCLASS(Abstract)
 class VOIDSPOKEN_API ABaseEnemy : public ABaseEntity
 {
@@ -33,14 +26,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "HealthBar")
 		FBroadcastDelegate UpdateHealthBar;
-
-	UFUNCTION(BlueprintPure)
-		enum EEnemyType GetEnemyType();
-
-	void SetEnemyType(EEnemyType type);
-
-	void SetTargetPosition(FVector Position);
-	FVector GetTargetPosition();
 
 	UFUNCTION(BlueprintCallable)
 		float GetAttack();
@@ -93,11 +78,6 @@ public:
 		bool bCanAttack = false;
 
 private:
-
-	UPROPERTY(EditDefaultsOnly)
-		TEnumAsByte<EEnemyType> EType = EEnemyType::Melee;
-
-	FVector TargetPosition = FVector::ZeroVector;
 
 	float WalkSpeed = 0;
 	float RunSpeed = 0;
