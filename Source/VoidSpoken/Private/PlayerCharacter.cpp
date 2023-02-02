@@ -208,6 +208,11 @@ void APlayerCharacter::SwapWeapons() {
 	#pragma endregion
 }
 
+void APlayerCharacter::ResetCameraRotation()
+{
+	GetWorld()->GetFirstPlayerController()->SetControlRotation(GetActorRotation());
+}
+
 #pragma endregion
 
 #pragma region Camera

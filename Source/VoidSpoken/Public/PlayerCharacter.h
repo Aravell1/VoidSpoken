@@ -103,6 +103,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SwapWeapons();
 
+	UFUNCTION(BlueprintCallable)
+		void ResetCameraRotation();
+
 	#pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
