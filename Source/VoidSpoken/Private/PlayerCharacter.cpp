@@ -2,6 +2,9 @@
 
 
 #include "PlayerCharacter.h"
+#include "FocusPickup.h"
+#include "HealthPickup.h"
+#include "StaminaPickup.h"
 
 #pragma region Constructor and Inheritied Functions
 
@@ -87,7 +90,8 @@ APlayerCharacter::APlayerCharacter()
 	TelekinesisSource->SetRelativeLocation(FVector(-250, 30, 200));
 	
 	#pragma endregion
-
+	
+	bIsFDown = false;
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -97,6 +101,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Running
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &APlayerCharacter::RunStart);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &APlayerCharacter::RunStop);
+
+	// Interactions / Items
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::On_F_Down);
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &APlayerCharacter::On_F_Release);
 
 	// Turning and moving camera
 	PlayerInputComponent->BindAxis("Turn / Mouse", this, &APawn::AddControllerYawInput);
@@ -599,6 +607,40 @@ void APlayerCharacter::RegenerateStamina() {
 
 #pragma region Items
 
+void APlayerCharacter::On_F_Down()
+{
+	bIsFDown = true;
+
+	if (OverlappingItem)
+	{
+		AFocusPickup* PickupF = Cast<AFocusPickup>(OverlappingItem);
+		AHealthPickup* PickupH = Cast<AHealthPickup>(OverlappingItem);
+		AStaminaPickup* PickupS = Cast<AStaminaPickup>(OverlappingItem);
+
+		if (PickupF)
+		{
+			PickupF->PickupFocus();
+			SetOverlappingItem(nullptr);
+		}
+		else if (PickupH)
+		{
+			PickupH->PickupHealth();
+			SetOverlappingItem(nullptr);
+		}
+		else if (PickupS)
+		{
+			PickupS->PickupStamina();
+			SetOverlappingItem(nullptr);
+		}
+	}
+}
+
+void APlayerCharacter::On_F_Release()
+{
+	bIsFDown = false;
+}
+
+
 void APlayerCharacter::UseHealthConsumable()
 {
 	AVoidSpokenGameModeBase* GM;
@@ -645,10 +687,9 @@ void APlayerCharacter::UseFocusConsumable()
 
 void APlayerCharacter::UseStaminaConsumable()
 {
-	AVoidSpokenGameModeBase* GM;
-	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	AVoidSpokenGameModeBase* GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-	if (GM->StaminaPickup > 0)
+	if (GM && GM->StaminaPickup > 0)
 	{
 		if (Stats->Stamina < Stats->GetMaxStamina())
 		{
@@ -661,8 +702,6 @@ void APlayerCharacter::UseStaminaConsumable()
 			}
 		}
 	}
-	else
-		return;
 }
 
 #pragma endregion 

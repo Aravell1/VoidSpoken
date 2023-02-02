@@ -71,6 +71,9 @@ public:
 	void TurnRate(const float Rate);
 	void LookUpRate(const float Rate);
 
+	UFUNCTION(BlueprintCallable)
+	void ResetCameraRotation();
+
 	#pragma endregion
 
 	#pragma region Weapons and Functions
@@ -125,6 +128,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	UCameraComponent* FollowCamera;
+
+	class UCapsuleComponent* PlayerCapsule;
+	class USkeletalMeshComponent* PlayerMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* TelekinesisSource = nullptr; // FVector(-190, 40, 147)
@@ -291,7 +297,26 @@ public:
 	UPROPERTY()
 	float StaminaAmount;
 
-	#pragma endregion 
+	#pragma endregion
+
+	#pragma region Pickup Interaction
+
+	public:
+
+	void On_F_Down();
+	void On_F_Release();
+
+	bool bIsFDown;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
+	class ABaseItem* OverlappingItem;
+
+	FORCEINLINE void SetOverlappingItem(ABaseItem* OverlapItem)
+	{
+		OverlappingItem = OverlapItem;
+	}
+
+	#pragma endregion
 
 	#pragma region Invincible and Health Regeneration
 	public:
