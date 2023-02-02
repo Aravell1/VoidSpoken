@@ -92,7 +92,10 @@ void AEnemyPortalSpawn::SpawnEnemy()
 		ABaseEnemy* SpawnedEnemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyType, SpawnLocation, SpawnRotation, SpawnInfo);
 		SpawnedEnemy->PatrolPoints = PatrolPoints;
 
-		CombatDirector->AddToMap(SpawnedEnemy);
+		if (SpawnedEnemy->GetEnemyType() == EEnemyType::Melee)
+			CombatDirector->AddToMap(SpawnedEnemy, true);
+		else
+			CombatDirector->AddToMap(SpawnedEnemy, false);
 	}
 
 	Destroy();

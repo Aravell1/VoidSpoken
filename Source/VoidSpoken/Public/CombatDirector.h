@@ -15,6 +15,7 @@ struct FEnemyData
 
 	ABaseEnemy* Enemy = nullptr;
 	float EnemyValue = 0;
+	bool MeleeType = false;
 };
 
 UCLASS()
@@ -26,9 +27,12 @@ public:
 	// Sets default values for this actor's properties
 	ACombatDirector();
 
-	void AddToMap(ABaseEnemy* Enemy);
+	void AddToMap(ABaseEnemy* Enemy, bool MeleeType);
 	UFUNCTION()
 		void RemoveEnemy(AActor* Enemy);
+
+	UFUNCTION(BlueprintCallable)
+		bool GetInCombat();
 
 	UPROPERTY(EditAnywhere)
 		bool bDebugMode = false;
@@ -45,15 +49,21 @@ private:
 	TArray<FEnemyData> Enemies;
 	APlayerCharacter* Player;
 
+
 	void CalculateEnemyActions();
 	float GetEnemyAngle(int Index);
 	ABaseEnemy* GetBestEnemy(float &Value);
+	void CalculatePlayerPositions();
 
 	void TriggerEnemyAttack();
 
 	FTimerHandle CombatAttackTimer;
-	const float MinTimeBetweenAttacks = 5.0f;
+	const float MinTimeBetweenAttacks = 3.0f;
 
 	float EnemiesInCombat = 0;
 
+	float MeleeDistance = 150.0f;
+	TArray<FVector> EnemyPositions;
+
+	bool bInCombat = false;
 };
