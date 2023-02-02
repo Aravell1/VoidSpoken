@@ -17,52 +17,82 @@ void ACombatDirector::BeginPlay()
 	Super::BeginPlay();
 
 	GetWorldTimerManager().SetTimer(CombatAttackTimer, this, &ACombatDirector::TriggerEnemyAttack, AttackCheckInterval);
+	Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void ACombatDirector::CalculateEnemyActions()
 {
-	for (auto& Elem : Enemies)
+	EnemiesInCombat = 0;
+
+	for (int i = 0; i < Enemies.Num(); i++)
 	{
-		if (Elem.Key == nullptr)
+		if (Enemies[i].Enemy->bInCombat && Enemies[i].Enemy->bCanAttack)
 		{
-			Enemies.Remove(Elem.Key);
-		}
-		else if (Elem.Key->bInCombat)
-		{
-			Elem.Value = UGameplayStatics::GetTimeSeconds(GetWorld()) - Elem.Key->TimeOfLastAttack;
+			Enemies[i].EnemyValue = 0;
+
+			float TimeSinceLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld()) - Enemies[i].Enemy->TimeOfLastAttack;
+			if (TimeSinceLastAttack > MinTimeBetweenAttacks)
+			{
+				Enemies[i].EnemyValue += (TimeSinceLastAttack) * 10;
+
+				float Angle = GetEnemyAngle(i);
+
+				if (Angle >= 1)
+					Enemies[i].EnemyValue += 50 / Angle;
+				else
+					Enemies[i].EnemyValue += 50;
+			}
+			else
+			{
+				Enemies[i].EnemyValue = -1;
+			}
+
+			EnemiesInCombat++;
 		}
 		else
 		{
-			Elem.Value = -1;
+			Enemies[i].EnemyValue = -1;
 		}
 	}
+
+	bInCombat = EnemiesInCombat > 0;
 }
 
-ABaseEnemy* ACombatDirector::GetBestEnemy(float &Value)
+float ACombatDirector::GetEnemyAngle(int Index)
 {
-	ABaseEnemy* HighestValueEnemy = Enemies.begin()->Key;
-	Value = Enemies.begin()->Value;
+	FVector PlayerToEnemy = (Enemies[Index].Enemy->GetActorLocation() - Player->GetActorLocation()).GetSafeNormal();
+	FVector PlayerForward = Player->GetActorForwardVector();
 
-	for (auto& Elem : Enemies)
+	float VectorDot = FVector::DotProduct(PlayerForward, PlayerToEnemy);
+	float Angle = FMath::RadiansToDegrees(FMath::Acos(VectorDot));
+
+	if (Angle > 180)
+		Angle = FMath::Abs(Angle - 360);
+
+	return Angle;
+}
+
+int ACombatDirector::GetBestEnemy(float &EnemyValue)
+{
+	EnemyValue = Enemies[0].EnemyValue;
+	int HighestValueIndex = 0;
+
+	for (int i = 0; i < Enemies.Num(); i++)
 	{
 		if (bDebugMode && GEngine)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, "HVE: " + HighestValueEnemy->GetName() + ": " + FString::SanitizeFloat(*Enemies.Find(HighestValueEnemy)));
-			GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, "Compare: " + Elem.Key->GetName() + ": " + FString::SanitizeFloat(Elem.Value));
+			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Blue, "HVE: " + Enemies[HighestValueIndex].Enemy->GetName() + ": " + FString::SanitizeFloat(Enemies[HighestValueIndex].EnemyValue));
+			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Red, "Compare: " + Enemies[i].Enemy->GetName() + ": " + FString::SanitizeFloat(Enemies[i].EnemyValue));
 		}
 		
-		if (Elem.Key == nullptr)
+		if (Enemies[i].EnemyValue > Enemies[HighestValueIndex].EnemyValue && Enemies[i].Enemy->CheckLineOfSight(Player))
 		{
-			Enemies.Remove(Elem.Key);
-		}
-		else if (Elem.Value > *Enemies.Find(HighestValueEnemy))
-		{
-			HighestValueEnemy = Elem.Key;
-			Value = Elem.Value;
+			HighestValueIndex = i;
+			EnemyValue = Enemies[i].EnemyValue;
 		}
 	}
 
-	return HighestValueEnemy;
+	return HighestValueIndex;
 }
 
 void ACombatDirector::TriggerEnemyAttack()
@@ -71,20 +101,61 @@ void ACombatDirector::TriggerEnemyAttack()
 	{
 		CalculateEnemyActions();
 
-		float HighestValue = 0;
-		ABaseEnemy* HighestValueEnemy = GetBestEnemy(HighestValue);
+		if (EnemiesInCombat > 0)
+		{
+			float HighestEnemyValue = 0;
+			int HighestValueIndex = GetBestEnemy(HighestEnemyValue);
 
-		if (bDebugMode && GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, "HVE: " + HighestValueEnemy->GetName() + ": " + FString::SanitizeFloat(HighestValue));
+			if (bDebugMode && GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Green, "HVE: " + Enemies[HighestValueIndex].Enemy->GetName() + ": " + FString::SanitizeFloat(HighestEnemyValue));
 
-		if (HighestValue > MinTimeBetweenAttacks)
-			HighestValueEnemy->TriggerAttack();
+			for (int i = 0; i < Enemies.Num(); i++)
+			{
+				if (Enemies[i].Enemy->bInCombat)
+				{
+					if (i == HighestValueIndex && HighestEnemyValue > 0)
+					{
+						Enemies[i].Enemy->TriggerAttack();
+					}
+					else
+					{
+						if (Enemies[i].MeleeType)
+							Enemies[i].Enemy->SetCirclePlayer();
+						else
+							Enemies[i].Enemy->SetCombatIdle();
+					}
+				}
+			}
+		}
 	}
 
 	GetWorldTimerManager().SetTimer(CombatAttackTimer, this, &ACombatDirector::TriggerEnemyAttack, AttackCheckInterval);
 }
 
-void ACombatDirector::AddToMap(ABaseEnemy* Enemy)
+void ACombatDirector::AddToMap(ABaseEnemy* Enemy, bool MeleeType)
 {
-	Enemies.Add(Enemy, 0);
+	FEnemyData NewEnemy;
+	NewEnemy.Enemy = Enemy;
+	NewEnemy.MeleeType = MeleeType;
+
+	Enemy->OnDestroyed.AddDynamic(this, &ACombatDirector::RemoveEnemy);
+
+	Enemies.Add(NewEnemy);
+}
+
+void ACombatDirector::RemoveEnemy(AActor* Enemy)
+{
+	for (int i = 0; i < Enemies.Num(); i++)
+	{
+		if (Enemies[i].Enemy == Enemy)
+		{
+			Enemies.RemoveAt(i);
+			return;
+		}
+	}
+}
+
+bool ACombatDirector::GetInCombat()
+{
+	return bInCombat;
 }

@@ -10,10 +10,6 @@
 #include "Engine.h"
 
 void UWeaponResetNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
-#if WITH_EDITOR
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
-#endif
-
 	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
 
 	/// NULL Check

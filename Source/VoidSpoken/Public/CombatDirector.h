@@ -5,7 +5,18 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BaseEnemy.h"
+#include "PlayerCharacter.h"
 #include "CombatDirector.generated.h"
+
+USTRUCT()
+struct FEnemyData
+{
+	GENERATED_USTRUCT_BODY()
+
+	ABaseEnemy* Enemy = nullptr;
+	float EnemyValue = 0;
+	bool MeleeType = false;
+};
 
 UCLASS()
 class VOIDSPOKEN_API ACombatDirector : public AActor
@@ -16,7 +27,12 @@ public:
 	// Sets default values for this actor's properties
 	ACombatDirector();
 
-	void AddToMap(ABaseEnemy* Enemy);
+	void AddToMap(ABaseEnemy* Enemy, bool MeleeType);
+	UFUNCTION()
+		void RemoveEnemy(AActor* Enemy);
+
+	UFUNCTION(BlueprintCallable)
+		bool GetInCombat();
 
 	UPROPERTY(EditAnywhere)
 		bool bDebugMode = false;
@@ -30,14 +46,23 @@ protected:
 
 private:
 	
-	TMap<ABaseEnemy*, float> Enemies;
+	TArray<FEnemyData> Enemies;
+	APlayerCharacter* Player;
+
 
 	void CalculateEnemyActions();
-	ABaseEnemy* GetBestEnemy(float &Value);
+	float GetEnemyAngle(int Index);
+	int GetBestEnemy(float &Value);
 
 	void TriggerEnemyAttack();
 
 	FTimerHandle CombatAttackTimer;
 	const float MinTimeBetweenAttacks = 5.0f;
 
+	float EnemiesInCombat = 0;
+
+	float MeleeDistance = 100.0f;
+	TArray<FVector> EnemyPositions;
+
+	bool bInCombat = false;
 };

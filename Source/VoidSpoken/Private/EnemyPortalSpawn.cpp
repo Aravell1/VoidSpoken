@@ -24,16 +24,10 @@ void AEnemyPortalSpawn::BeginPlay()
 	{
 		CombatDirector = Cast<ACombatDirector>(FoundDirectors[0]);
 	}
-}
-
-// Called every frame
-void AEnemyPortalSpawn::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
 	if (!bEnemySpawned)
 	{
-		if (!GetWorldTimerManager().IsTimerActive(DistanceCheckTimer) && Player)
+		if (Player)
 		{
 			GetWorldTimerManager().SetTimer(DistanceCheckTimer,
 				this,
@@ -41,6 +35,12 @@ void AEnemyPortalSpawn::Tick(float DeltaTime)
 				DistanceCheckInterval);
 		}
 	}
+}
+
+// Called every frame
+void AEnemyPortalSpawn::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 void AEnemyPortalSpawn::CheckPlayerDistance()
@@ -54,6 +54,17 @@ void AEnemyPortalSpawn::CheckPlayerDistance()
 			this,
 			&AEnemyPortalSpawn::SpawnEnemy,
 			DelayPortalToEnemy);
+	}
+
+	if (!bEnemySpawned)
+	{
+		if (Player)
+		{
+			GetWorldTimerManager().SetTimer(DistanceCheckTimer,
+				this,
+				&AEnemyPortalSpawn::CheckPlayerDistance,
+				DistanceCheckInterval);
+		}
 	}
 }
 
@@ -81,7 +92,12 @@ void AEnemyPortalSpawn::SpawnEnemy()
 		ABaseEnemy* SpawnedEnemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyType, SpawnLocation, SpawnRotation, SpawnInfo);
 		SpawnedEnemy->PatrolPoints = PatrolPoints;
 
-		CombatDirector->AddToMap(SpawnedEnemy);
+		if (SpawnedEnemy->GetEnemyType() == EEnemyType::Melee)
+			CombatDirector->AddToMap(SpawnedEnemy, true);
+		else
+			CombatDirector->AddToMap(SpawnedEnemy, false);
 	}
+
+	Destroy();
 }
 
