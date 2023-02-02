@@ -18,8 +18,8 @@ AGhoul::AGhoul()
 	Stats->Health = Stats->GetMaxHealth();
 
 	//Initialize Character Movement Stats
-	SetWalkSpeed(150);
-	SetRunSpeed(300);
+	SetWalkSpeed(GhoulWalkSpeed);
+	SetRunSpeed(GhoulRunSpeed);
 	GetCharacterMovement()->MaxWalkSpeed = GetWalkSpeed();
 
 	if (PawnSensing)
@@ -91,6 +91,14 @@ void AGhoul::BehaviourStateEvent()
 	case EGhoulState::AttackCooldown:
 		bCanAttack = true;
 		AttackCooldown();
+		break;
+
+	case EGhoulState::CirclePlayer:
+		CirclePlayer();
+		break;
+
+	case EGhoulState::CombatIdle:
+		CombatIdle();
 		break;
 
 	case EGhoulState::Staggered:
@@ -412,20 +420,20 @@ void AGhoul::CirclePlayer()
 		{
 			FVector PlayerToEnemy = GetActorLocation() - AttackTarget->GetActorLocation();
 			PlayerToEnemy.Z = 0;
-			UE_LOG(LogTemp, Warning, TEXT("Player To Enemy Vector: %s"), *PlayerToEnemy.ToString());
+
 			if (PlayerToEnemy.Length() > MeleeSpreadRange)
 				GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
+			else
+				GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
 
 			FRotator Direction = PlayerToEnemy.Rotation();
 			Direction.Yaw += 30;
-			UE_LOG(LogTemp, Warning, TEXT("Direction Rotator: %s"), *Direction.ToString());
 
 			FVector TargetPosition;
 			TargetPosition = AttackTarget->GetActorLocation() + Direction.Vector() * MeleeSpreadRange;
-			UE_LOG(LogTemp, Warning, TEXT("Target Position: %s"), *TargetPosition.ToString());
 
 			if (TestPathExists(TargetPosition))
-				AIController->MoveToLocation(TargetPosition, 25);
+				AIController->MoveToLocation(TargetPosition, MeleeTargetDistance);
 		}
 		else if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) > ReachTargetDistance)
 		{
@@ -436,7 +444,7 @@ void AGhoul::CirclePlayer()
 		GetWorldTimerManager().SetTimer(AttackCooldownTimer,
 			this,
 			&AGhoul::CirclePlayer,
-			1);
+			2);
 	}
 }
 
@@ -476,7 +484,7 @@ void AGhoul::CombatIdle()
 		GetWorldTimerManager().SetTimer(AttackCooldownTimer,
 			this,
 			&AGhoul::CirclePlayer,
-			1);
+			2);
 	}
 }
 

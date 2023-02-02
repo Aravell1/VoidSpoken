@@ -136,6 +136,9 @@ private:
 	FTimerHandle TimerHandle;
 	FTimerHandle AttackCooldownTimer;
 
+	const float GhoulWalkSpeed = 200.0f;
+	const float GhoulRunSpeed = 300.0f;
+
 	float ReachTargetDistance = 0;
 	const float MeleeTargetDistance = 100.0f;
 	const float RangedTargetDistance = 2000.0f;
