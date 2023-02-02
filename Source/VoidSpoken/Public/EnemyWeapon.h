@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BaseWeapon.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/Character.h"
 #include "Animation/AnimMontage.h"
