@@ -19,16 +19,6 @@ void ABaseEnemy::SetEnemyType(EEnemyType type)
 	EType = type;
 }
 
-void ABaseEnemy::SetTargetPosition(FVector Position)
-{
-	TargetPosition = Position;
-}
-
-FVector ABaseEnemy::GetTargetPosition()
-{
-	return TargetPosition;
-}
-
 float ABaseEnemy::GetAttack()
 {
 	return Attack;
@@ -82,6 +72,20 @@ void ABaseEnemy::TriggerAttack()
 }
 
 void ABaseEnemy::EnterCombat(APawn* OtherPawn, bool Cooldown)
+{
+}
+
+//Make sure to override and do not use Super for this function
+bool ABaseEnemy::CheckLineOfSight(AActor* OtherActor)
+{
+	return false;
+}
+
+void ABaseEnemy::SetCombatIdle()
+{
+}
+
+void ABaseEnemy::SetCirclePlayer()
 {
 }
 

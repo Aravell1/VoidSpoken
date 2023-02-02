@@ -106,8 +106,7 @@ void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, cla
 	default:
 		DamageMultiplier = 1.0f;
 	}
-	
-	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * DamageMultiplier, NULL, EquippedCharacter, NULL);
+	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * DamageMultiplier, NULL, EquippedCharacter, UDamageTypeStagger::StaticClass());
 }
 
 bool ABaseWeapon::CheckMovementMode() const {
