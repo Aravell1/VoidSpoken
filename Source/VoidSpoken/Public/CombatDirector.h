@@ -52,17 +52,16 @@ private:
 
 	void CalculateEnemyActions();
 	float GetEnemyAngle(int Index);
-	ABaseEnemy* GetBestEnemy(float &Value);
-	void CalculatePlayerPositions();
+	int GetBestEnemy(float &Value);
 
 	void TriggerEnemyAttack();
 
 	FTimerHandle CombatAttackTimer;
-	const float MinTimeBetweenAttacks = 3.0f;
+	const float MinTimeBetweenAttacks = 5.0f;
 
 	float EnemiesInCombat = 0;
 
-	float MeleeDistance = 150.0f;
+	float MeleeDistance = 100.0f;
 	TArray<FVector> EnemyPositions;
 
 	bool bInCombat = false;
