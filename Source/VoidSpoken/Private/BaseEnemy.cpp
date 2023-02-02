@@ -17,6 +17,7 @@ EEnemyType ABaseEnemy::GetEnemyType()
 void ABaseEnemy::SetEnemyType(EEnemyType type)
 {
 	EType = type;
+}
 
 void ABaseEnemy::SetTargetPosition(FVector Position)
 {
