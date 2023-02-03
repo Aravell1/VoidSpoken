@@ -38,7 +38,7 @@ EGhoulState AGhoul::GetState()
 
 void AGhoul::SetState(EGhoulState state)
 {
-	if (!LockState)
+	if (!LockState || state == EGhoulState::Dead)
 	{
 		GhState = state;
 		SetSpeed();
@@ -103,6 +103,7 @@ void AGhoul::BehaviourStateEvent()
 
 	case EGhoulState::Staggered:
 		bCanAttack = false;
+		LockState = true;
 		if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 			GetMesh()->GetAnimInstance()->StopAllMontages(false);
 		if (StaggerMontage)
@@ -347,6 +348,7 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 		}
 		else if (Montage == StaggerMontage)
 		{
+			LockState = false;
 			SetState(EGhoulState::Chase);
 		}
 		else if (Montage == ScreechMontage)
