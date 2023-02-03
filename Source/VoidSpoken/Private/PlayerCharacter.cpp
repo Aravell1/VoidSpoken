@@ -491,7 +491,7 @@ void APlayerCharacter::Attack() {
 
 void APlayerCharacter::AlternateAttack() {
 	if (!bTelekinesis && EquippedWeapon) 
-		EquippedWeapon->UniqueAttack();
+		EquippedWeapon->ChargedAttack();
 	// Telekinetic Dropping
 	else if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold)) {
 		ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference);
