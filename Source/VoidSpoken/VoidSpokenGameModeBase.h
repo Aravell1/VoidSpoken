@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "JsonLibrary.h"
+//#include "JsonLibrary.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "VoidSpokenGameModeBase.generated.h"
@@ -26,7 +26,7 @@ public:
 	
 
 	UFUNCTION()
-	void SetHealItem(int heal);
+	void SetHealItem(int health);
 
 	UFUNCTION(BlueprintCallable)
 	int GetHealItem()
@@ -38,7 +38,7 @@ public:
 	void SetFocusItem(int focus);
 
 	UFUNCTION(BlueprintCallable)
-		int GetFocusItem()
+	int GetFocusItem()
 	{
 		return FocusPickup;
 	}
@@ -46,26 +46,36 @@ public:
 	UFUNCTION()
 	void SetStaminaItem(int stamina);
 
+
 	UFUNCTION(BlueprintCallable)
 	int GetStaminaItem()
 	{
-		return HealPickup;
+		return StaminaPickup;
 	}
 
+	UFUNCTION()
+	void PickupFull();
+
+	
+
+	int MaxHeal = 5;
+	int MaxFocus = 5;
+	int MaxStamina = 2;
+
+	int HealPickup = 0;
+	int FocusPickup = 0;
+	int StaminaPickup = 0;
 
 private:
 
-	int HealPickup;
-	int FocusPickup;
-	int StaminaPickup;
 
 public:
 
 	/// <summary>
 	/// Get Reference to the JsonLibrary
 	/// </summary>
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "JSON")
-	UJsonLibrary* JsonLibrary;
+	/*UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "JSON")
+	UJsonLibrary* JsonLibrary;*/
 
 	/// <summary>
 	/// An actor class that can be spawn in the scene, Note: Setup needed in the editor

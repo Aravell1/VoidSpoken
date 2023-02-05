@@ -135,7 +135,7 @@ protected:
 
 	#pragma region Telekinesis Variables and Prototypes
 
-	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities")
+	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities", DisplayName = "Telekinesis")
 		bool bTelekinesis = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Telekinetic Abilities")
@@ -146,7 +146,7 @@ protected:
 
 	/// Determines how hard the "Push" Telkinetic ability can push a TelekineticProp object
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Push Force")
-		float fPushForce = 250.0f;
+		float fPushForce = 450.0f;
 	
 	/// Determines how large the SphereTrace of detecting TelekineticProps are
 	///		- Making it too large can make the player start constatly being triggered
@@ -183,7 +183,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Camera|Zoom Settings", DisplayName = "Input Yaw Scale")
 		float fInputYawScale = 2.5f;
 
-
 	#pragma region Telekinetic Function Prototypes 
 	UFUNCTION()
 		void HandleTelekinesis();
@@ -211,6 +210,9 @@ public:
 	void Attack();
 	void AlternateAttack();
 
+	void OnWeaponAttackStarted();
+	void OnWeaponAttackEnded();
+
 	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
 
 	UFUNCTION()
@@ -231,13 +233,31 @@ public:
 	void SetInvincibility() { bInvincible = !bInvincible; };
 	void SetInvincibility(bool State) { bInvincible = State; };
 
+	UFUNCTION(BlueprintCallable)
+	void UseHealthConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseFocusConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseStaminaConsumable();
+
+	UPROPERTY()
+	float HealAmount;
+
+	UPROPERTY()
+	float FocusAmount;
+
+	UPROPERTY()
+	float StaminaAmount;
+
 	private:
 	void RegenerateHealth();
 	FTimerHandle InvincibilityTimer;
 	FTimerHandle HealthRegenerationTimer;
 
 	/// Determines if the player can be damaged
-	UPROPERTY(EditDefaultsOnly, Category = "Stats", DisplayName = "Invincible")
+	UPROPERTY(VisibleAnywhere, Category = "Stats", DisplayName = "Invincible")
 		bool bInvincible = false;
 
 	#pragma endregion
@@ -251,7 +271,7 @@ public:
 
 	/// The Cost of the Telekinetic "Holding" Ability, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Telekinetic Abilities|Costs and Consumptions", DisplayName = "Holding Focus Rate ( /s )")
-		float fConstantFocusRate = 1.5f; // Depleation Rate (1/s)
+		float fConstantFocusRate = 0.75f; // Depleation Rate (1/s)
 
 	/// The Cost of the Telekinetic "Push" Ability, Flat Rate
 	UPROPERTY(EditDefaultsOnly, Category = "Telekinetic Abilities|Costs and Consumptions", DisplayName = "Push Focus Cost")
@@ -269,7 +289,7 @@ public:
 
 	/// A delay to start regenerating stamina
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Stamina Delay (s)")
-		float fStaminaDelay =.75f;
+		float fStaminaDelay = 0.75f;
 
 	/// The regeneration rate of Stamina, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Stamina Regeneration Rate ( /s )")

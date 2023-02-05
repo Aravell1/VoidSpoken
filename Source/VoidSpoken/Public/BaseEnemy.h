@@ -60,6 +60,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		float Attack = 0;
 
+	UFUNCTION()
+		virtual void OnSeePawn(APawn* OtherPawn);
+
 private:
 
 	float WalkSpeed = 0;

@@ -16,11 +16,13 @@ void AHealthPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		AVoidSpokenGameModeBase* GM;
 
 		GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-		if (GM)
+		if (GM->GetHealItem() < GM->MaxHeal)
 		{
 			GM->SetHealItem(1);
+			Destroy();
 		}
-		Destroy();
+		else
+			GM->PickupFull();
 	}
 	else
 		return;

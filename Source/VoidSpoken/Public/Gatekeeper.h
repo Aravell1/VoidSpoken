@@ -45,8 +45,7 @@ public:
 
 	void BehaviourStateEvent();
 
-	UFUNCTION()
-		void OnSeePawn(APawn* OtherPawn);
+	void OnSeePawn(APawn* OtherPawn) override;
 
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<APortalSpawn> Portal;
@@ -124,5 +123,6 @@ private:
 	bool Enraged = false;
 	bool LockState = false;
 
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "True"))
+	bool bIsDead = false;
 };

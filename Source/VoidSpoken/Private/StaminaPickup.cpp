@@ -16,11 +16,13 @@ void AStaminaPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AA
 		AVoidSpokenGameModeBase* GM;
 
 		GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-		if (GM)
+		if (GM->GetStaminaItem() < GM->MaxStamina)
 		{
 			GM->SetStaminaItem(1);
+			Destroy();
 		}
-		Destroy();
+		else
+			GM->PickupFull();
 	}
 	else
 		return;

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BaseEnemy.h"
+#include "Ghoul.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "../VoidSpokenGameModeBase.h"
 #include "Kismet/GameplayStatics.h"

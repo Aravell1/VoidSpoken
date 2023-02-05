@@ -6,7 +6,7 @@
 #include "StatsMasterClass.h"
 #include "PlayerCharacter.h"
 #include "DrawDebugHelpers.h"
-#include "JsonLibrary.h"
+//#include "JsonLibrary.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "CheckPoints.generated.h"
@@ -34,8 +34,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Checkpoints")
 	class UStaticMeshComponent* CheckpointMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Checkpoints")
-	class UJsonLibrary* JsonLibrary;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Checkpoints")
+	class UJsonLibrary* JsonLibrary;*/
 
 	float MeshRadius;
 
