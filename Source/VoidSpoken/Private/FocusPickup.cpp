@@ -5,23 +5,87 @@
 
 AFocusPickup::AFocusPickup()
 {
-	
+	Text = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Pickup Text"));
+	Text->SetupAttachment(RootComponent);
+
+	TextTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Text Trigger Box"));
+	TextTriggerBox->SetupAttachment(RootComponent);
+}
+
+void AFocusPickup::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(Text)
+		Text->SetVisibility(false);
+
+	TextTriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AFocusPickup::TextTriggerOverlapBegin);
+	TextTriggerBox->OnComponentEndOverlap.AddDynamic(this, &AFocusPickup::TextTriggerOverlapEnd);
 }
 
 void AFocusPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor != this && OtherActor->IsA<APlayerCharacter>())
+	if (OtherActor)
 	{
-		//Focus Pickup++
-		AVoidSpokenGameModeBase* GM;
-		GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-		if (GM->GetFocusItem() < GM->MaxFocus)
+		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+
+		if (Player)
 		{
-			GM->SetFocusItem(1);
-			Destroy();
+			Player->SetOverlappingItem(this);
+			//Player->GetCurrentItem(this);
+			//UE_LOG(LogTemp, Warning, TEXT("Focus Overlap"));
 		}
-		GM->PickupFull();
+	}
+}
+
+void AFocusPickup::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+
+}
+
+void AFocusPickup::PickupFocus()
+{
+	AVoidSpokenGameModeBase* GM;
+	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	
+	if (GM->GetFocusItem() < GM->MaxFocus)
+	{
+		GM->SetFocusItem(1);
+		Destroy();
 	}
 	else
-		return;
+		GM->PickupFull();
 }
+
+void AFocusPickup::TextTriggerOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor)
+	{
+		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+
+		if (Player)
+		{
+			if (Text)
+			{
+				Text->SetVisibility(true);
+			}
+		}
+	}
+}
+
+void AFocusPickup::TextTriggerOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor)
+	{
+		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+
+		if (Player)
+		{
+			if (Text)
+			{
+				Text->SetVisibility(false);
+			}
+		}
+	}
+}
+

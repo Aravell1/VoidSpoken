@@ -10,32 +10,19 @@
 #include "Engine.h"
 
 void UWeaponAttackNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, float TotalDuration) {
-#if WITH_EDITOR
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
-#endif
-
 	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
 
-	/// NULL Check
-	if (Player != nullptr && Player->EquippedWeapon != nullptr) Player->EquippedWeapon->SetAttackDelay(true);
+	if (Player != nullptr && Player->EquippedWeapon != nullptr)
+		Player->EquippedWeapon->SetAttackDelay(true);
 }
 
 [[deprecated]] void UWeaponAttackNotifyState::NotifyTick(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, float FrameDeltaTime) {
-#if WITH_EDITOR
-	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
-#endif
+	
 }
 
 void UWeaponAttackNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
-#if WITH_EDITOR
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
-#endif
-
 	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
 
-	/// NULL Check
-	if (Player != nullptr && Player->EquippedWeapon != nullptr) {
-		Player->EquippedWeapon->SetAttackDelay(false);
+	if (Player != nullptr && Player->EquippedWeapon != nullptr)
 		Player->EquippedWeapon->NextAttack();
-	}
 }

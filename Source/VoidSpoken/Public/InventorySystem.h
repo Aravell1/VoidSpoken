@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "StatsMasterClass.h"
+#include "Kismet/GameplayStatics.h"
+#include "VoidSpoken/VoidSpokenGameModeBase.h"
 #include "InventorySystem.generated.h"
 
 
@@ -16,32 +19,7 @@ public:
 	// Sets default values for this component's properties
 	UInventorySystem();
 
-	UFUNCTION()
-		void SetHealItem(int heal);
-
-	UFUNCTION(BlueprintCallable)
-		int GetHealItem()
-	{
-		return HealPickup;
-	}
-
-	UFUNCTION()
-		void SetFocusItem(int focus);
-
-	UFUNCTION(BlueprintCallable)
-		int GetFocusItem()
-	{
-		return FocusPickup;
-	}
-
-	UFUNCTION()
-		void SetStaminaItem(int stamina);
-
-	UFUNCTION(BlueprintCallable)
-		int GetStaminaItem()
-	{
-		return StaminaPickup;
-	}
+	
 
 protected:
 	// Called when the game starts
@@ -51,13 +29,22 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(BlueprintCallable)
+	void UseHealthConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseFocusConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseStaminaConsumable();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stats")
+	class UStatsMasterClass* Stats;
+
 private:
 
-	int HealPickup;
-	int FocusPickup;
-	int StaminaPickup;
-
-	int HealLimit;
-	int FocusLimit;
-	int StaminaLimit;
+	float HealAmount;
+	float FocusAmount;
+	float StaminaAmount;
+	
 };

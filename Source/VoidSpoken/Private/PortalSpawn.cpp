@@ -18,6 +18,13 @@ void APortalSpawn::BeginPlay()
 	
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle,	this, &APortalSpawn::SpawnEnemy, 1.5f);
+
+	TArray<AActor*> FoundDirectors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACombatDirector::StaticClass(), FoundDirectors);
+	if (Cast<ACombatDirector>(FoundDirectors[0]))
+	{
+		CombatDirector = Cast<ACombatDirector>(FoundDirectors[0]);
+	}
 }
 
 // Called every frame
@@ -42,6 +49,11 @@ void APortalSpawn::SpawnEnemy()
 		ABaseEnemy* Enemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyClass, SpawnLocation, SpawnRotation, SpawnInfo);
 		Enemy->OnSeePawn(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()))->AddGatekeeperSpawn(Enemy);
+
+		if (Enemy->GetEnemyType() == EEnemyType::Melee)
+			CombatDirector->AddToMap(Enemy, true);
+		else
+			CombatDirector->AddToMap(Enemy, false);
 
 		SetLifeSpan(7);
 	}

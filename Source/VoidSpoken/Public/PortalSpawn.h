@@ -9,6 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "../VoidSpokenGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "CombatDirector.h"
 #include "PortalSpawn.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAttackCommand);
@@ -43,5 +44,7 @@ protected:
 
 private:
 	void SpawnEnemy();
+
+	ACombatDirector* CombatDirector;
 
 };

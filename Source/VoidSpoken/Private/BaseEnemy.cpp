@@ -9,6 +9,16 @@ ABaseEnemy::ABaseEnemy()
 	
 }
 
+EEnemyType ABaseEnemy::GetEnemyType()
+{
+	return EType;
+}
+
+void ABaseEnemy::SetEnemyType(EEnemyType type)
+{
+	EType = type;
+}
+
 float ABaseEnemy::GetAttack()
 {
 	return Attack;
@@ -54,6 +64,28 @@ void ABaseEnemy::AttackTrace(UAnimMontage* AnimTrigger)
 }
 
 void ABaseEnemy::OnSeePawn(APawn* OtherPawn)
+{
+}
+
+void ABaseEnemy::TriggerAttack()
+{
+}
+
+void ABaseEnemy::EnterCombat(APawn* OtherPawn, bool Cooldown)
+{
+}
+
+//Make sure to override and do not use Super for this function
+bool ABaseEnemy::CheckLineOfSight(AActor* OtherActor)
+{
+	return false;
+}
+
+void ABaseEnemy::SetCombatIdle()
+{
+}
+
+void ABaseEnemy::SetCirclePlayer()
 {
 }
 
