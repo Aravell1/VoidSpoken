@@ -47,13 +47,24 @@ public:
 
 	void OnSeePawn(APawn* OtherPawn) override;
 
+	void SetCanWeaponApplyDamage(bool ApplyDamage);
+
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<APortalSpawn> Portal;
+
+	UPROPERTY(EditDefaultsOnly)
+		UStaticMeshComponent* Weapon;
+
+	UPROPERTY(EditDefaultsOnly)
+		UBoxComponent* WeaponCollider;
 
 	UPROPERTY(EditAnywhere)
 		TArray<AGatekeeperTransforms*> PortalSpawns = { nullptr, nullptr, nullptr };
 	UPROPERTY(EditAnywhere)
 		AGatekeeperTransforms* BossStartPoint;
+
+	UPROPERTY(EditDefaultsOnly)
+		TMap<UAnimMontage*, float> MontageMap;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* BaseAttackMontage = nullptr;
@@ -71,7 +82,7 @@ public:
 		UAnimMontage* RandomMontage = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
-		float StompImpulseForce = 5000;
+		float StompImpulseForce = 6000;
 
 	void AttackTrace(UAnimMontage* AnimTrigger) override;
 protected:
@@ -82,6 +93,8 @@ protected:
 	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
 	UFUNCTION()
 		void OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted);
+	UFUNCTION()
+		virtual void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 private:
 
@@ -108,20 +121,21 @@ private:
 	FOnMontageEnded MontageEndDelegate;
 	FTimerHandle TimerHandle;
 
-	float ReachTargetDistance = 320.0f;
-	float TimeToRun = 4.0f;
+	const float ReachTargetDistance = 320.0f;
+	const float TimeToRun = 4.0f;
 	float RandomTimeToRun = 3.0f;
 	float RunTimer = 0;
 
-	float AttackMultiplier = 1;
-	float DefenseMultiplier = 1;
-	float StompRadius = 750;
+	const float AttackMultiplier = 1;
+	const float DefenseMultiplier = 1;
+	const float StompRadius = 750;
 	bool HeavyReset = true;
 	bool AttackReset = true;
 	bool PortalReset = true;
 	bool Attacking = false;
 	bool Enraged = false;
 	bool LockState = false;
+	bool bCanWeaponApplyDamage = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "True"))
 	bool bIsDead = false;

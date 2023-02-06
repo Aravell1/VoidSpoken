@@ -65,7 +65,7 @@ public:
 	void OnStaggered() override;
 	bool CheckLineOfSight(AActor* OtherActor) override;
 	void SetCombatIdle() override;
-	void SetCirclePlayer() override;
+	void SetCirclePlayer(bool RandomizeDirection) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* Attack1Montage = nullptr;
@@ -158,7 +158,7 @@ private:
 
 	const float BurstSpikeSpawnDistance = 50.0f;
 	const float BurstRadius = 500.0f;
-	const float ProjectileSpeed = 1800.0f;
+	const float ProjectileSpeed = 2500.0f;
 
 	const float CallAlliesRange = 1200.0f;
 	const float MeleeSpreadRange = 500.0f;

@@ -6,6 +6,7 @@
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "BaseEnemy.h"
 #include "Ghoul.h"
+#include "Gatekeeper.h"
 #include "EnemyAttackNotifyState.generated.h"
 
 /**

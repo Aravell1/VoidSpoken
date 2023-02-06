@@ -94,10 +94,12 @@ void AGhoul::BehaviourStateEvent()
 		break;
 
 	case EGhoulState::CirclePlayer:
+		bCanAttack = true;
 		CirclePlayer();
 		break;
 
 	case EGhoulState::CombatIdle:
+		bCanAttack = true;
 		CombatIdle();
 		break;
 
@@ -527,8 +529,23 @@ void AGhoul::SetCombatIdle()
 		SetState(EGhoulState::CombatIdle);
 }
 
-void AGhoul::SetCirclePlayer()
+void AGhoul::SetCirclePlayer(bool RandomizeDirection)
 {
+	if (RandomizeDirection)
+	{
+		int Random = FMath::RandRange(0, 1);
+
+		switch (Random)
+		{
+		case 0:
+			MoveRight = true;
+			break;
+		case 1:
+			MoveRight = false;
+			break;
+		}
+	}
+
 	if (GetState() != EGhoulState::Attack && GetState() != EGhoulState::CirclePlayer)
 		SetState(EGhoulState::CirclePlayer);
 }

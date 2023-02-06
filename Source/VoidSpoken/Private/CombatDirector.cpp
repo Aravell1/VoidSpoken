@@ -120,7 +120,19 @@ void ACombatDirector::TriggerEnemyAttack()
 					else
 					{
 						if (Enemies[i].MeleeType)
-							Enemies[i].Enemy->SetCirclePlayer();
+						{
+							if (DirectionCounter >= DirectionThreshold)
+							{
+								Enemies[i].Enemy->SetCirclePlayer(true);
+								DirectionCounter = 0;
+							}
+							else
+							{
+								Enemies[i].Enemy->SetCirclePlayer(false);
+								DirectionCounter++;
+							}
+
+						}
 						else
 							Enemies[i].Enemy->SetCombatIdle();
 					}

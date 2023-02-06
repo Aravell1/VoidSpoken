@@ -85,7 +85,7 @@ void ABaseEnemy::SetCombatIdle()
 {
 }
 
-void ABaseEnemy::SetCirclePlayer()
+void ABaseEnemy::SetCirclePlayer(bool RandomizeDirection)
 {
 }
 
