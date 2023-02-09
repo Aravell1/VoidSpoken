@@ -174,7 +174,7 @@ public:
 
 	/// Base Stamina of this Weapon
 	///		-How much each Attack costs within the ComboAttackString
-	///		-Cannot Attack if the player doesn't have enough stamina
+	///		-Cannot Attack if the player does not have enough stamina
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (NoGetter))
 	float BaseStamina = 0;
 
@@ -270,6 +270,13 @@ public:
 	UPROPERTY(VisibleAnywhere, DisplayName = "Is Attacking")
 		bool bIsAttacking = false;
 
+	/// Boolean for Checking Collisions for the weapon to deal Damage
+	UPROPERTY(VisibleAnywhere, DisplayName = "Check For Overlapped Actors")
+		bool bCheckForOverlappedActors = false;
+
+	UFUNCTION(BlueprintCallable)
+	void SetCheckForOverlappedActors(bool State) { bCheckForOverlappedActors = State; };
+
 	/// Boolean Handler for NextAttack(), and to prevent the player attacking again
 	UPROPERTY(VisibleAnywhere, DisplayName = "Attacking Delay")
 		bool bAttackDelay = false;
@@ -281,12 +288,6 @@ public:
 	UFUNCTION()
 		virtual void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UFUNCTION()
-		virtual void OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex);
-
-	UFUNCTION()
-		virtual void OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit); 
-	
 	#pragma endregion
 
 	#pragma region Delegates and Events

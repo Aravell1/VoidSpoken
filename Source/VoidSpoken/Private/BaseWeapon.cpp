@@ -42,8 +42,6 @@ void ABaseWeapon::PostInitializeComponents() {
 
 	//Weapon Collision Delegates
 	WeaponCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ABaseWeapon::OnComponentBeginOverlap);
-	WeaponCollisionBox->OnComponentHit.AddDynamic(this, &ABaseWeapon::OnComponentHit);
-	WeaponCollisionBox->OnComponentEndOverlap.AddDynamic(this, &ABaseWeapon::OnComponentEndOverlap);
 }
 
 // Called every frame
@@ -75,7 +73,7 @@ void ABaseWeapon::Attack() {
 			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
 			
 			EAttackState = EAT_NormalAttack;
-			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
+			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex++]);
 		}
 	}
 }
@@ -89,7 +87,6 @@ void ABaseWeapon::NextAttack() {
 	EAttackState = EAT_None;
 	OverlappedActors.Empty();
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
-	CurrentComboIndex++;
 }
 
 void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent) {
@@ -156,25 +153,11 @@ void ABaseWeapon::Reset() {
 
 void ABaseWeapon::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (bIsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent) {
+	if (bCheckForOverlappedActors && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent) {
 		if (!OverlappedActors.Contains(OtherActor)) {
 			DealDamage(OverlappedComponent, OtherActor, OtherComponent);
 			OverlappedActors.AddUnique(OtherActor);
 		}
-	}
-}
-
-[[deprecated]] void ABaseWeapon::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex)
-{
-	if (bIsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent) {
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Overlap End: " + OtherActor->GetName()));
-	}
-}
-
-/// May not be used later on since these weapon will work off of overlapping actors instead of hitting and moving other actor around.
-[[deprecated]] void ABaseWeapon::OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
-	if (bIsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent) {
-		DealDamage(OverlappedComponent, OtherActor, OtherComponent);
 	}
 }
 
