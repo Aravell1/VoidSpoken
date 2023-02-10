@@ -19,6 +19,10 @@ ATelekineticProp::ATelekineticProp()
 
 	StaticMesh->SetAngularDamping(2.0f);
 	#pragma endregion
+
+	static ConstructorHelpers::FObjectFinder<UCurveFloat>C_LiftCurve(TEXT("/Game/Blueprints/Player/Telekinesis/Zoom.Zoom"));
+	if (C_LiftCurve.Succeeded())
+		LiftCurve = C_LiftCurve.Object;
 }
 
 void ATelekineticProp::PostInitializeComponents() {
@@ -31,7 +35,6 @@ void ATelekineticProp::PostInitializeComponents() {
 void ATelekineticProp::BeginPlay()
 {
 	Super::BeginPlay();
-
 
 	#pragma region Setup Timeline
 	FOnTimelineFloat LiftProgressUpdate;
@@ -57,6 +60,8 @@ void ATelekineticProp::Tick(float DeltaTime)
 		break;
 	case ETelekinesisState::ETS_Pulled:
 		ReachCharacter();
+	default:
+		break;
 	}
 }
 
@@ -103,7 +108,7 @@ void ATelekineticProp::Drop_Implementation() {
 
 #pragma region Visual Touches
 void ATelekineticProp::LiftUpdate(const float Alpha) {
-	FVector NewLocation = FMath::Lerp(LiftStart, LiftEnd, Alpha);
+	const FVector NewLocation = FMath::Lerp(LiftStart, LiftEnd, Alpha);
 	SetActorLocation(NewLocation);
 }
 
@@ -127,7 +132,7 @@ void ATelekineticProp::ChaoticJitter() {
 
 void ATelekineticProp::ReachCharacter() {
 	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::ClampVectorSize(UKismetMathLibrary::Subtract_VectorVector(Player->TelekinesisSource->GetComponentLocation(), GetActorLocation()), 0, 1000.0f), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f));
+	const FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::ClampVectorSize(UKismetMathLibrary::Subtract_VectorVector(Player->TelekinesisSource->GetComponentLocation(), GetActorLocation()), 0, 1000.0f), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f));
 	StaticMesh->AddImpulse(Impulse, NAME_None, true);
 
 	if (UKismetMathLibrary::Vector_Distance(GetActorLocation(), Player->TelekinesisSource->GetComponentLocation()) <= 50.0f)

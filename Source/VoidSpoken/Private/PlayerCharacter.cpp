@@ -7,6 +7,7 @@
 #include "FocusPickup.h"
 #include "HealthPickup.h"
 #include "StaminaPickup.h"
+#include "CombatDirector.h"
 
 #pragma region Constructor and Inheritied Functions
 
@@ -148,6 +149,17 @@ void APlayerCharacter::BeginPlay()
 	DodgingMaterialInterface = GetMesh()->GetMaterial(0);
 	DodgingTrailComponent->Deactivate();
 
+	#pragma region Combat Director Declaration
+
+		TArray<AActor*> FoundDirectors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACombatDirector::StaticClass(), FoundDirectors);
+		if (Cast<ACombatDirector>(FoundDirectors[0]))
+		{
+			CombatDirector = Cast<ACombatDirector>(FoundDirectors[0]);
+		}
+
+	#pragma endregion 
+
 	#pragma region Timeline Bindings
 
 	#pragma region Camera Zooming Bindings
@@ -186,15 +198,19 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	
-	/// Add "Relative" Movement endings to the character when in Telekinesis
-	/// Change this to AddMovementInput
-	//AddActorLocalOffset(FVector(GetMesh()->GetAnimInstance()->GetCurveValue("Movement Delta (Forward)"), 0.0f, 0.0f));
 	if (bTelekinesis)
 		AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
 	else
 		AddMovementInput(GetActorForwardVector(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
 
 	DetermineMovementState();
+
+	if (CombatDirector && bInCombat != CombatDirector->GetInCombat() && !GetWorldTimerManager().IsTimerActive(CombatTimer))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "In Combat");
+		GetWorldTimerManager().ClearTimer(CombatTimer);
+		bInCombat = CombatDirector->GetInCombat();
+	}
 
 	ZoomTimeline.TickTimeline(DeltaTime);
 	if (bTelekinesis)
@@ -237,8 +253,7 @@ void APlayerCharacter::SwapWeapons() {
 	#pragma endregion
 }
 
-void APlayerCharacter::ResetCameraRotation()
-{
+void APlayerCharacter::ResetCameraRotation() {
 	GetWorld()->GetFirstPlayerController()->SetControlRotation(GetActorRotation());
 }
 
@@ -450,9 +465,12 @@ void APlayerCharacter::DodgingStarted()
 void APlayerCharacter::DodgingUpdate(const float Alpha) {
 	AddMovementInput(DodgingDirection, 1.0f);
 	
-	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(DodgingMaterialInterface, GetMesh());
-	DynMaterial->SetScalarParameterValue("Dither", Alpha);
-	GetMesh()->SetMaterial(0, DynMaterial);
+	UMaterialInstanceDynamic* DynPlayerMaterial = UMaterialInstanceDynamic::Create(DodgingMaterialInterface, GetMesh());
+	UMaterialInstanceDynamic* DynWeaponMaterial = UMaterialInstanceDynamic::Create(EquippedWeapon->WeaponMaterialInterface, EquippedWeapon);
+	DynPlayerMaterial->SetScalarParameterValue("Dither", Alpha);
+	DynWeaponMaterial->SetScalarParameterValue("Dither", Alpha);
+	GetMesh()->SetMaterial(0, DynPlayerMaterial);
+	EquippedWeapon->WeaponMeshComponent->SetMaterial(0, DynWeaponMaterial);
 }
 
 void APlayerCharacter::DodgingFinished() {
@@ -545,7 +563,6 @@ void APlayerCharacter::OnWeaponAttackStarted() {
 	GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
 	
 	Stats->Stamina -= EquippedWeapon->GetStaminaCost();
-	bInCombat = true;
 }
 
 void APlayerCharacter::OnWeaponAttackEnded() {
@@ -554,8 +571,10 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 	GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, StaminaDelay);
 	
 	// Combat
+	bInCombat = true;
 	GetWorldTimerManager().ClearTimer(CombatTimer);
-	GetWorldTimerManager().SetTimer(CombatTimer, this, &APlayerCharacter::SetCombatState, 1.0f, false, CombatDelay);
+	if (!CombatDirector->GetInCombat())
+		GetWorldTimerManager().SetTimer(CombatTimer, this, &APlayerCharacter::SetCombatState, 1.0f, false, CombatDelay);
 }
 
 #pragma endregion

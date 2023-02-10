@@ -239,12 +239,18 @@ public:
 	#pragma endregion
 
 	#pragma region Components of this class
+
+	public:
 	
 	/// Mesh of this weapon
 	///		-Can be uninitialized, although not recommended
 	///		-Collision will be based off of this mesh (Simple Collision)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		class UStaticMeshComponent* WeaponMeshComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, DisplayName = "Weapon Material")
+	UMaterialInterface* WeaponMaterialInterface;
+	
 	/// Collision of this Weapon
 	///		-This is a box that attaches to a socket on the mesh itself
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

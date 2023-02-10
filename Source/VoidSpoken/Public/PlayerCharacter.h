@@ -55,6 +55,8 @@ enum class EMovementState : uint8 {
 
 #pragma endregion
 
+class ACombatDirector;
+
 UCLASS()
 class VOIDSPOKEN_API APlayerCharacter : public ABaseEntity {
 	GENERATED_BODY()
@@ -93,7 +95,10 @@ public:
 	void SwapWeapons();
 
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-	bool GetInCombat() const { return bInCombat; };
+	bool GetInCombat() const { return bInCombat; }
+
+	UPROPERTY(VisibleAnywhere, DisplayName = "Combat Director")
+	ACombatDirector* CombatDirector = nullptr;
 
 	#pragma region Combat Booleans and Timers
 	
@@ -150,7 +155,11 @@ public:
 
 	#pragma region Player Movement States and Variables
 
+	UPROPERTY(VisibleAnywhere)
 	FVector PlayerInput;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		FVector GetPlayerInputDirection() { return PlayerInput.X * FollowCamera->GetForwardVector() + PlayerInput.Y * FollowCamera->GetRightVector(); }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FVector GetPlayerInput() { return PlayerInput; }

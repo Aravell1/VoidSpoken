@@ -11,8 +11,6 @@
 
 #include "BaseWeapon.h"
 
-#include "Kismet/KismetMathLibrary.h"
-
 // Sets default values
 ABaseWeapon::ABaseWeapon()
 {
@@ -28,7 +26,8 @@ ABaseWeapon::ABaseWeapon()
 void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	WeaponMaterialInterface = WeaponMeshComponent->GetMaterial(0);
 }
 
 void ABaseWeapon::PostInitializeComponents() {
@@ -49,12 +48,18 @@ void ABaseWeapon::Tick(const float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	// Change for player based input, still moving into walls and such
-	EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "Equipped Character Forward: " + EquippedCharacter->GetActorForwardVector().ToString() + " Forward Delta: " + FString::SanitizeFloat(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)"))));
+
+	//EquippedCharacter->AddMovementInput(EquippedCharacter->GetActorForwardVector(), EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+	//EquippedCharacter->AddMovementInput(EquippedCharacter->GetActorForwardVector() ,EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
 }
 
 void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
 	EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
 	EquippedCharacter = EquippingCharacter;
+	
+	AddActorLocalOffset(FVector(0, 0, -48));
+	AddActorLocalRotation(FRotator(0, 0, -90));
 }
 
 void ABaseWeapon::Attack() {
