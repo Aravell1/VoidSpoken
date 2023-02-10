@@ -10,20 +10,6 @@ AGatekeeper::AGatekeeper()
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88);
 	GetCapsuleComponent()->SetCapsuleRadius(34);
 
-	if (!GetMesh()->SkeletalMesh)
-	{
-		static ConstructorHelpers::FObjectFinder<USkeletalMesh>MeshContainer(TEXT("/Game/Blueprints/Bosses/Gatekeeper/Components/Standing_Idle.Standing_Idle"));
-		if (MeshContainer.Succeeded())
-		{
-			GetMesh()->SetSkeletalMesh(MeshContainer.Object);
-
-			GetMesh()->SetupAttachment(GetCapsuleComponent());
-
-			GetMesh()->SetRelativeLocation(FVector(0, 0, -90));
-			GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
-		}
-	}
-
 	//Initialize General Stats
 	if (GetAttack() <= 0)
 		SetAttack(10);

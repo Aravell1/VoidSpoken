@@ -109,6 +109,7 @@ void ACombatDirector::TriggerEnemyAttack()
 			if (bDebugMode && GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Green, "HVE: " + Enemies[HighestValueIndex].Enemy->GetName() + ": " + FString::SanitizeFloat(HighestEnemyValue));
 
+			int AdditionalDistanceIndex = 0;
 			for (int i = 0; i < Enemies.Num(); i++)
 			{
 				if (Enemies[i].Enemy->bInCombat)
@@ -123,15 +124,15 @@ void ACombatDirector::TriggerEnemyAttack()
 						{
 							if (DirectionCounter >= DirectionThreshold)
 							{
-								Enemies[i].Enemy->SetCirclePlayer(true);
+								Enemies[i].Enemy->SetCirclePlayer(true, DistanceMultiplier * AdditionalDistanceIndex);
 								DirectionCounter = 0;
 							}
 							else
 							{
-								Enemies[i].Enemy->SetCirclePlayer(false);
+								Enemies[i].Enemy->SetCirclePlayer(false, DistanceMultiplier * AdditionalDistanceIndex);
 								DirectionCounter++;
 							}
-
+							AdditionalDistanceIndex++;
 						}
 						else
 							Enemies[i].Enemy->SetCombatIdle();

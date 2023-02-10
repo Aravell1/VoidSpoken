@@ -61,6 +61,7 @@ private:
 
 	int DirectionCounter = 5;
 	const int DirectionThreshold = 5;
+	const float DistanceMultiplier = 50;
 
 	float EnemiesInCombat = 0;
 
