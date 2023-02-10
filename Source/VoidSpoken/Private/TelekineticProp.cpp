@@ -14,6 +14,7 @@ ATelekineticProp::ATelekineticProp()
 	RootComponent = StaticMesh;
 
 	StaticMesh->SetSimulatePhysics(true);
+	StaticMesh->SetNotifyRigidBodyCollision(true);
 	StaticMesh->SetCollisionProfileName("Telekinesis");
 	StaticMesh->CustomDepthStencilValue = 1;
 
