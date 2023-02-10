@@ -90,7 +90,7 @@ public:
 	/// Function: GetAttackDelay()
 	///		-Returns the bool AttackDelay
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-		bool GetIsAttacking() const { return bIsAttacking; };
+		bool GetIsAttacking() const { return bAttackDelay; };
 
 	/// Function: CheckMovementMode()
 	///		-Fetches the current MovementMode from the EquippedCharacter, and compares if it's a valid mode to attack in
@@ -266,9 +266,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
 		TEnumAsByte<EAttackType> EAttackState = EAT_None;
 
+	/*
 	/// Boolean for when the attack started (prevent spamming attack inputs)
 	UPROPERTY(VisibleAnywhere, DisplayName = "Is Attacking")
 		bool bIsAttacking = false;
+	 */
 
 	/// Boolean for Checking Collisions for the weapon to deal Damage
 	UPROPERTY(VisibleAnywhere, DisplayName = "Check For Overlapped Actors")

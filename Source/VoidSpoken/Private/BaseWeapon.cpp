@@ -49,9 +49,7 @@ void ABaseWeapon::Tick(const float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	// Change for player based input, still moving into walls and such
-	if (bIsAttacking) {
-		EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0));
-	}
+	EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0));
 }
 
 void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
@@ -60,11 +58,10 @@ void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
 }
 
 void ABaseWeapon::Attack() {
-	if (!bIsAttacking && !bAttackDelay && CheckMovementMode()) {
-		if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0) {
+	if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0) {
+		if (EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurrentActiveMontage() != ComboAnimationMontage[CurrentComboIndex] && !bAttackDelay && CheckMovementMode()) {
 			// On Attack Started
 			OnAttackStarted.ExecuteIfBound();
-			bIsAttacking = true;
 
 			//Check the current index to make sure we do not reference something unwanted
 			if (CurrentComboIndex >= GetComboLength()) Reset();
@@ -73,7 +70,7 @@ void ABaseWeapon::Attack() {
 			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
 			
 			EAttackState = EAT_NormalAttack;
-			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex++]);
+			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
 		}
 	}
 }
@@ -81,8 +78,7 @@ void ABaseWeapon::Attack() {
 void ABaseWeapon::NextAttack() {
 	// On Attack Ended
 	OnAttackEnded.ExecuteIfBound();
-
-	bIsAttacking = false;
+	CurrentComboIndex++;
 	bAttackDelay = false;
 	EAttackState = EAT_None;
 	OverlappedActors.Empty();
@@ -121,7 +117,6 @@ void ABaseWeapon::Clear() {
 }
 
 void ABaseWeapon::Reset() {
-	bIsAttacking = false;
 	EAttackState = EAT_None;
 	CurrentComboIndex = 0;
 	OverlappedActors.Empty();
@@ -134,9 +129,8 @@ void ABaseWeapon::Reset() {
 
 [[deprecated]] void ABaseWeapon::ChargedAttack()
 {
-	if (!bAttackDelay && !bIsAttacking && CheckMovementMode()) {
+	if (!bAttackDelay && CheckMovementMode()) {
 		if (ChargedAttackMontage && EquippedCharacter->FindComponentByClass<UStatsMasterClass>()->Stamina >= ChargedAttackConsumption) {
-			bIsAttacking = true;
 
 			//Disabling Actors movement while attacking
 			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
