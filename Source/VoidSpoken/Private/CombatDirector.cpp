@@ -18,6 +18,15 @@ void ACombatDirector::BeginPlay()
 
 	GetWorldTimerManager().SetTimer(CombatAttackTimer, this, &ACombatDirector::TriggerEnemyAttack, AttackCheckInterval);
 	Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	TArray<AActor*> FoundBosses;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseBoss::StaticClass(), FoundBosses);
+	if (FoundBosses.Num() > 0)
+	{
+		for (int i = 0 ; i < FoundBosses.Num(); i++)
+			AddToMap(Cast<ABaseEnemy>(FoundBosses[i]), true);
+	}
+
 }
 
 void ACombatDirector::CalculateEnemyActions()
@@ -26,21 +35,28 @@ void ACombatDirector::CalculateEnemyActions()
 
 	for (int i = 0; i < Enemies.Num(); i++)
 	{
-		if (Enemies[i].Enemy->bInCombat && Enemies[i].Enemy->bCanAttack)
+		if (Enemies[i].Enemy->bInCombat)
 		{
-			Enemies[i].EnemyValue = 0;
-
-			float TimeSinceLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld()) - Enemies[i].Enemy->TimeOfLastAttack;
-			if (TimeSinceLastAttack > MinTimeBetweenAttacks)
+			if (Enemies[i].Enemy->bCanAttack)
 			{
-				Enemies[i].EnemyValue += (TimeSinceLastAttack) * 10;
+				Enemies[i].EnemyValue = 0;
 
-				float Angle = GetEnemyAngle(i);
+				float TimeSinceLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld()) - Enemies[i].Enemy->TimeOfLastAttack;
+				if (TimeSinceLastAttack > MinTimeBetweenAttacks)
+				{
+					Enemies[i].EnemyValue += (TimeSinceLastAttack) * 10;
 
-				if (Angle >= 1)
-					Enemies[i].EnemyValue += 50 / Angle;
+					float Angle = GetEnemyAngle(i);
+
+					if (Angle >= 1)
+						Enemies[i].EnemyValue += 50 / Angle;
+					else
+						Enemies[i].EnemyValue += 50;
+				}
 				else
-					Enemies[i].EnemyValue += 50;
+				{
+					Enemies[i].EnemyValue = -1;
+				}
 			}
 			else
 			{

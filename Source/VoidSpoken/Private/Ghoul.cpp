@@ -295,8 +295,7 @@ void AGhoul::CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeColli
 	if (UseSpikeCollision)
 	{
 		CreatedSpike->SetDamage(Attack);
-		CreatedSpike->ProjectileMovementComponent->InitialSpeed = InitVel;
-		CreatedSpike->ProjectileMovementComponent->MaxSpeed = InitVel * 3;
+		CreatedSpike->SetSpeed(InitVel);
 		CreatedSpike->ProjectileMovementComponent->ProjectileGravityScale = 1.0f;
 		CreatedSpike->Owner = this;
 	}
@@ -524,7 +523,7 @@ void AGhoul::OnStaggered()
 
 bool AGhoul::CheckLineOfSight(AActor* OtherActor)
 {
-	return AIController->LineOfSightTo(OtherActor);
+	return AIController->LineOfSightTo(OtherActor) && FVector::Distance(GetActorLocation(), OtherActor->GetActorLocation()) <= PatrolResetDistance;
 }
 
 void AGhoul::SetCombatIdle()
@@ -535,24 +534,27 @@ void AGhoul::SetCombatIdle()
 
 void AGhoul::SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance)
 {
-	if (RandomizeDirection)
+	if (GetState() != EGhoulState::Attack && GetState() != EGhoulState::CirclePlayer && GetState() != EGhoulState::CallAllies)
 	{
-		int Random = FMath::RandRange(0, 1);
-
-		switch (Random)
+		if (RandomizeDirection)
 		{
-		case 0:
-			MoveRight = true;
-			break;
-		case 1:
-			MoveRight = false;
-			break;
-		}
-	}
+			int Random = FMath::RandRange(0, 1);
 
-	CircleTargetDistance = MeleeSpreadRange + AdditionalDistance;
-	if (GetState() != EGhoulState::Attack && GetState() != EGhoulState::CirclePlayer)
+			switch (Random)
+			{
+			case 0:
+				MoveRight = true;
+				break;
+			case 1:
+				MoveRight = false;
+				break;
+			}
+		}
+
+		CircleTargetDistance = MeleeSpreadRange + AdditionalDistance;
 		SetState(EGhoulState::CirclePlayer);
+
+	}
 }
 
 void AGhoul::BeginPlay()

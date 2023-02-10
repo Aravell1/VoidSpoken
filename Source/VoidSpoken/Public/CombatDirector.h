@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "BaseEnemy.h"
 #include "PlayerCharacter.h"
+#include "BaseBoss.h"
 #include "CombatDirector.generated.h"
 
 USTRUCT()

@@ -44,6 +44,13 @@ void ASpikeProjectile::SetDamage(float NewDamage, bool Collision, float LifeTime
 	SetLifeSpan(LifeTime);
 }
 
+void ASpikeProjectile::SetSpeed(float InitialSpeed)
+{
+	ProjectileMovementComponent->MaxSpeed = InitialSpeed * 2;
+	ProjectileMovementComponent->InitialSpeed = InitialSpeed;
+	ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileMovementComponent->InitialSpeed;
+}
+
 // Called when the game starts or when spawned
 void ASpikeProjectile::BeginPlay()
 {

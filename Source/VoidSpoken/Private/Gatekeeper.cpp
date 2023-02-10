@@ -96,6 +96,7 @@ void AGatekeeper::Tick(float DeltaTime)
 void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 {
 	AttackTarget = OtherPawn;
+	bInCombat = true;
 	AIController->SeePlayer(AttackTarget);
 
 	SetSpeed();
@@ -325,6 +326,7 @@ void AGatekeeper::Death()
 	GetCharacterMovement()->MaxWalkSpeed = 0;
 	Attacking = false;
 	bIsDead = true;
+	bInCombat = false;
 	SetState(GatekeeperState::Dead);
 
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
