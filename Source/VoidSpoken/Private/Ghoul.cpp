@@ -325,6 +325,10 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 				1);
 			break;
 
+		case EGhoulState::CirclePlayer:
+			GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
+			break;
+
 		case EGhoulState::Patrol:
 			if (PatrolIndex < PatrolPoints.Num() - 1)
 				PatrolIndex++;
@@ -425,7 +429,7 @@ void AGhoul::CirclePlayer()
 			FVector PlayerToEnemy = GetActorLocation() - AttackTarget->GetActorLocation();
 			PlayerToEnemy.Z = 0;
 
-			if (PlayerToEnemy.Length() > MeleeSpreadRange)
+			if (PlayerToEnemy.Length() > CircleTargetDistance)
 				GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
 			else
 				GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
@@ -437,7 +441,7 @@ void AGhoul::CirclePlayer()
 				Direction.Yaw -= 30;
 
 			FVector TargetPosition;
-			TargetPosition = AttackTarget->GetActorLocation() + Direction.Vector() * MeleeSpreadRange;
+			TargetPosition = AttackTarget->GetActorLocation() + Direction.Vector() * CircleTargetDistance;
 
 			if (TestPathExists(TargetPosition))
 				AIController->MoveToLocation(TargetPosition, MeleeTargetDistance);
@@ -529,7 +533,7 @@ void AGhoul::SetCombatIdle()
 		SetState(EGhoulState::CombatIdle);
 }
 
-void AGhoul::SetCirclePlayer(bool RandomizeDirection)
+void AGhoul::SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance)
 {
 	if (RandomizeDirection)
 	{
@@ -546,6 +550,7 @@ void AGhoul::SetCirclePlayer(bool RandomizeDirection)
 		}
 	}
 
+	CircleTargetDistance = MeleeSpreadRange + AdditionalDistance;
 	if (GetState() != EGhoulState::Attack && GetState() != EGhoulState::CirclePlayer)
 		SetState(EGhoulState::CirclePlayer);
 }
