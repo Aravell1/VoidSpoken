@@ -149,6 +149,11 @@ public:
 	#pragma endregion
 
 	#pragma region Player Movement States and Variables
+
+	FVector PlayerInput;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		FVector GetPlayerInput() { return PlayerInput; }
 	
 	void MoveForward(float Axis);
 	void MoveRight(float Axis);
@@ -407,6 +412,9 @@ public:
 
 	UFUNCTION()
 	void DodgingFinished();
+	
+	UFUNCTION(BlueprintCallable)
+	void ResetDodging();
 
 	protected:
 
