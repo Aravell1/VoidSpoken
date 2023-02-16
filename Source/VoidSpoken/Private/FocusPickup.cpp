@@ -25,13 +25,15 @@ void AFocusPickup::BeginPlay()
 
 void AFocusPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherComp)
+	if (OtherActor)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
-		if (Player && Player->GetMesh())
+		if (Player)
 		{
 			Player->SetOverlappingItem(this);
+			//Player->GetCurrentItem(this);
+			//UE_LOG(LogTemp, Warning, TEXT("Focus Overlap"));
 		}
 	}
 }
@@ -57,11 +59,11 @@ void AFocusPickup::PickupFocus()
 
 void AFocusPickup::TextTriggerOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherComp)
+	if (OtherActor)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
-		if (Player && Player->GetMesh())
+		if (Player)
 		{
 			if (Text)
 			{
@@ -73,11 +75,11 @@ void AFocusPickup::TextTriggerOverlapBegin(UPrimitiveComponent* OverlappedCompon
 
 void AFocusPickup::TextTriggerOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor && OtherComp)
+	if (OtherActor)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
-		if (Player && Player->GetMesh())
+		if (Player)
 		{
 			if (Text)
 			{

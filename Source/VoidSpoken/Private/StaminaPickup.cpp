@@ -26,11 +26,12 @@ void AStaminaPickup::BeginPlay()
 
 void AStaminaPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherComp)
+	if (OtherActor)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+		
 
-		if (Player && Player->GetMesh())
+		if (Player)
 		{
 			Player->SetOverlappingItem(this);
 		}
@@ -55,11 +56,11 @@ void AStaminaPickup::PickupStamina()
 
 void AStaminaPickup::TextTriggerOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherComp)
+	if (OtherActor)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
-		if (Player && Player->GetMesh())
+		if (Player)
 		{
 			if (Text)
 			{
@@ -71,11 +72,11 @@ void AStaminaPickup::TextTriggerOverlapBegin(UPrimitiveComponent* OverlappedComp
 
 void AStaminaPickup::TextTriggerOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor && OtherComp)
+	if (OtherActor)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
-		if (Player && Player->GetMesh())
+		if (Player)
 		{
 			if (Text)
 			{
