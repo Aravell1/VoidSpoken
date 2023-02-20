@@ -65,7 +65,7 @@ public:
 	void OnStaggered() override;
 	bool CheckLineOfSight(AActor* OtherActor) override;
 	void SetCombatIdle() override;
-	void SetCirclePlayer() override;
+	void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* Attack1Montage = nullptr;
@@ -140,6 +140,7 @@ private:
 	const float GhoulRunSpeed = 300.0f;
 
 	float ReachTargetDistance = 0;
+	float CircleTargetDistance = 0;
 	const float MeleeTargetDistance = 75.0f;
 	const float RangedTargetDistance = 2000.0f;
 
@@ -158,7 +159,7 @@ private:
 
 	const float BurstSpikeSpawnDistance = 50.0f;
 	const float BurstRadius = 500.0f;
-	const float ProjectileSpeed = 1800.0f;
+	const float ProjectileSpeed = 2500.0f;
 
 	const float CallAlliesRange = 1200.0f;
 	const float MeleeSpreadRange = 500.0f;

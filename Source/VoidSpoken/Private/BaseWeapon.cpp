@@ -11,8 +11,6 @@
 
 #include "BaseWeapon.h"
 
-#include "Kismet/KismetMathLibrary.h"
-
 // Sets default values
 ABaseWeapon::ABaseWeapon()
 {
@@ -28,7 +26,8 @@ ABaseWeapon::ABaseWeapon()
 void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	WeaponMaterialInterface = WeaponMeshComponent->GetMaterial(0);
 }
 
 void ABaseWeapon::PostInitializeComponents() {
@@ -42,8 +41,6 @@ void ABaseWeapon::PostInitializeComponents() {
 
 	//Weapon Collision Delegates
 	WeaponCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ABaseWeapon::OnComponentBeginOverlap);
-	WeaponCollisionBox->OnComponentHit.AddDynamic(this, &ABaseWeapon::OnComponentHit);
-	WeaponCollisionBox->OnComponentEndOverlap.AddDynamic(this, &ABaseWeapon::OnComponentEndOverlap);
 }
 
 // Called every frame
@@ -51,22 +48,25 @@ void ABaseWeapon::Tick(const float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	// Change for player based input, still moving into walls and such
-	if (bIsAttacking) {
-		EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0));
-	}
+	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "Equipped Character Forward: " + EquippedCharacter->GetActorForwardVector().ToString() + " Forward Delta: " + FString::SanitizeFloat(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)"))));
+
+	//EquippedCharacter->AddMovementInput(EquippedCharacter->GetActorForwardVector(), EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+	//EquippedCharacter->AddMovementInput(EquippedCharacter->GetActorForwardVector() ,EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
 }
 
 void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
 	EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
 	EquippedCharacter = EquippingCharacter;
+	
+	AddActorLocalOffset(FVector(0, 0, -48));
+	AddActorLocalRotation(FRotator(0, 0, -90));
 }
 
 void ABaseWeapon::Attack() {
-	if (!bIsAttacking && !bAttackDelay && CheckMovementMode()) {
-		if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0) {
+	if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0) {
+		if (EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurrentActiveMontage() != ComboAnimationMontage[CurrentComboIndex] && !bAttackDelay && CheckMovementMode()) {
 			// On Attack Started
 			OnAttackStarted.ExecuteIfBound();
-			bIsAttacking = true;
 
 			//Check the current index to make sure we do not reference something unwanted
 			if (CurrentComboIndex >= GetComboLength()) Reset();
@@ -83,13 +83,11 @@ void ABaseWeapon::Attack() {
 void ABaseWeapon::NextAttack() {
 	// On Attack Ended
 	OnAttackEnded.ExecuteIfBound();
-
-	bIsAttacking = false;
+	CurrentComboIndex++;
 	bAttackDelay = false;
 	EAttackState = EAT_None;
 	OverlappedActors.Empty();
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
-	CurrentComboIndex++;
 }
 
 void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent) {
@@ -124,7 +122,6 @@ void ABaseWeapon::Clear() {
 }
 
 void ABaseWeapon::Reset() {
-	bIsAttacking = false;
 	EAttackState = EAT_None;
 	CurrentComboIndex = 0;
 	OverlappedActors.Empty();
@@ -137,9 +134,8 @@ void ABaseWeapon::Reset() {
 
 [[deprecated]] void ABaseWeapon::ChargedAttack()
 {
-	if (!bAttackDelay && !bIsAttacking && CheckMovementMode()) {
+	if (!bAttackDelay && CheckMovementMode()) {
 		if (ChargedAttackMontage && EquippedCharacter->FindComponentByClass<UStatsMasterClass>()->Stamina >= ChargedAttackConsumption) {
-			bIsAttacking = true;
 
 			//Disabling Actors movement while attacking
 			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
@@ -156,25 +152,11 @@ void ABaseWeapon::Reset() {
 
 void ABaseWeapon::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (bIsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent) {
+	if (bCheckForOverlappedActors && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent) {
 		if (!OverlappedActors.Contains(OtherActor)) {
 			DealDamage(OverlappedComponent, OtherActor, OtherComponent);
 			OverlappedActors.AddUnique(OtherActor);
 		}
-	}
-}
-
-[[deprecated]] void ABaseWeapon::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex)
-{
-	if (bIsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent) {
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Overlap End: " + OtherActor->GetName()));
-	}
-}
-
-/// May not be used later on since these weapon will work off of overlapping actors instead of hitting and moving other actor around.
-[[deprecated]] void ABaseWeapon::OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
-	if (bIsAttacking && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent) {
-		DealDamage(OverlappedComponent, OtherActor, OtherComponent);
 	}
 }
 

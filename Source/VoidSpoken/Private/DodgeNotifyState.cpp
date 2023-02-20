@@ -9,13 +9,8 @@ void UDodgeNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComponent, UAnim
 	#endif
 
 	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
-
 	if (Player)
 		Player->DodgingStarted();
-}
-
-[[deprecated]] void UDodgeNotifyState::NotifyTick(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, float FrameDeltaTime) {
-
 }
 
 void UDodgeNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
@@ -24,7 +19,6 @@ void UDodgeNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSe
 	#endif
 
 	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
-
 	if (Player)
 		Player->DodgingFinished();
 }

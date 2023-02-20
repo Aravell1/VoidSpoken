@@ -85,7 +85,7 @@ public:
 	virtual void EnterCombat(APawn* OtherPawn, bool Cooldown);
 	virtual bool CheckLineOfSight(AActor* OtherActor);
 	virtual void SetCombatIdle();
-	virtual void SetCirclePlayer();
+	virtual void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance);
 
 	UPROPERTY(VisibleAnywhere)
 		bool bInCombat = false;

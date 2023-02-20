@@ -5,8 +5,9 @@
 #include "Engine.h"
 
 void UWeaponClearNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
-	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
+	const APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
 
 	/// NULL Check
-	if (Player != nullptr && Player->EquippedWeapon != nullptr) Player->EquippedWeapon->Clear();
+	if (Player != nullptr && Player->EquippedWeapon != nullptr)
+		Player->EquippedWeapon->Clear();
 }

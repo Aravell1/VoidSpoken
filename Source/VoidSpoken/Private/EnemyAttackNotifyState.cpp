@@ -7,8 +7,8 @@ void UEnemyAttackNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComponent,
 {
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(MeshComponent->GetOwner());
 
-	if (Enemy != nullptr && Enemy->EquippedWeapon != nullptr)
-		Enemy->EquippedWeapon->SetIsAttacking(true);
+	if (Enemy != nullptr && Cast<AGatekeeper>(Enemy))
+		Cast<AGatekeeper>(Enemy)->SetCanWeaponApplyDamage(true);
 	else if (Enemy != nullptr && Cast<AGhoul>(Enemy))
 		Cast<AGhoul>(Enemy)->SetAttacking(Cast<UAnimMontage>(Animation), true);
 }
@@ -17,8 +17,8 @@ void UEnemyAttackNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComponent, U
 {
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(MeshComponent->GetOwner());
 
-	if (Enemy != nullptr && Enemy->EquippedWeapon != nullptr)
-		Enemy->EquippedWeapon->SetIsAttacking(false);
+	if (Enemy != nullptr && Cast<AGatekeeper>(Enemy))
+		Cast<AGatekeeper>(Enemy)->SetCanWeaponApplyDamage(false);
 	else if (Enemy != nullptr && Cast<AGhoul>(Enemy))
 		Cast<AGhoul>(Enemy)->SetAttacking(Cast<UAnimMontage>(Animation), false);
 }

@@ -10,19 +10,23 @@
 #include "Engine.h"
 
 void UWeaponAttackNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, float TotalDuration) {
-	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
+	const APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
 
 	if (Player != nullptr && Player->EquippedWeapon != nullptr)
-		Player->EquippedWeapon->SetAttackDelay(true);
-}
+		Player->EquippedWeapon->SetCheckForOverlappedActors(true);
 
-[[deprecated]] void UWeaponAttackNotifyState::NotifyTick(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation, float FrameDeltaTime) {
-	
+	#if WITH_ENGINE
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Orange, __FUNCTION__);
+	#endif
 }
 
 void UWeaponAttackNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
-	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
+	const APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
 
 	if (Player != nullptr && Player->EquippedWeapon != nullptr)
-		Player->EquippedWeapon->NextAttack();
+		Player->EquippedWeapon->SetCheckForOverlappedActors(false);
+
+	#if WITH_ENGINE
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Orange, __FUNCTION__);
+	#endif
 }

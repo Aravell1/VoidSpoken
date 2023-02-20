@@ -28,6 +28,7 @@ public:
 		UStaticMeshComponent* ProjectileMeshComponent;
 
 	void SetDamage(float NewDamage, bool Collision = true, float LifeTime = 3);
+	void SetSpeed(float InitialSpeed);
 
 protected:
 	// Called when the game starts or when spawned

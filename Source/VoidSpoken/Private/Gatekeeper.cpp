@@ -10,20 +10,6 @@ AGatekeeper::AGatekeeper()
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88);
 	GetCapsuleComponent()->SetCapsuleRadius(34);
 
-	if (!GetMesh()->SkeletalMesh)
-	{
-		static ConstructorHelpers::FObjectFinder<USkeletalMesh>MeshContainer(TEXT("/Game/Blueprints/Bosses/Gatekeeper/Components/Standing_Idle.Standing_Idle"));
-		if (MeshContainer.Succeeded())
-		{
-			GetMesh()->SetSkeletalMesh(MeshContainer.Object);
-
-			GetMesh()->SetupAttachment(GetCapsuleComponent());
-
-			GetMesh()->SetRelativeLocation(FVector(0, 0, -90));
-			GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
-		}
-	}
-
 	//Initialize General Stats
 	if (GetAttack() <= 0)
 		SetAttack(10);
@@ -68,6 +54,14 @@ void AGatekeeper::BeginPlay()
 	MontageArray.Add(StompMontage);
 	MontageArray.Add(BeamMontage);
 
+	if (!Weapon)
+		Weapon = Cast<UStaticMeshComponent>(GetDefaultSubobjectByName(TEXT("WeaponMesh")));
+	if (!WeaponCollider)
+		WeaponCollider = Cast<UBoxComponent>(GetDefaultSubobjectByName(TEXT("WeaponBox")));
+
+	if (WeaponCollider)
+		WeaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGatekeeper::OnComponentBeginOverlap);
+
 	SetState(GatekeeperState::Start);
 }
 
@@ -102,6 +96,7 @@ void AGatekeeper::Tick(float DeltaTime)
 void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 {
 	AttackTarget = OtherPawn;
+	bInCombat = true;
 	AIController->SeePlayer(AttackTarget);
 
 	SetSpeed();
@@ -109,6 +104,11 @@ void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 	SetState(GatekeeperState::Chase);
 
 	PawnSensing->SetSensingUpdatesEnabled(false);
+}
+
+void AGatekeeper::SetCanWeaponApplyDamage(bool ApplyDamage)
+{
+	bCanWeaponApplyDamage = ApplyDamage;
 }
 
 void AGatekeeper::BehaviourStateEvent()
@@ -197,6 +197,25 @@ void AGatekeeper::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 		{
 			SetSpeed();
 			SetState(GatekeeperState::HeavyAttack);
+		}
+	}
+}
+
+void AGatekeeper::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OverlappedComponent == WeaponCollider && bCanWeaponApplyDamage)
+	{
+		if (OtherActor == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+		{
+			float Multiplier = 0;
+			UAnimMontage* CurrentMontage = GetMesh()->GetAnimInstance()->GetCurrentActiveMontage();
+
+			if (MontageMap.Contains(CurrentMontage))
+			{
+				Multiplier = *MontageMap.Find(CurrentMontage);
+			}
+
+			UGameplayStatics::ApplyDamage(OtherActor, Attack * Multiplier, NULL, this, NULL);
 		}
 	}
 }
@@ -307,6 +326,7 @@ void AGatekeeper::Death()
 	GetCharacterMovement()->MaxWalkSpeed = 0;
 	Attacking = false;
 	bIsDead = true;
+	bInCombat = false;
 	SetState(GatekeeperState::Dead);
 
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
@@ -401,6 +421,12 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 
 	FVector StartLocation;
 	float AttackRadius;
+	float Multiplier = 0;
+
+	if (MontageMap.Contains(AnimTrigger))
+	{
+		Multiplier = *MontageMap.Find(AnimTrigger);
+	}
 
 	if (AnimTrigger == StompMontage)
 	{
@@ -426,8 +452,10 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 			if (OutActors[i] == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 			{
 				//DrawDebugLine(GetWorld(), StartLocation, OutActors[i]->GetActorLocation(), FColor::Blue, false, 5);
-				UGameplayStatics::ApplyDamage(OutActors[i], Damage, NULL, this, NULL);
-				FVector ImpulseVector = (OutActors[i]->GetActorLocation() - StartLocation).GetSafeNormal() * StompImpulseForce;
+				UGameplayStatics::ApplyDamage(OutActors[i], Damage * Multiplier, NULL, this, NULL);
+				FVector ImpulseVector = OutActors[i]->GetActorLocation() - StartLocation;
+				ImpulseVector.Z = 0;
+				ImpulseVector = ImpulseVector.GetSafeNormal() * StompImpulseForce;
 				Cast<ACharacter>(OutActors[i])->LaunchCharacter(ImpulseVector, true, false);
 				return;
 			}
