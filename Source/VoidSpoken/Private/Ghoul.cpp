@@ -94,10 +94,12 @@ void AGhoul::BehaviourStateEvent()
 		break;
 
 	case EGhoulState::CirclePlayer:
+		bCanAttack = true;
 		CirclePlayer();
 		break;
 
 	case EGhoulState::CombatIdle:
+		bCanAttack = true;
 		CombatIdle();
 		break;
 
@@ -293,8 +295,7 @@ void AGhoul::CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeColli
 	if (UseSpikeCollision)
 	{
 		CreatedSpike->SetDamage(Attack);
-		CreatedSpike->ProjectileMovementComponent->InitialSpeed = InitVel;
-		CreatedSpike->ProjectileMovementComponent->MaxSpeed = InitVel * 3;
+		CreatedSpike->SetSpeed(InitVel);
 		CreatedSpike->ProjectileMovementComponent->ProjectileGravityScale = 1.0f;
 		CreatedSpike->Owner = this;
 	}
@@ -321,6 +322,10 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 				this,
 				&AGhoul::AttackCooldown,
 				1);
+			break;
+
+		case EGhoulState::CirclePlayer:
+			GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
 			break;
 
 		case EGhoulState::Patrol:
@@ -423,7 +428,7 @@ void AGhoul::CirclePlayer()
 			FVector PlayerToEnemy = GetActorLocation() - AttackTarget->GetActorLocation();
 			PlayerToEnemy.Z = 0;
 
-			if (PlayerToEnemy.Length() > MeleeSpreadRange)
+			if (PlayerToEnemy.Length() > CircleTargetDistance)
 				GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
 			else
 				GetCharacterMovement()->MaxWalkSpeed = BackUpSpeed;
@@ -435,7 +440,7 @@ void AGhoul::CirclePlayer()
 				Direction.Yaw -= 30;
 
 			FVector TargetPosition;
-			TargetPosition = AttackTarget->GetActorLocation() + Direction.Vector() * MeleeSpreadRange;
+			TargetPosition = AttackTarget->GetActorLocation() + Direction.Vector() * CircleTargetDistance;
 
 			if (TestPathExists(TargetPosition))
 				AIController->MoveToLocation(TargetPosition, MeleeTargetDistance);
@@ -518,7 +523,7 @@ void AGhoul::OnStaggered()
 
 bool AGhoul::CheckLineOfSight(AActor* OtherActor)
 {
-	return AIController->LineOfSightTo(OtherActor);
+	return AIController->LineOfSightTo(OtherActor) && FVector::Distance(GetActorLocation(), OtherActor->GetActorLocation()) <= PatrolResetDistance;
 }
 
 void AGhoul::SetCombatIdle()
@@ -527,10 +532,29 @@ void AGhoul::SetCombatIdle()
 		SetState(EGhoulState::CombatIdle);
 }
 
-void AGhoul::SetCirclePlayer()
+void AGhoul::SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance)
 {
-	if (GetState() != EGhoulState::Attack && GetState() != EGhoulState::CirclePlayer)
+	if (GetState() != EGhoulState::Attack && GetState() != EGhoulState::CirclePlayer && GetState() != EGhoulState::CallAllies)
+	{
+		if (RandomizeDirection)
+		{
+			int Random = FMath::RandRange(0, 1);
+
+			switch (Random)
+			{
+			case 0:
+				MoveRight = true;
+				break;
+			case 1:
+				MoveRight = false;
+				break;
+			}
+		}
+
+		CircleTargetDistance = MeleeSpreadRange + AdditionalDistance;
 		SetState(EGhoulState::CirclePlayer);
+
+	}
 }
 
 void AGhoul::BeginPlay()
