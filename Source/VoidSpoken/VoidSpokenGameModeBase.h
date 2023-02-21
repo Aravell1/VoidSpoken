@@ -24,7 +24,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 		TArray<AActor*> GatekeeperEnemySpawns;
-	
+
+	int ObeliskCount = 0;
 
 	UFUNCTION()
 	void SetHealItem(int health);

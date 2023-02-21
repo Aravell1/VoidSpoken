@@ -24,9 +24,93 @@ void ACombatDirector::BeginPlay()
 	if (FoundBosses.Num() > 0)
 	{
 		for (int i = 0 ; i < FoundBosses.Num(); i++)
-			AddToMap(Cast<ABaseEnemy>(FoundBosses[i]), true);
+			AddToMap(Cast<ABaseEnemy>(FoundBosses[i]));
 	}
 
+	TArray<AActor*> FoundObelisks;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AObelisk::StaticClass(), FoundObelisks);
+	if (FoundObelisks.Num() > 0)
+	{
+		for (int i = 0; i < FoundObelisks.Num(); i++)
+		{
+			Obelisks.Add(Cast<AObelisk>(FoundObelisks[i]));
+			Obelisks[i]->EnableCharge.AddDynamic(this, &ACombatDirector::SetObeliskMode);
+			Obelisks[i]->DisableCharge.AddDynamic(this, &ACombatDirector::SetObeliskMode);
+		}
+	}
+
+	TArray<AActor*> FoundSpawnPoints;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemyPortalSpawn::StaticClass(), FoundSpawnPoints);
+	if (FoundSpawnPoints.Num() > 0)
+	{
+		for (int i = 0; i < FoundSpawnPoints.Num(); i++)
+		{
+			EnemySpawnPoints.Add(Cast<AEnemyPortalSpawn>(FoundSpawnPoints[i]));
+			EnemySpawnPoints[i]->OnEnemySpawned.AddDynamic(this, &ACombatDirector::AddToMap);
+		}
+	}
+
+	GetWorldTimerManager().SetTimer(SpawnEnemiesTimer,
+		this,
+		&ACombatDirector::SpawnEnemy,
+		SpawnTimerDuration);
+}
+
+void ACombatDirector::SpawnEnemy()
+{
+	if (!bObeliskMode)
+	{
+		TArray<AEnemyPortalSpawn*> SpawnPoints;
+		for (int i = 0; i < EnemySpawnPoints.Num(); i++)
+		{
+			if (FVector::Distance(EnemySpawnPoints[i]->GetActorLocation(), Player->GetActorLocation()) <= EnemySpawnDistance)
+				SpawnPoints.Add(EnemySpawnPoints[i]);
+		}
+
+		for (int i = 0; i < EnemiesToSpawn; i++)
+		{
+			int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+
+			SpawnPoints[RandomIndex]->SpawnPortal();
+
+			SpawnPoints.RemoveAt(RandomIndex);
+		}
+	}
+
+	SpawnTicks++;
+	if (SpawnTicks >= InreaseSpawnsThreshold)
+	{
+		SpawnTicks = 0;
+		EnemiesToSpawn++;
+	}
+
+	GetWorldTimerManager().SetTimer(SpawnEnemiesTimer,
+		this,
+		&ACombatDirector::SpawnEnemy,
+		SpawnTimerDuration);
+	
+
+}
+
+void ACombatDirector::SpawnObeliskEnemy()
+{
+	if (ActivatedObelisk)
+	{
+		TArray<AEnemyPortalSpawn*> SpawnPoints = ActivatedObelisk->NearbySpawnPoints;
+		int SpawnCount = EnemiesToSpawn - ObeliskSpawns;
+		if (SpawnCount > 0)
+		{
+			for (int i = 0; i < SpawnCount; i++)
+			{
+				int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+				SpawnPoints[RandomIndex]->SpawnPortal();
+
+				SpawnPoints.RemoveAt(RandomIndex);
+
+				ObeliskSpawns++;
+			}
+		}
+	}
 }
 
 void ACombatDirector::CalculateEnemyActions()
@@ -136,7 +220,7 @@ void ACombatDirector::TriggerEnemyAttack()
 					}
 					else
 					{
-						if (Enemies[i].MeleeType)
+						if (Enemies[i].Enemy->GetEnemyType() == EEnemyType::Melee)
 						{
 							if (DirectionCounter >= DirectionThreshold)
 							{
@@ -161,24 +245,35 @@ void ACombatDirector::TriggerEnemyAttack()
 	GetWorldTimerManager().SetTimer(CombatAttackTimer, this, &ACombatDirector::TriggerEnemyAttack, AttackCheckInterval);
 }
 
-void ACombatDirector::AddToMap(ABaseEnemy* Enemy, bool MeleeType)
+void ACombatDirector::AddToMap(ABaseEnemy* Enemy)
 {
 	FEnemyData NewEnemy;
 	NewEnemy.Enemy = Enemy;
-	NewEnemy.MeleeType = MeleeType;
 
-	Enemy->OnDestroyed.AddDynamic(this, &ACombatDirector::RemoveEnemy);
+	Enemy->OnDeathTrigger.AddDynamic(this, &ACombatDirector::RemoveEnemy);
 
 	Enemies.Add(NewEnemy);
+
+	if (bObeliskMode)
+		Enemy->EnterCombat(Player, false);
 }
 
-void ACombatDirector::RemoveEnemy(AActor* Enemy)
+void ACombatDirector::RemoveEnemy(ABaseEnemy* Enemy)
 {
 	for (int i = 0; i < Enemies.Num(); i++)
 	{
 		if (Enemies[i].Enemy == Enemy)
 		{
 			Enemies.RemoveAt(i);
+
+			if (bObeliskMode)
+			{
+				ObeliskSpawns--;
+				if (ObeliskSpawns < 0)
+					ObeliskSpawns = 0;
+				SpawnObeliskEnemy();
+			}
+
 			return;
 		}
 	}
@@ -187,4 +282,17 @@ void ACombatDirector::RemoveEnemy(AActor* Enemy)
 bool ACombatDirector::GetInCombat()
 {
 	return bInCombat;
+}
+
+void ACombatDirector::SetObeliskMode(AObelisk* Obelisk)
+{
+	bObeliskMode = !bObeliskMode;
+
+	if (bObeliskMode)
+	{
+		ActivatedObelisk = Obelisk;
+		SpawnObeliskEnemy();
+	}
+	else
+		ActivatedObelisk = nullptr;
 }
