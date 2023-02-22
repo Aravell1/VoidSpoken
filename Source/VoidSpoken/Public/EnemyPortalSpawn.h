@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BaseEnemy.h"
-#include "CombatDirector.h"
 #include "EnemyPortalSpawn.generated.h"
+
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSpawnDelegate, ABaseEnemy*, NewEnemy);
 
 UCLASS()
 class VOIDSPOKEN_API AEnemyPortalSpawn : public AActor
@@ -17,13 +19,16 @@ public:
 	// Sets default values for this actor's properties
 	AEnemyPortalSpawn();
 
-	UPROPERTY(EditAnywhere)
-		TSubclassOf<ABaseEnemy> EnemyType;
 
 	UPROPERTY(EditAnywhere)
 		TArray<APatrolPoint*> PatrolPoints;
 	
-	bool bEnemySpawned = false;
+	void SpawnPortal();
+
+	UPROPERTY(EditAnywhere)
+		bool bSpawnOnBeginPlay = false;
+
+	FSpawnDelegate OnEnemySpawned;
 
 protected:
 	// Called when the game starts or when spawned
@@ -34,21 +39,16 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	UPROPERTY(EditDefaultsOnly)
+		TArray<TSubclassOf<ABaseEnemy>> EnemyTypes;
 
-	AActor* Player;
-	
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<AActor> Portal;
 
-	void CheckPlayerDistance();
-	void SpawnPortal();
 	void SpawnEnemy();
 
 	FTimerHandle DistanceCheckTimer;
 
 	const float PlayerDistanceToSpawn = 5000;
-	const float DistanceCheckInterval = 1.0f;
 	const float DelayPortalToEnemy = 2.5f;
-
-	ACombatDirector* CombatDirector;
 };

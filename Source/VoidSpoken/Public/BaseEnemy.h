@@ -15,6 +15,9 @@
  * 
  */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBroadcastDelegate);
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTriggerDelegate, ABaseEnemy*, EnemyTrigger);
+
 
 UENUM()
 enum EEnemyType
@@ -33,6 +36,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "HealthBar")
 		FBroadcastDelegate UpdateHealthBar;
+
+	UPROPERTY(BlueprintAssignable, Category = "Death")
+		FTriggerDelegate OnDeathTrigger;
 
 	UFUNCTION(BlueprintPure)
 		enum EEnemyType GetEnemyType();
