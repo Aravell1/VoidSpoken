@@ -58,6 +58,8 @@ void ACombatDirector::BeginPlay()
 
 void ACombatDirector::SpawnEnemy()
 {
+	bAttackOnSpawn = true;
+
 	if (!bObeliskMode)
 	{
 		TArray<AEnemyPortalSpawn*> SpawnPoints;
@@ -67,13 +69,27 @@ void ACombatDirector::SpawnEnemy()
 				SpawnPoints.Add(EnemySpawnPoints[i]);
 		}
 
-		for (int i = 0; i < EnemiesToSpawn; i++)
+		if (SpawnPoints.Num() > EnemiesToSpawn)
 		{
-			int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+			for (int i = 0; i < EnemiesToSpawn; i++)
+			{
+				int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
 
-			SpawnPoints[RandomIndex]->SpawnPortal();
+				SpawnPoints[RandomIndex]->SpawnPortal();
 
-			SpawnPoints.RemoveAt(RandomIndex);
+				SpawnPoints.RemoveAt(RandomIndex);
+			}
+		}
+		else if (SpawnPoints.Num() > 0)
+		{
+			for (int i = 0; i < SpawnPoints.Num(); i++)
+			{
+				int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+
+				SpawnPoints[RandomIndex]->SpawnPortal();
+
+				SpawnPoints.RemoveAt(RandomIndex);
+			}
 		}
 	}
 
@@ -88,8 +104,6 @@ void ACombatDirector::SpawnEnemy()
 		this,
 		&ACombatDirector::SpawnEnemy,
 		SpawnTimerDuration);
-	
-
 }
 
 void ACombatDirector::SpawnObeliskEnemy()
@@ -254,7 +268,7 @@ void ACombatDirector::AddToMap(ABaseEnemy* Enemy)
 
 	Enemies.Add(NewEnemy);
 
-	if (bObeliskMode)
+	if (bObeliskMode || bAttackOnSpawn)
 		Enemy->EnterCombat(Player, false);
 }
 

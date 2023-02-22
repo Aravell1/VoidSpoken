@@ -61,6 +61,7 @@ private:
 	void SpawnEnemy();
 	void SpawnObeliskEnemy();
 	bool bObeliskMode = false;
+	bool bAttackOnSpawn = false;
 
 	int ObeliskSpawns = 0;
 	int EnemiesToSpawn = 2;
