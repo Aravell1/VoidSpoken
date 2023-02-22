@@ -37,7 +37,7 @@ void AObelisk::SetObeliskState(EActivationState NewState)
 
 	case EActivationState::Activated:
 		DisableCharge.Broadcast(this);
-		GameMode->ObeliskCount--;
+		GameMode->AddSubtractObeliskCount(-1);
 		ActivationSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		break;
 	}
@@ -48,7 +48,7 @@ void AObelisk::AddCharge(ABaseEnemy* EnemyTrigger)
 	if (GetObeliskState() == EActivationState::Charging)
 	{
 		if (GameMode)
-			ObeliskCharge += GameMode->ObeliskCount;
+			ObeliskCharge += GameMode->GetObeliskCount();
 
 		UpdateChargeWidget.Broadcast();
 		
@@ -64,7 +64,7 @@ void AObelisk::BeginPlay()
 	
 	GameMode = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (GameMode)
-		GameMode->ObeliskCount++;
+		GameMode->AddSubtractObeliskCount(1);
 
 	if (ActivationSphere)
 		ActivationSphere->OnComponentBeginOverlap.AddDynamic(this, &AObelisk::OnComponentBeginOverlap);
@@ -76,12 +76,12 @@ void AObelisk::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if (GetObeliskState() != EActivationState::Activated)
 	{
-		if (GetObeliskState() == EActivationState::Inactive)
+		if (GetObeliskState() == EActivationState::Inactive && bCanBeginCharging)
 		{
 			if (OtherActor->GetOwner())
 				OtherActor = OtherActor->GetOwner();
 
-			if (OverlappedComponent == ActivationSphere && Cast<APlayerCharacter>(OtherActor))
+			if (Cast<APlayerCharacter>(OtherActor))
 			{
 				SetObeliskState(EActivationState::Charging);
 			}

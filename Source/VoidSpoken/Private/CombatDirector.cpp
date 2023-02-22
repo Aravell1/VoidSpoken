@@ -279,11 +279,6 @@ void ACombatDirector::RemoveEnemy(ABaseEnemy* Enemy)
 	}
 }
 
-bool ACombatDirector::GetInCombat()
-{
-	return bInCombat;
-}
-
 void ACombatDirector::SetObeliskMode(AObelisk* Obelisk)
 {
 	bObeliskMode = !bObeliskMode;
@@ -291,8 +286,22 @@ void ACombatDirector::SetObeliskMode(AObelisk* Obelisk)
 	if (bObeliskMode)
 	{
 		ActivatedObelisk = Obelisk;
+		for (int i = 0; i < Obelisks.Num(); i++)
+		{
+			Obelisks[i]->SetCanBeginCharging(false);
+		}
+
 		SpawnObeliskEnemy();
 	}
 	else
+	{
 		ActivatedObelisk = nullptr;
+		for (int i = 0; i < Obelisks.Num(); i++)
+		{
+			if (Obelisks[i] != ActivatedObelisk && Obelisks[i]->GetObeliskState() == EActivationState::Inactive)
+			{
+				Obelisks[i]->SetCanBeginCharging(true);
+			}
+		}
+	}
 }

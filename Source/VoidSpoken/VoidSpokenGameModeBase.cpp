@@ -19,6 +19,16 @@ void AVoidSpokenGameModeBase::KillGatekeeperSpawns()
 	}
 }
 
+void AVoidSpokenGameModeBase::AddSubtractObeliskCount(int Count)
+{
+	ObeliskCount += Count;
+
+	if (ObeliskCount <= 0)
+	{
+		//Code to open or unlock portal to cathedral
+	}
+}
+
 void AVoidSpokenGameModeBase::SetHealItem(int health)
 {
 	HealPickup += health;
@@ -44,39 +54,5 @@ void AVoidSpokenGameModeBase::PickupFull()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Pickup full"));
 	return;
-}
-
-void AVoidSpokenGameModeBase::SpawnPlayersFromData()
-{
-	/*TArray<FPlayerData> PlayerDataInfo;
-	bool bReadSuccess = JsonLibrary->ReadPlayerData(PlayerDataInfo);
-
-	if (bReadSuccess)
-	{
-		if (PlayerDataInfo.Num() > 0)
-		{
-			FPlayerData PlayerData = PlayerDataInfo[0];
-			FVector SpawnLocation = PlayerData.CurrentLocation;
-
-			UWorld* World = GetWorld();
-			if (World)
-			{
-				TArray<AActor*> FoundActors;
-				UGameplayStatics::GetAllActorsOfClass(World, PlayerActorClass, FoundActors);
-
-				if (FoundActors.Num() > 0)
-				{
-					AActor* PlayerCharacter = FoundActors[0];
-					PlayerCharacter->SetActorLocation(SpawnLocation);
-				}
-				else
-				{
-					FActorSpawnParameters SpawnParams;
-					SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-					World->SpawnActor<AActor>(PlayerActorClass.Get(), SpawnLocation, FRotator::ZeroRotator, SpawnParams);
-				}
-			}
-		}
-	}*/
 }
 

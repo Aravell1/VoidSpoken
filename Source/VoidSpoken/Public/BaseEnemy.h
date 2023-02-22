@@ -18,7 +18,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBroadcastDelegate);
 UDELEGATE()
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTriggerDelegate, ABaseEnemy*, EnemyTrigger);
 
-
 UENUM()
 enum EEnemyType
 {
@@ -41,29 +40,29 @@ public:
 		FTriggerDelegate OnDeathTrigger;
 
 	UFUNCTION(BlueprintPure)
-		enum EEnemyType GetEnemyType();
+		enum EEnemyType GetEnemyType() { return EType; }
 
-	void SetEnemyType(EEnemyType type);
-
-	UFUNCTION(BlueprintCallable)
-		float GetAttack();
-	UFUNCTION(BlueprintCallable)
-		void SetAttack(float Atk);
+	void SetEnemyType(EEnemyType type) { EType = type; }
 
 	UFUNCTION(BlueprintCallable)
-		float GetWalkSpeed();
+		float GetAttack() { return Attack; }
 	UFUNCTION(BlueprintCallable)
-		void SetWalkSpeed(float Walk);
+		void SetAttack(float Atk) { Attack = Atk; }
 
 	UFUNCTION(BlueprintCallable)
-		float GetRunSpeed();
+		float GetWalkSpeed() { return WalkSpeed; }
 	UFUNCTION(BlueprintCallable)
-		void SetRunSpeed(float Run);
+		void SetWalkSpeed(float Walk) { WalkSpeed = Walk; }
 
 	UFUNCTION(BlueprintCallable)
-		float GetDamageMultiplier();
+		float GetRunSpeed() { return RunSpeed; }
 	UFUNCTION(BlueprintCallable)
-		void SetDamageMultiplier(float DMult);
+		void SetRunSpeed(float Run) { RunSpeed = Run; }
+
+	UFUNCTION(BlueprintCallable)
+		float GetDamageMultiplier() { return DamageMultiplier; }
+	UFUNCTION(BlueprintCallable)
+		void SetDamageMultiplier(float DMult) { DamageMultiplier = DMult; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PawnSensing)
 		class UPawnSensingComponent* PawnSensing;
@@ -74,24 +73,24 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		AEnemyWeapon* EquippedWeapon;
 
-	virtual void AttackTrace(UAnimMontage* AnimTrigger);
+	virtual void AttackTrace(UAnimMontage* AnimTrigger) {}
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		float Attack = 0;
 
 	UFUNCTION()
-		virtual void OnSeePawn(APawn* OtherPawn);
+		virtual void OnSeePawn(APawn* OtherPawn) {}
 
 	UPROPERTY(EditAnywhere)
 		TArray<APatrolPoint*> PatrolPoints;
 
 	float TimeOfLastAttack = 0;
 
-	virtual void TriggerAttack();
-	virtual void EnterCombat(APawn* OtherPawn, bool Cooldown);
-	virtual bool CheckLineOfSight(AActor* OtherActor);
-	virtual void SetCombatIdle();
-	virtual void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance);
+	virtual void TriggerAttack() {}
+	virtual void EnterCombat(APawn* OtherPawn, bool Cooldown) {}
+	virtual bool CheckLineOfSight(AActor* OtherActor) { return false; }
+	virtual void SetCombatIdle() {}
+	virtual void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance) {}
 
 	UPROPERTY(VisibleAnywhere)
 		bool bInCombat = false;

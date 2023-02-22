@@ -35,7 +35,7 @@ public:
 		void RemoveEnemy(ABaseEnemy* Enemy);
 
 	UFUNCTION(BlueprintCallable)
-		bool GetInCombat();
+		bool GetInCombat() { return bInCombat; }
 
 	UFUNCTION()
 		void SetObeliskMode(AObelisk* Obelisk);

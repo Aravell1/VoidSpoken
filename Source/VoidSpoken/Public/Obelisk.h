@@ -44,6 +44,8 @@ public:
 	UFUNCTION(BlueprintPure)
 		float GetObeliskCharge() { return ObeliskCharge; }
 
+	void SetCanBeginCharging(bool CanCharge) { bCanBeginCharging = CanCharge; }
+
 	UFUNCTION()
 		void AddCharge(ABaseEnemy* EnemyTrigger);
 
@@ -85,6 +87,9 @@ private:
 
 	const float TotalRequiredCharge = 10.0f;
 	float ObeliskCharge = 0;
+
+	//False if another Obelisk is already charging
+	bool bCanBeginCharging = true;
 
 	EActivationState ObeliskState = EActivationState::Inactive;
 	AVoidSpokenGameModeBase* GameMode;
