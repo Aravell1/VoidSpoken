@@ -43,7 +43,7 @@ void AObelisk::SetObeliskState(EActivationState NewState)
 		ActivationSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		if (ChargeZoneDecal)
-			ChargeZoneDecal->GetDecal()->SetFadeOut(0, 0.5f, true);
+			ChargeZoneDecal->GetDecal()->SetFadeOut(0, 1.0f, true);
 		break;
 	}
 }
@@ -121,7 +121,11 @@ void AObelisk::Tick(float DeltaTime)
 
 void AObelisk::SpawnDecal()
 {
-	FActorSpawnParameters SpawnInfo;
-	ChargeZoneDecal = GetWorld()->SpawnActor<ADecalActor>(ChargeZoneDecalClass, GetActorLocation(), GetActorRotation(), SpawnInfo);
+	if (ChargeZoneDecalClass)
+	{
+		FActorSpawnParameters SpawnInfo;
+		ChargeZoneDecal = GetWorld()->SpawnActor<ADecalActor>(ChargeZoneDecalClass, GetActorLocation(), GetActorRotation(), SpawnInfo);
+		ChargeZoneDecal->GetDecal()->DecalSize = FVector(5, EnemyDetectionRadius / 2, EnemyDetectionRadius / 2);
+	}
 }
 

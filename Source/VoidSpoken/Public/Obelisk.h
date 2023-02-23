@@ -84,7 +84,8 @@ private:
 
 	void SpawnDecal();
 
-	TSubclassOf<ADecalActor> ChargeZoneDecalClass;
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<ADecalActor> ChargeZoneDecalClass;
 	ADecalActor* ChargeZoneDecal;
 
 	const float PlayerDetectionRadius = 750.0f;
