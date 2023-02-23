@@ -27,13 +27,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<ABaseEnemy> EnemyClass = ABaseEnemy::StaticClass();
-	UPROPERTY(EditAnywhere)
-		TSubclassOf<ACharacter> EnemyBPClass = ABaseEnemy::StaticClass();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TArray<TSubclassOf<ABaseEnemy>> EnemyArray = {};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<TSubclassOf<ACharacter>> EnemyBPArray = {};
 
 	UPROPERTY(BlueprintAssignable)
 		FAttackCommand OrderAttackBP;

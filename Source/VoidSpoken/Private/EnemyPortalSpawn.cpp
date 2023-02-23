@@ -15,26 +15,9 @@ AEnemyPortalSpawn::AEnemyPortalSpawn()
 void AEnemyPortalSpawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
-	TArray<AActor*> FoundDirectors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACombatDirector::StaticClass(), FoundDirectors);
-	if (Cast<ACombatDirector>(FoundDirectors[0]))
-	{
-		CombatDirector = Cast<ACombatDirector>(FoundDirectors[0]);
-	}
-
-	if (!bEnemySpawned)
-	{
-		if (Player)
-		{
-			GetWorldTimerManager().SetTimer(DistanceCheckTimer,
-				this,
-				&AEnemyPortalSpawn::CheckPlayerDistance,
-				DistanceCheckInterval);
-		}
-	}
+	if (bSpawnOnBeginPlay)
+		SpawnPortal();
 }
 
 // Called every frame
@@ -43,61 +26,38 @@ void AEnemyPortalSpawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AEnemyPortalSpawn::CheckPlayerDistance()
+void AEnemyPortalSpawn::SpawnPortal()
 {
-	if (FVector::Distance(GetActorLocation(), Player->GetActorLocation()) <= PlayerDistanceToSpawn)
+	if (Portal)
 	{
-		bEnemySpawned = true;
-		SpawnPortal();
+		FVector SpawnLocation = GetActorLocation() + FVector(0, 0, 95);
+		FRotator SpawnRotation = GetActorRotation();
+		FActorSpawnParameters SpawnInfo;
+
+		AActor* SpawnedPortal = GetWorld()->SpawnActor<AActor>(Portal, SpawnLocation, SpawnRotation, SpawnInfo);
+		SpawnedPortal->SetLifeSpan(5);
 
 		GetWorldTimerManager().SetTimer(DistanceCheckTimer,
 			this,
 			&AEnemyPortalSpawn::SpawnEnemy,
 			DelayPortalToEnemy);
 	}
-
-	if (!bEnemySpawned)
-	{
-		if (Player)
-		{
-			GetWorldTimerManager().SetTimer(DistanceCheckTimer,
-				this,
-				&AEnemyPortalSpawn::CheckPlayerDistance,
-				DistanceCheckInterval);
-		}
-	}
-}
-
-void AEnemyPortalSpawn::SpawnPortal()
-{
-	if (Portal)
-	{
-		FVector SpawnLocation = GetActorLocation();
-		FRotator SpawnRotation = GetActorRotation();
-		FActorSpawnParameters SpawnInfo;
-
-		AActor* SpawnedPortal = GetWorld()->SpawnActor<AActor>(Portal, SpawnLocation, SpawnRotation, SpawnInfo);
-		SpawnedPortal->SetLifeSpan(5);
-	}
 }
 
 void AEnemyPortalSpawn::SpawnEnemy()
 {
-	if (EnemyType)
+	if (EnemyTypes.Num() > 0)
 	{
+		int RandomType = FMath::RandRange(0, EnemyTypes.Num() - 1);
+
 		FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100;
 		FRotator SpawnRotation = GetActorRotation();
 		FActorSpawnParameters SpawnInfo;
 
-		ABaseEnemy* SpawnedEnemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyType, SpawnLocation, SpawnRotation, SpawnInfo);
+		ABaseEnemy* SpawnedEnemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyTypes[RandomType], SpawnLocation, SpawnRotation, SpawnInfo);
 		SpawnedEnemy->PatrolPoints = PatrolPoints;
 
-		if (SpawnedEnemy->GetEnemyType() == EEnemyType::Melee)
-			CombatDirector->AddToMap(SpawnedEnemy, true);
-		else
-			CombatDirector->AddToMap(SpawnedEnemy, false);
+		OnEnemySpawned.Broadcast(SpawnedEnemy);
 	}
-
-	Destroy();
 }
 
