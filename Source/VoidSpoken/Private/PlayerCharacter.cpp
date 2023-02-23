@@ -82,8 +82,8 @@ APlayerCharacter::APlayerCharacter()
 	Stats->SetBaseStamina(50.f);
 	Stats->GetBaseStamina();
 
-	HealAmount = 10.0f;
-	FocusAmount = 25.0f;
+	HealAmount = 10.f;
+	FocusAmount = 25.f;
 	StaminaAmount = 12.5f;
 
 	#pragma endregion
@@ -492,6 +492,8 @@ void APlayerCharacter::DodgingFinished() {
 	else GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, StaminaDelay);
 }
 
+
+
 void APlayerCharacter::ResetDodging() {
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 }
@@ -680,18 +682,20 @@ void APlayerCharacter::On_F_Release()
 	bIsFDown = false;
 }
 
-
 void APlayerCharacter::UseHealthConsumable()
 {
 	AVoidSpokenGameModeBase* GM;
 	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-	if (GM->HealPickup > 0)
+
+	if (GM->GetHealItem() > 0)
 	{
 		if (Stats->Health < Stats->GetMaxHealth())
 		{
 			Stats->Health += HealAmount;
-			GM->HealPickup -= 1;
+			GM->SetHealItem(-1);
+
+			UE_LOG(LogTemp, Warning, TEXT("HEALTH Items: %d"), GM->HealPickup);
 
 			if (Stats->Health >= Stats->GetMaxHealth())
 			{
@@ -708,12 +712,15 @@ void APlayerCharacter::UseFocusConsumable()
 	AVoidSpokenGameModeBase* GM;
 	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-	if (GM->FocusPickup > 0)
+
+	if (GM->GetFocusItem() > 0)
 	{
 		if (Stats->FocusPoints < Stats->GetMaxFocus())
 		{
 			Stats->FocusPoints += FocusAmount;
-			GM->FocusPickup -= 1;
+			GM->SetFocusItem(-1);
+
+			UE_LOG(LogTemp, Warning, TEXT("FOCUS Items: %d"), GM->FocusPickup);
 
 			if (Stats->FocusPoints >= Stats->GetMaxFocus())
 			{
@@ -727,14 +734,18 @@ void APlayerCharacter::UseFocusConsumable()
 
 void APlayerCharacter::UseStaminaConsumable()
 {
-	AVoidSpokenGameModeBase* GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	AVoidSpokenGameModeBase* GM;
+	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-	if (GM && GM->StaminaPickup > 0)
+
+	if (GM->GetStaminaItem() > 0)
 	{
 		if (Stats->Stamina < Stats->GetMaxStamina())
 		{
 			Stats->Stamina += StaminaAmount;
-			GM->StaminaPickup -= 1;
+			GM->SetStaminaItem(-1);
+
+			UE_LOG(LogTemp, Warning, TEXT("STAMINA Items: %d"), GM->FocusPickup);
 
 			if (Stats->Stamina >= Stats->GetMaxStamina())
 			{
@@ -742,6 +753,8 @@ void APlayerCharacter::UseStaminaConsumable()
 			}
 		}
 	}
+	else
+		return;
 }
 
 #pragma endregion

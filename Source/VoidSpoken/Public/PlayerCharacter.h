@@ -295,27 +295,6 @@ public:
 
 	#pragma endregion
 
-	#pragma region Consumables / Item Usage
-
-	UFUNCTION(BlueprintCallable)
-	void UseHealthConsumable();
-
-	UFUNCTION(BlueprintCallable)
-	void UseFocusConsumable();
-
-	UFUNCTION(BlueprintCallable)
-	void UseStaminaConsumable();
-
-	UPROPERTY()
-	float HealAmount;
-
-	UPROPERTY()
-	float FocusAmount;
-
-	UPROPERTY()
-	float StaminaAmount;
-
-	#pragma endregion
 
 	#pragma region Pickup Interaction
 
@@ -334,7 +313,22 @@ public:
 		OverlappingItem = OverlapItem;
 	}
 
+	UFUNCTION(BlueprintCallable)
+	void UseHealthConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseFocusConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseStaminaConsumable();
+
+	float HealAmount;
+	float FocusAmount;
+	float StaminaAmount;
+
 	#pragma endregion
+
+
 
 	#pragma region Invincible and Health Regeneration
 	public:
