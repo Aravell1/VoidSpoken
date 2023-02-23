@@ -5,9 +5,6 @@
 
 AStaminaPickup::AStaminaPickup()
 {
-	Text = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Pickup Text"));
-	Text->SetupAttachment(RootComponent);
-
 	TextTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Text Trigger Box"));
 	TextTriggerBox->SetupAttachment(RootComponent);
 }
@@ -16,9 +13,6 @@ void AStaminaPickup::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (Text)
-		Text->SetVisibility(false);
-
 	TextTriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AStaminaPickup::TextTriggerOverlapBegin);
 	TextTriggerBox->OnComponentEndOverlap.AddDynamic(this, &AStaminaPickup::TextTriggerOverlapEnd);
 }
@@ -26,12 +20,11 @@ void AStaminaPickup::BeginPlay()
 
 void AStaminaPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor)
+	if (OtherActor && OtherComp)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
-		
 
-		if (Player)
+		if (Player && Player->GetMesh())
 		{
 			Player->SetOverlappingItem(this);
 		}
@@ -56,32 +49,10 @@ void AStaminaPickup::PickupStamina()
 
 void AStaminaPickup::TextTriggerOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor)
-	{
-		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
-		if (Player)
-		{
-			if (Text)
-			{
-				Text->SetVisibility(true);
-			}
-		}
-	}
 }
 
 void AStaminaPickup::TextTriggerOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor)
-	{
-		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
-
-		if (Player)
-		{
-			if (Text)
-			{
-				Text->SetVisibility(false);
-			}
-		}
-	}
+	
 }
