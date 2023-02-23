@@ -57,7 +57,8 @@ void ABaseWeapon::Tick(const float DeltaTime) {
 void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
 	EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
 	EquippedCharacter = EquippingCharacter;
-	
+	SetOwner(EquippingCharacter);
+
 	AddActorLocalOffset(FVector(0, 0, -48));
 	AddActorLocalRotation(FRotator(0, 0, -90));
 }

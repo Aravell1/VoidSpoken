@@ -7,6 +7,8 @@
 #include "BaseEnemy.h"
 #include "PlayerCharacter.h"
 #include "BaseBoss.h"
+#include "EnemyPortalSpawn.h"
+#include "Obelisk.h"
 #include "CombatDirector.generated.h"
 
 USTRUCT()
@@ -16,7 +18,6 @@ struct FEnemyData
 
 	ABaseEnemy* Enemy = nullptr;
 	float EnemyValue = 0;
-	bool MeleeType = false;
 };
 
 UCLASS()
@@ -28,12 +29,16 @@ public:
 	// Sets default values for this actor's properties
 	ACombatDirector();
 
-	void AddToMap(ABaseEnemy* Enemy, bool MeleeType);
 	UFUNCTION()
-		void RemoveEnemy(AActor* Enemy);
+		void AddToMap(ABaseEnemy* Enemy);
+	UFUNCTION()
+		void RemoveEnemy(ABaseEnemy* Enemy);
 
 	UFUNCTION(BlueprintCallable)
-		bool GetInCombat();
+		bool GetInCombat() { return bInCombat; }
+
+	UFUNCTION()
+		void SetObeliskMode(AObelisk* Obelisk);
 
 	UPROPERTY(EditAnywhere)
 		bool bDebugMode = false;
@@ -50,6 +55,21 @@ private:
 	TArray<FEnemyData> Enemies;
 	APlayerCharacter* Player;
 
+	TArray<AEnemyPortalSpawn*> EnemySpawnPoints;
+	TArray<AObelisk*> Obelisks;
+	AObelisk* ActivatedObelisk;
+	void SpawnEnemy();
+	void SpawnObeliskEnemy();
+	bool bObeliskMode = false;
+	bool bAttackOnSpawn = false;
+
+	int ObeliskSpawns = 0;
+	int EnemiesToSpawn = 2;
+	int SpawnTicks = 0;
+	const int InreaseSpawnsThreshold = 5;
+	const float EnemySpawnDistance = 2500.0f;
+	FTimerHandle SpawnEnemiesTimer;
+	const float SpawnTimerDuration = 30.0f;
 
 	void CalculateEnemyActions();
 	float GetEnemyAngle(int Index);
