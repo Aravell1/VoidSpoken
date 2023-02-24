@@ -9,6 +9,7 @@
 #include "BaseBoss.h"
 #include "EnemyPortalSpawn.h"
 #include "Obelisk.h"
+#include "../VoidSpokenGameModeBase.h"
 #include "CombatDirector.generated.h"
 
 USTRUCT()
@@ -35,7 +36,7 @@ public:
 		void RemoveEnemy(ABaseEnemy* Enemy);
 
 	UFUNCTION(BlueprintCallable)
-		bool GetInCombat();
+		bool GetInCombat() { return bInCombat; }
 
 	UFUNCTION()
 		void SetObeliskMode(AObelisk* Obelisk);
@@ -54,6 +55,7 @@ private:
 	
 	TArray<FEnemyData> Enemies;
 	APlayerCharacter* Player;
+	AVoidSpokenGameModeBase* GameMode;
 
 	TArray<AEnemyPortalSpawn*> EnemySpawnPoints;
 	TArray<AObelisk*> Obelisks;
@@ -61,12 +63,14 @@ private:
 	void SpawnEnemy();
 	void SpawnObeliskEnemy();
 	bool bObeliskMode = false;
+	bool bAttackOnSpawn = false;
 
 	int ObeliskSpawns = 0;
 	int EnemiesToSpawn = 2;
 	int SpawnTicks = 0;
 	const int InreaseSpawnsThreshold = 5;
-	const float EnemySpawnDistance = 2500.0f;
+	const float EnemySpawnDistance = 1500.0f;
+	const float AdditionalSpawnDistance = 500.0f;
 	FTimerHandle SpawnEnemiesTimer;
 	const float SpawnTimerDuration = 30.0f;
 

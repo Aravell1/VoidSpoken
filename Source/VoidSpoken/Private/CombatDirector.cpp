@@ -18,6 +18,8 @@ void ACombatDirector::BeginPlay()
 
 	GetWorldTimerManager().SetTimer(CombatAttackTimer, this, &ACombatDirector::TriggerEnemyAttack, AttackCheckInterval);
 	Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (!GameMode)
+		GameMode = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
 	TArray<AActor*> FoundBosses;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseBoss::StaticClass(), FoundBosses);
@@ -58,38 +60,56 @@ void ACombatDirector::BeginPlay()
 
 void ACombatDirector::SpawnEnemy()
 {
-	if (!bObeliskMode)
+	if (GameMode->GetObeliskCount() <= 0)
 	{
-		TArray<AEnemyPortalSpawn*> SpawnPoints;
-		for (int i = 0; i < EnemySpawnPoints.Num(); i++)
+		bAttackOnSpawn = true;
+
+		if (!bObeliskMode)
 		{
-			if (FVector::Distance(EnemySpawnPoints[i]->GetActorLocation(), Player->GetActorLocation()) <= EnemySpawnDistance)
-				SpawnPoints.Add(EnemySpawnPoints[i]);
+			TArray<AEnemyPortalSpawn*> SpawnPoints;
+			float MaxSpawnDistance = EnemySpawnDistance + AdditionalSpawnDistance * EnemiesToSpawn;
+			for (int i = 0; i < EnemySpawnPoints.Num(); i++)
+			{
+				if (FVector::Distance(EnemySpawnPoints[i]->GetActorLocation(), Player->GetActorLocation()) <= MaxSpawnDistance)
+					SpawnPoints.Add(EnemySpawnPoints[i]);
+			}
+
+			if (SpawnPoints.Num() > EnemiesToSpawn)
+			{
+				for (int i = 0; i < EnemiesToSpawn; i++)
+				{
+					int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+
+					SpawnPoints[RandomIndex]->SpawnPortal();
+
+					SpawnPoints.RemoveAt(RandomIndex);
+				}
+			}
+			else if (SpawnPoints.Num() > 0)
+			{
+				for (int i = 0; i < SpawnPoints.Num(); i++)
+				{
+					int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+
+					SpawnPoints[RandomIndex]->SpawnPortal();
+
+					SpawnPoints.RemoveAt(RandomIndex);
+				}
+			}
 		}
 
-		for (int i = 0; i < EnemiesToSpawn; i++)
+		SpawnTicks++;
+		if (SpawnTicks >= InreaseSpawnsThreshold)
 		{
-			int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
-
-			SpawnPoints[RandomIndex]->SpawnPortal();
-
-			SpawnPoints.RemoveAt(RandomIndex);
+			SpawnTicks = 0;
+			EnemiesToSpawn++;
 		}
+
+		GetWorldTimerManager().SetTimer(SpawnEnemiesTimer,
+			this,
+			&ACombatDirector::SpawnEnemy,
+			SpawnTimerDuration);
 	}
-
-	SpawnTicks++;
-	if (SpawnTicks >= InreaseSpawnsThreshold)
-	{
-		SpawnTicks = 0;
-		EnemiesToSpawn++;
-	}
-
-	GetWorldTimerManager().SetTimer(SpawnEnemiesTimer,
-		this,
-		&ACombatDirector::SpawnEnemy,
-		SpawnTimerDuration);
-	
-
 }
 
 void ACombatDirector::SpawnObeliskEnemy()
@@ -254,7 +274,7 @@ void ACombatDirector::AddToMap(ABaseEnemy* Enemy)
 
 	Enemies.Add(NewEnemy);
 
-	if (bObeliskMode)
+	if (bObeliskMode || bAttackOnSpawn)
 		Enemy->EnterCombat(Player, false);
 }
 
@@ -279,11 +299,6 @@ void ACombatDirector::RemoveEnemy(ABaseEnemy* Enemy)
 	}
 }
 
-bool ACombatDirector::GetInCombat()
-{
-	return bInCombat;
-}
-
 void ACombatDirector::SetObeliskMode(AObelisk* Obelisk)
 {
 	bObeliskMode = !bObeliskMode;
@@ -291,8 +306,22 @@ void ACombatDirector::SetObeliskMode(AObelisk* Obelisk)
 	if (bObeliskMode)
 	{
 		ActivatedObelisk = Obelisk;
+		for (int i = 0; i < Obelisks.Num(); i++)
+		{
+			Obelisks[i]->SetCanBeginCharging(false);
+		}
+
 		SpawnObeliskEnemy();
 	}
 	else
+	{
 		ActivatedObelisk = nullptr;
+		for (int i = 0; i < Obelisks.Num(); i++)
+		{
+			if (Obelisks[i] != ActivatedObelisk && Obelisks[i]->GetObeliskState() == EActivationState::Inactive)
+			{
+				Obelisks[i]->SetCanBeginCharging(true);
+			}
+		}
+	}
 }

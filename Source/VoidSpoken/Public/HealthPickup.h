@@ -24,9 +24,6 @@ public:
 
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Text")
-	UTextRenderComponent* Text;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Text | Trigger")
 	UBoxComponent* TextTriggerBox;
 

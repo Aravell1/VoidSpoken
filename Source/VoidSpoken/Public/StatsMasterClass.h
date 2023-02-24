@@ -65,15 +65,6 @@ public:
 
 
 	///Will
-	///Player Functions
-
-	//Regen Functions (will be called every frame)
-	void RegenHP(float _HP)
-	{
-		BaseHealth += _HP;
-	}
-	
-
 
 
 	/// Set & Get Max Stats
