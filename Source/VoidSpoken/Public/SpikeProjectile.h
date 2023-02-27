@@ -41,7 +41,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	AActor* Owner;
 	float Damage = 3;
 	bool UseCollision = true;
 };

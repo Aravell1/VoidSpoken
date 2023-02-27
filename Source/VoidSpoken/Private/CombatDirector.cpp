@@ -36,8 +36,8 @@ void ACombatDirector::BeginPlay()
 		for (int i = 0; i < FoundObelisks.Num(); i++)
 		{
 			Obelisks.Add(Cast<AObelisk>(FoundObelisks[i]));
-			Obelisks[i]->EnableCharge.AddDynamic(this, &ACombatDirector::SetObeliskMode);
-			Obelisks[i]->DisableCharge.AddDynamic(this, &ACombatDirector::SetObeliskMode);
+			Obelisks[i]->EnableCharge.AddDynamic(this, &ACombatDirector::EnableObeliskMode);
+			Obelisks[i]->DisableCharge.AddDynamic(this, &ACombatDirector::DisableObeliskMode);
 		}
 	}
 
@@ -96,6 +96,10 @@ void ACombatDirector::SpawnEnemy()
 					SpawnPoints.RemoveAt(RandomIndex);
 				}
 			}
+		}
+		else
+		{
+			SpawnObeliskEnemy();
 		}
 
 		SpawnTicks++;
@@ -299,29 +303,29 @@ void ACombatDirector::RemoveEnemy(ABaseEnemy* Enemy)
 	}
 }
 
-void ACombatDirector::SetObeliskMode(AObelisk* Obelisk)
+void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 {
-	bObeliskMode = !bObeliskMode;
-
-	if (bObeliskMode)
+	bObeliskMode = false;
+	
+	ActivatedObelisk = nullptr;
+	for (int i = 0; i < Obelisks.Num(); i++)
 	{
-		ActivatedObelisk = Obelisk;
-		for (int i = 0; i < Obelisks.Num(); i++)
+		if (Obelisks[i] != ActivatedObelisk && Obelisks[i]->GetObeliskState() == EActivationState::Inactive)
 		{
-			Obelisks[i]->SetCanBeginCharging(false);
-		}
-
-		SpawnObeliskEnemy();
-	}
-	else
-	{
-		ActivatedObelisk = nullptr;
-		for (int i = 0; i < Obelisks.Num(); i++)
-		{
-			if (Obelisks[i] != ActivatedObelisk && Obelisks[i]->GetObeliskState() == EActivationState::Inactive)
-			{
-				Obelisks[i]->SetCanBeginCharging(true);
-			}
+			Obelisks[i]->SetCanBeginCharging(true);
 		}
 	}
+}
+
+void ACombatDirector::EnableObeliskMode(AObelisk* Obelisk)
+{
+	bObeliskMode = true;
+
+	ActivatedObelisk = Obelisk;
+	for (int i = 0; i < Obelisks.Num(); i++)
+	{
+		Obelisks[i]->SetCanBeginCharging(false);
+	}
+
+	SpawnObeliskEnemy();
 }

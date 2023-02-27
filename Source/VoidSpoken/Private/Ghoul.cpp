@@ -298,7 +298,7 @@ void AGhoul::CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeColli
 		CreatedSpike->SetDamage(Attack);
 		CreatedSpike->SetSpeed(InitVel);
 		CreatedSpike->ProjectileMovementComponent->ProjectileGravityScale = 1.0f;
-		CreatedSpike->Owner = this;
+		CreatedSpike->SetOwner(this);
 	}
 	else
 		CreatedSpike->SetDamage(0, false, 0.25f);
@@ -374,8 +374,9 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 				{
 					if (Cast<ABaseEnemy>(OutActors[i]))
 					{
-						if (AIController->LineOfSightTo(Cast<ACharacter>(OutActors[i])))
-							Cast<ABaseEnemy>(OutActors[i])->EnterCombat(AttackTarget, false);
+						if (!Cast<ABaseEnemy>(OutActors[i])->bInCombat)
+							if (AIController->LineOfSightTo(Cast<ACharacter>(OutActors[i])))
+								Cast<ABaseEnemy>(OutActors[i])->EnterCombat(AttackTarget, false);
 					}
 				}
 			}
@@ -398,10 +399,10 @@ void AGhoul::EnterCombat(APawn* OtherPawn, bool Cooldown)
 {
 	AttackTarget = OtherPawn;
 	bInCombat = true;
-	GetWorldTimerManager().SetTimer(PatrolTimerHandle,
+	/*GetWorldTimerManager().SetTimer(PatrolTimerHandle,
 		this,
 		&AGhoul::CheckPatrolReset,
-		PTHandleInterval);
+		PTHandleInterval);*/
 
 	UpdateHealthBar.Broadcast();
 
@@ -505,10 +506,10 @@ void AGhoul::OnSeePawn(APawn* OtherPawn)
 {
 	AttackTarget = OtherPawn;
 	bInCombat = true;
-	GetWorldTimerManager().SetTimer(PatrolTimerHandle,
+	/*GetWorldTimerManager().SetTimer(PatrolTimerHandle,
 		this,
 		&AGhoul::CheckPatrolReset,
-		PTHandleInterval);
+		PTHandleInterval);*/
 	PawnSensing->SetSensingUpdatesEnabled(false);
 	UpdateHealthBar.Broadcast();
 

@@ -39,7 +39,10 @@ public:
 		bool GetInCombat() { return bInCombat; }
 
 	UFUNCTION()
-		void SetObeliskMode(AObelisk* Obelisk);
+		void EnableObeliskMode(AObelisk* Obelisk);
+
+	UFUNCTION()
+		void DisableObeliskMode(AObelisk* Obelisk);
 
 	UPROPERTY(EditAnywhere)
 		bool bDebugMode = false;
