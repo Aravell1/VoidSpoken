@@ -38,7 +38,7 @@ EGhoulState AGhoul::GetState()
 
 void AGhoul::SetState(EGhoulState state)
 {
-	if (!LockState || state == EGhoulState::Dead)
+	if (!LockState || (state == EGhoulState::Dead && GhState != EGhoulState::Dead))
 	{
 		GhState = state;
 		SetSpeed();
@@ -117,6 +117,7 @@ void AGhoul::BehaviourStateEvent()
 		break;
 
 	case EGhoulState::Dead:
+		OnDeathTrigger.Broadcast(this);
 		bCanAttack = false;
 		LockState = true;
 		break;
@@ -475,12 +476,12 @@ void AGhoul::CombatIdle()
 		else 
 		{
 			float DistToPlayer = FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation());
-			if (DistToPlayer > ReachTargetDistance)
+			if (DistToPlayer > ReachTargetDistance || !AIController->LineOfSightTo(AttackTarget))
 			{
 				GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
 
 				if (TestPathExists(AttackTarget))
-					AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+					AIController->MoveToActor(AttackTarget, BackUpDistance);
 			}
 			else if (DistToPlayer < BackOffRange)
 			{
@@ -553,7 +554,6 @@ void AGhoul::SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance)
 
 		CircleTargetDistance = MeleeSpreadRange + AdditionalDistance;
 		SetState(EGhoulState::CirclePlayer);
-
 	}
 }
 
@@ -638,7 +638,7 @@ void AGhoul::Death()
 {
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->MaxWalkSpeed = 0;
-	SetState(EGhoulState::Dead);
+	SetState(EGhoulState::Dead);	
 	bIsDead = true;
 	bInCombat = false;
 	AIController->ClearFocus(EAIFocusPriority::Gameplay);
@@ -670,11 +670,11 @@ void AGhoul::AttackCooldown()
 
 				AIController->MoveToLocation(BackUpTargetPos, 0);
 			}
-			else if (DistToPlayer > ReachTargetDistance)
+			else if (DistToPlayer > ReachTargetDistance || (!AIController->LineOfSightTo(AttackTarget) || !AIController->LineOfSightTo(Cast<APlayerCharacter>(AttackTarget)->EquippedWeapon)))
 			{
 				SetSpeed();
 				if (TestPathExists(AttackTarget))
-					AIController->MoveToActor(AttackTarget, ReachTargetDistance);
+					AIController->MoveToActor(AttackTarget, BackUpDistance);
 			}
 		}
 		else

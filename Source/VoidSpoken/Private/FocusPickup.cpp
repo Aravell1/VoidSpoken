@@ -5,9 +5,6 @@
 
 AFocusPickup::AFocusPickup()
 {
-	Text = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Pickup Text"));
-	Text->SetupAttachment(RootComponent);
-
 	TextTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Text Trigger Box"));
 	TextTriggerBox->SetupAttachment(RootComponent);
 }
@@ -16,20 +13,17 @@ void AFocusPickup::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(Text)
-		Text->SetVisibility(false);
-
 	TextTriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AFocusPickup::TextTriggerOverlapBegin);
 	TextTriggerBox->OnComponentEndOverlap.AddDynamic(this, &AFocusPickup::TextTriggerOverlapEnd);
 }
 
 void AFocusPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherComp)
+	if (OtherActor)
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 
-		if (Player && Player->GetMesh())
+		if (Player)
 		{
 			Player->SetOverlappingItem(this);
 		}
@@ -57,33 +51,11 @@ void AFocusPickup::PickupFocus()
 
 void AFocusPickup::TextTriggerOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherComp)
-	{
-		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
-
-		if (Player && Player->GetMesh())
-		{
-			if (Text)
-			{
-				Text->SetVisibility(true);
-			}
-		}
-	}
+	
 }
 
 void AFocusPickup::TextTriggerOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor && OtherComp)
-	{
-		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
-
-		if (Player && Player->GetMesh())
-		{
-			if (Text)
-			{
-				Text->SetVisibility(false);
-			}
-		}
-	}
+	
 }
 

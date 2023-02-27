@@ -38,14 +38,15 @@
 
 #pragma region ENums
 
-UENUM()
+UENUM(BlueprintType)
 enum class ETelekinesisAttackState : uint8 {
 	ETA_None = 0 UMETA(DisplayName = "None"),	// Holding Nothing
 	ETA_Pull = 1 UMETA(DisplayName = "Pull"),	// Started Pulling an Object (Can stop mid way through)
 	ETA_Hold = 2 UMETA(DisplayName = "Hold"),	// Got to holding position and awaiting to be thrown
+	ETA_Push = 3 UMETA(DisplayName = "Push"),	// Pushing the thrown telekinetic object
 };
 
-UENUM()
+UENUM(BlueprintType)
 enum class EMovementState : uint8 {
 	EMS_Idle = 0 UMETA(DisplayName = "Idle"),			// Idle
 	EMS_Walking = 1 UMETA(DisplayName = "Walking"),		// Walking
@@ -198,10 +199,13 @@ public:
 	void SetTelekineticAttackState(const ETelekinesisAttackState State) { ETelekineticAttackState = State; };
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
+	ETelekinesisAttackState GetTelekineticAttackState() const { return ETelekineticAttackState; };
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool GetTelekinesis() const { return bTelekinesis; };
 
 	#pragma endregion
-
+	
 	protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Telekinetic Attack State")
 	ETelekinesisAttackState ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
@@ -291,27 +295,6 @@ public:
 
 	#pragma endregion
 
-	#pragma region Consumables / Item Usage
-
-	UFUNCTION(BlueprintCallable)
-	void UseHealthConsumable();
-
-	UFUNCTION(BlueprintCallable)
-	void UseFocusConsumable();
-
-	UFUNCTION(BlueprintCallable)
-	void UseStaminaConsumable();
-
-	UPROPERTY()
-	float HealAmount;
-
-	UPROPERTY()
-	float FocusAmount;
-
-	UPROPERTY()
-	float StaminaAmount;
-
-	#pragma endregion
 
 	#pragma region Pickup Interaction
 
@@ -330,7 +313,22 @@ public:
 		OverlappingItem = OverlapItem;
 	}
 
+	UFUNCTION(BlueprintCallable)
+	void UseHealthConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseFocusConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseStaminaConsumable();
+
+	float HealAmount;
+	float FocusAmount;
+	float StaminaAmount;
+
 	#pragma endregion
+
+
 
 	#pragma region Invincible and Health Regeneration
 	public:
