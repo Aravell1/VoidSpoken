@@ -6,6 +6,9 @@
 #include "HealthPickup.h"
 #include "StaminaPickup.h"
 #include "CombatDirector.h"
+#include "Camera/PlayerCameraManager.h"
+
+// Need these weapons to show up as active!!! REMEMVER!@!
 
 #pragma region Constructor and Inheritied Functions
 
@@ -122,8 +125,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("Move Right/Left", this, &APlayerCharacter::MoveRight);
 
 	// Attacking
-	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::Attack);
-	PlayerInputComponent->BindAction("AlternateAttack", IE_Pressed, this, &APlayerCharacter::AlternateAttack);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::LeftAttack);
+	PlayerInputComponent->BindAction("AlternateAttack", IE_Pressed, this, &APlayerCharacter::RightAttack);
 
 	// Telekinesis
 	PlayerInputComponent->BindAction("Telekinesis", IE_Pressed, this, &APlayerCharacter::HandleTelekinesis);
@@ -138,12 +141,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	// Checks Player levels to initialize stats
 	Stats->InitializeMaxStats();
 	Stats->InitializeMainStats();
 
-	EquipFromInventory(0, "LeftWeaponSocket");
+	EquipFromInventory(0, "Left");
+	EquipFromInventory(1, "Right");
 	DodgingMaterialInterface = GetMesh()->GetMaterial(0);
 	DodgingTrailComponent->Deactivate();
 
@@ -182,19 +186,12 @@ void APlayerCharacter::BeginPlay()
 	#pragma endregion
 
 	#pragma endregion
-
-	#pragma region Combat and Attacking Delegates Binding
-	
-	if (EquippedWeapon) {
-		EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
-		EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
-	}
-
-	#pragma endregion
 }
 
 void APlayerCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetViewTarget()->GetName());
 	
 	if (bTelekinesis)
 		AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
@@ -222,33 +219,24 @@ void APlayerCharacter::Tick(float DeltaTime) {
 
 #pragma region Weapon and Inventories
 
-void APlayerCharacter::EquipFromInventory(int32 Index, FName EquippingSocket = "LeftWeaponSocket") {
+void APlayerCharacter::EquipFromInventory(int32 Index, FName EquippingSlot = FName("Left")) {
 	if (WeaponInventory.IsValidIndex(Index)) {
-		if (!GetMesh()->DoesSocketExist(EquippingSocket)) return;
+		if (!GetMesh()->DoesSocketExist("LeftWeaponSocket")) return;
 
-		EquippedWeapon = GetWorld()->SpawnActor<ABaseWeapon>(WeaponInventory[Index]);
+		ABaseWeapon* ActiveWeapon = GetWorld()->SpawnActor<ABaseWeapon>(WeaponInventory[Index]);
 		const FAttachmentTransformRules TransformRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
-		EquippedWeapon->AttachToComponent(GetMesh(), TransformRules, EquippingSocket);
+		ActiveWeapon->AttachToComponent(GetMesh(), TransformRules, "LeftWeaponSocket");
 
+		if (EquippingSlot == "Right") RightEquippedWeapon = ActiveWeapon;
+		else LeftEquippedWeapon = ActiveWeapon;
+		EquippedWeapon = ActiveWeapon;
+		
 		if (const IBaseWeaponInterface* SpawnedWeaponInterface = Cast<IBaseWeaponInterface>(EquippedWeapon)) {
-			SpawnedWeaponInterface->Execute_Equip(EquippedWeapon, this);
+			SpawnedWeaponInterface->Execute_Equip(EquippedWeapon, this, EquippingSlot);
 			EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
 			EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
 		}
 	}
-}
-
-void APlayerCharacter::SwapWeapons() {
-	// Swap weapons and rebind delegates
-
-	#pragma region Attacking Delegates Binding
-
-	if (EquippedWeapon) {
-		EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
-		EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
-	}
-
-	#pragma endregion
 }
 
 void APlayerCharacter::ResetCameraRotation() {
@@ -345,7 +333,7 @@ void APlayerCharacter::DetectTelekineticObject() {
 
 		FHitResult Hit;
 
-		const bool DidFindObject = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), StartTrace, EndTrace, DetectionRadius, ObjectTypes, false, { this, EquippedWeapon }, EDrawDebugTrace::ForOneFrame, Hit, true);
+		const bool DidFindObject = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), StartTrace, EndTrace, DetectionRadius, ObjectTypes, false, { this, LeftEquippedWeapon, RightEquippedWeapon }, EDrawDebugTrace::ForOneFrame, Hit, true);
 
 		if (!HighlightedReference && DidFindObject) {
 			// Find if the hit object has the desired interface
@@ -429,8 +417,9 @@ void APlayerCharacter::RunStop() {
 #pragma region Dodging
 
 void APlayerCharacter::Dodge() {
-	if (!bIsDodging && !EquippedWeapon->bAttackDelay && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
-		EquippedWeapon->Reset();
+	if (!bIsDodging && !LeftEquippedWeapon->bAttackDelay && !RightEquippedWeapon->bAttackDelay && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
+		LeftEquippedWeapon->Reset();
+		RightEquippedWeapon->Reset();
 		Stats->Stamina -= DodgeStaminaCost;
 		bIsDodging = true;
 		GetMesh()->GetAnimInstance()->Montage_Play(DodgeAnimation);
@@ -478,7 +467,6 @@ void APlayerCharacter::DodgingFinished() {
 	DodgingTrailComponent->Deactivate();
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-
 	if (bTelekinesis) GetCharacterMovement()->bOrientRotationToMovement = false;
 	else GetCharacterMovement()->bOrientRotationToMovement = true;
 
@@ -504,10 +492,12 @@ void APlayerCharacter::ResetDodging() {
 
 #pragma region Combat
 
-void APlayerCharacter::Attack() {
+void APlayerCharacter::LeftAttack() {
 	if (EMovementState != EMovementState::EMS_Dodging) {
-		if (!bTelekinesis && EquippedWeapon && Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay()) 
+		if (!bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
+			EquippedWeapon = LeftEquippedWeapon;
 			EquippedWeapon->Attack();
+		}
 		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference)) {
 			if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
 				if (const ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference)) {
@@ -541,9 +531,11 @@ void APlayerCharacter::Attack() {
 	}
 }
 
-void APlayerCharacter::AlternateAttack() {
-	if (!bTelekinesis && EquippedWeapon) 
-		EquippedWeapon->ChargedAttack();
+void APlayerCharacter::RightAttack() {
+	if (!bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
+		EquippedWeapon = RightEquippedWeapon;
+		EquippedWeapon->Attack();
+	}
 	// Telekinetic Dropping
 	else if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold)) {
 		if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
