@@ -62,6 +62,10 @@ APlayerCharacter::APlayerCharacter()
 	CameraArm->bUsePawnControlRotation = true;
 	CameraArm->bEnableCameraLag = true;
 
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	FollowCamera->SetupAttachment(CameraArm, USpringArmComponent::SocketName);
+	FollowCamera->bUsePawnControlRotation = false;
+
 	// CurveFloat'/Game/Blueprints/Player/Telekinesis/Zoom.Zoom'
 
 	static ConstructorHelpers::FObjectFinder<UCurveFloat>C_ZoomCurve(TEXT("/Game/Blueprints/Player/Telekinesis/Zoom.Zoom"));
@@ -137,24 +141,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
-	//FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	//FollowCamera = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-	/*
-	TArray<AActor*> Cameras;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), UCameraComponent::StaticClass(), Cameras);
-	if (Cameras[0]) {
-		FollowCamera = Cast<UCameraComponent>(Cameras[0]);
-		FollowCamera->AttachToComponent(CameraArm, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false), USpringArmComponent::SocketName);
-		FollowCamera->bUsePawnControlRotation = false;
-	}
-	 */
-
-	APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-	CameraManager->AttachToComponent(CameraArm, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false));
-	CameraManager->SetViewTarget(this);
-	CameraManager->AddActorLocalOffset(FVector(300, 0, 0));
 	
 	// Checks Player levels to initialize stats
 	Stats->InitializeMaxStats();

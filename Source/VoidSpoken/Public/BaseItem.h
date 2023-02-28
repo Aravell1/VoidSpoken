@@ -14,9 +14,9 @@
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-	EIT_None = 0 UMETA(DisplayName = "None"),	
-	EIT_Health = 1 UMETA(DisplayName = "Health"),	
-	EIT_Focus = 2 UMETA(DisplayName = "Focus"),	
+	EIT_None = 0    UMETA(DisplayName = "None"),	
+	EIT_Health = 1  UMETA(DisplayName = "Health"),	
+	EIT_Focus = 2   UMETA(DisplayName = "Focus"),	
 	EIT_Stamina = 3 UMETA(DisplayName = "Stamina"),	
 };
 
