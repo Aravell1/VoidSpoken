@@ -8,7 +8,7 @@
 #include "EnemyPortalSpawn.generated.h"
 
 UDELEGATE()
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSpawnDelegate, ABaseEnemy*, NewEnemy);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FSpawnDelegate, ABaseEnemy*, NewEnemy, bool, ObeliskSpawn);
 
 UCLASS()
 class VOIDSPOKEN_API AEnemyPortalSpawn : public AActor
@@ -23,12 +23,13 @@ public:
 	UPROPERTY(EditAnywhere)
 		TArray<APatrolPoint*> PatrolPoints;
 	
-	void SpawnPortal();
+	void SpawnPortal(bool ObeliskSpawn);
 
 	UPROPERTY(EditAnywhere)
 		bool bSpawnOnBeginPlay = false;
 
 	FSpawnDelegate OnEnemySpawned;
+	bool bEnemySpawning = false;
 
 protected:
 	// Called when the game starts or when spawned
@@ -51,4 +52,5 @@ private:
 
 	const float PlayerDistanceToSpawn = 5000;
 	const float DelayPortalToEnemy = 2.5f;
+	bool bObeliskSpawn = false;
 };

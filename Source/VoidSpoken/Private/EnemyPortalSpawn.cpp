@@ -17,7 +17,7 @@ void AEnemyPortalSpawn::BeginPlay()
 	Super::BeginPlay();
 
 	if (bSpawnOnBeginPlay)
-		SpawnPortal();
+		SpawnPortal(false);
 }
 
 // Called every frame
@@ -26,16 +26,18 @@ void AEnemyPortalSpawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AEnemyPortalSpawn::SpawnPortal()
+void AEnemyPortalSpawn::SpawnPortal(bool ObeliskSpawn)
 {
 	if (Portal)
 	{
+		bObeliskSpawn = ObeliskSpawn;
 		FVector SpawnLocation = GetActorLocation() + FVector(0, 0, 95);
 		FRotator SpawnRotation = GetActorRotation();
 		FActorSpawnParameters SpawnInfo;
 
 		AActor* SpawnedPortal = GetWorld()->SpawnActor<AActor>(Portal, SpawnLocation, SpawnRotation, SpawnInfo);
 		SpawnedPortal->SetLifeSpan(5);
+		bEnemySpawning = true;
 
 		GetWorldTimerManager().SetTimer(DistanceCheckTimer,
 			this,
@@ -56,8 +58,9 @@ void AEnemyPortalSpawn::SpawnEnemy()
 
 		ABaseEnemy* SpawnedEnemy = GetWorld()->SpawnActor<ABaseEnemy>(EnemyTypes[RandomType], SpawnLocation, SpawnRotation, SpawnInfo);
 		SpawnedEnemy->PatrolPoints = PatrolPoints;
+		bEnemySpawning = false;
 
-		OnEnemySpawned.Broadcast(SpawnedEnemy);
+		OnEnemySpawned.Broadcast(SpawnedEnemy, bObeliskSpawn);
 	}
 }
 

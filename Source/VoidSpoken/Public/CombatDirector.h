@@ -19,6 +19,7 @@ struct FEnemyData
 
 	ABaseEnemy* Enemy = nullptr;
 	float EnemyValue = 0;
+	bool ObeliskEnemy = false;
 };
 
 UCLASS()
@@ -31,7 +32,7 @@ public:
 	ACombatDirector();
 
 	UFUNCTION()
-		void AddToMap(ABaseEnemy* Enemy);
+		void AddToMap(ABaseEnemy* Enemy, bool ObeliskSpawn);
 	UFUNCTION()
 		void RemoveEnemy(ABaseEnemy* Enemy);
 

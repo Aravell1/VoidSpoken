@@ -80,7 +80,7 @@ void ACombatDirector::SpawnEnemy()
 				{
 					int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
 
-					SpawnPoints[RandomIndex]->SpawnPortal();
+					SpawnPoints[RandomIndex]->SpawnPortal(false);
 
 					SpawnPoints.RemoveAt(RandomIndex);
 				}
@@ -91,7 +91,7 @@ void ACombatDirector::SpawnEnemy()
 				{
 					int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
 
-					SpawnPoints[RandomIndex]->SpawnPortal();
+					SpawnPoints[RandomIndex]->SpawnPortal(false);
 
 					SpawnPoints.RemoveAt(RandomIndex);
 				}
@@ -118,16 +118,32 @@ void ACombatDirector::SpawnEnemy()
 
 void ACombatDirector::SpawnObeliskEnemy()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Spawn Obelisk Enemy:"));
 	if (ActivatedObelisk)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Activated Obelisk Found"));
+
 		TArray<AEnemyPortalSpawn*> SpawnPoints = ActivatedObelisk->NearbySpawnPoints;
 		int SpawnCount = EnemiesToSpawn - ObeliskSpawns;
+		if (SpawnCount > SpawnPoints.Num())
+			SpawnCount = SpawnPoints.Num();
+
+		UE_LOG(LogTemp, Warning, TEXT("Total Enemies: %s"), *FString::FromInt(EnemiesToSpawn));
+		UE_LOG(LogTemp, Warning, TEXT("Enemies To Be Spawned: %s"), *FString::FromInt(SpawnCount));
+
 		if (SpawnCount > 0)
 		{
 			for (int i = 0; i < SpawnCount; i++)
 			{
 				int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
-				SpawnPoints[RandomIndex]->SpawnPortal();
+				while (SpawnPoints[RandomIndex]->bEnemySpawning && SpawnCount > 0)
+				{
+					SpawnPoints.RemoveAt(RandomIndex);
+					SpawnCount--;
+					int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+				}
+
+				SpawnPoints[RandomIndex]->SpawnPortal(true);
 
 				SpawnPoints.RemoveAt(RandomIndex);
 
@@ -269,10 +285,14 @@ void ACombatDirector::TriggerEnemyAttack()
 	GetWorldTimerManager().SetTimer(CombatAttackTimer, this, &ACombatDirector::TriggerEnemyAttack, AttackCheckInterval);
 }
 
-void ACombatDirector::AddToMap(ABaseEnemy* Enemy)
+void ACombatDirector::AddToMap(ABaseEnemy* Enemy, bool ObeliskSpawn)
 {
 	FEnemyData NewEnemy;
 	NewEnemy.Enemy = Enemy;
+	NewEnemy.ObeliskEnemy = ObeliskSpawn;
+
+	if (ObeliskSpawn)
+		ObeliskSpawns++;
 
 	Enemy->OnDeathTrigger.AddDynamic(this, &ACombatDirector::RemoveEnemy);
 
@@ -290,12 +310,16 @@ void ACombatDirector::RemoveEnemy(ABaseEnemy* Enemy)
 		{
 			Enemies.RemoveAt(i);
 
-			if (bObeliskMode)
+			if (Enemies[i].ObeliskEnemy)
 			{
 				ObeliskSpawns--;
 				if (ObeliskSpawns < 0)
 					ObeliskSpawns = 0;
-				SpawnObeliskEnemy();
+
+				if (bObeliskMode)
+				{
+					SpawnObeliskEnemy();
+				}
 			}
 
 			return;
