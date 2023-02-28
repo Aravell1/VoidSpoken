@@ -48,7 +48,7 @@ enum class ETelekinesisAttackState : uint8 {
 
 UENUM(BlueprintType)
 enum class EMovementState : uint8 {
-	EMS_Idle = 0 UMETA(DisplayName = "Idle"),			// Idle
+	EMS_Idle = 0	UMETA(DisplayName = "Idle"),		// Idle
 	EMS_Walking = 1 UMETA(DisplayName = "Walking"),		// Walking
 	EMS_Running = 2 UMETA(DisplayName = "Running"),		// Running
 	EMS_Dodging = 3 UMETA(DisplayName = "Dodging"),		// Dodging
@@ -82,18 +82,21 @@ public:
 	#pragma region Weapons and Functions
 
 	public:
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Active Equipped Weapon")
 	ABaseWeapon* EquippedWeapon = nullptr;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Left Weapon")
+	ABaseWeapon* LeftEquippedWeapon = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Right Weapon")
+	ABaseWeapon* RightEquippedWeapon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TArray<TSubclassOf<ABaseWeapon>> WeaponInventory = {};
 
 	UFUNCTION(BlueprintCallable)
 	void EquipFromInventory(int32 Index, FName EquippingSocket);
-
-	UFUNCTION(BlueprintCallable)
-	void SwapWeapons();
 
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	bool GetInCombat() const { return bInCombat; }
@@ -287,8 +290,8 @@ public:
 
 	#pragma region Weapon Attacks and Delegates
 	
-	void Attack();
-	void AlternateAttack();
+	void LeftAttack();
+	void RightAttack();
 
 	void OnWeaponAttackStarted();
 	void OnWeaponAttackEnded();
