@@ -11,15 +11,6 @@
 #include "BaseItem.generated.h"
 
 
-UENUM(BlueprintType)
-enum class EItemType : uint8
-{
-	EIT_None = 0    UMETA(DisplayName = "None"),	
-	EIT_Health = 1  UMETA(DisplayName = "Health"),	
-	EIT_Focus = 2   UMETA(DisplayName = "Focus"),	
-	EIT_Stamina = 3 UMETA(DisplayName = "Stamina"),	
-};
-
 UCLASS()
 class VOIDSPOKEN_API ABaseItem : public AActor
 {
@@ -35,12 +26,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item | Particles")
 	class UNiagaraComponent* Particles;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	EItemType Type = EItemType::EIT_None;
-
-	UFUNCTION(BlueprintPure, BlueprintCallable)
-	EItemType GetItemType() const { return Type; };
-	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
