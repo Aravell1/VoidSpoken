@@ -244,8 +244,16 @@ public:
 
 	public:
 
+	//
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Location Offset", meta = (NoGetter))
+	FVector LocalWeaponLocationOffset = FVector(0, 0, 0);
+
+	//
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Rotation Offset", meta = (NoGetter))
+	FRotator LocalWeaponRotationOffset = FRotator(0, 0, 0);
+	
 	/// Will dictate in which side of the HUD will this be equipped to and bound to a button 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Equipped Slot", meta = (NoGetter))
 		EEquippedSlot EEquippedSlot = EEquippedSlot::EES_None;
 
 	/// This will Ensure that the weapons type will stay consistent

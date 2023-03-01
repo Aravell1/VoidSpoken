@@ -111,6 +111,9 @@ public:
 	/// Determines if the player can be damaged
 	UPROPERTY(VisibleAnywhere, Category = "Stats|Combat", DisplayName = "In Combat")
 	bool bInCombat = false;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Stats|Combat", DisplayName = "Is Attacking")
+	bool bIsAttacking = false;
 
 	#pragma region Timers and Variables
 	

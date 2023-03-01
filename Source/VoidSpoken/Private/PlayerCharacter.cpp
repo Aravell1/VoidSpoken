@@ -125,8 +125,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("Move Right/Left", this, &APlayerCharacter::MoveRight);
 
 	// Attacking
-	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::LeftAttack);
-	PlayerInputComponent->BindAction("AlternateAttack", IE_Pressed, this, &APlayerCharacter::RightAttack);
+	PlayerInputComponent->BindAction("LeftAttack", IE_Pressed, this, &APlayerCharacter::LeftAttack);
+	PlayerInputComponent->BindAction("RightAttack", IE_Pressed, this, &APlayerCharacter::RightAttack);
 
 	// Telekinesis
 	PlayerInputComponent->BindAction("Telekinesis", IE_Pressed, this, &APlayerCharacter::HandleTelekinesis);
@@ -190,8 +190,6 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetViewTarget()->GetName());
 	
 	if (bTelekinesis)
 		AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
@@ -420,6 +418,7 @@ void APlayerCharacter::Dodge() {
 	if (!bIsDodging && !LeftEquippedWeapon->bAttackDelay && !RightEquippedWeapon->bAttackDelay && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
 		LeftEquippedWeapon->Reset();
 		RightEquippedWeapon->Reset();
+		bIsAttacking = false;
 		Stats->Stamina -= DodgeStaminaCost;
 		bIsDodging = true;
 		GetMesh()->GetAnimInstance()->Montage_Play(DodgeAnimation);
@@ -491,12 +490,14 @@ void APlayerCharacter::ResetDodging() {
 #pragma region Combat
 
 void APlayerCharacter::LeftAttack() {
-	if (EMovementState != EMovementState::EMS_Dodging) {
-		if (!bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
+	if (EMovementState != EMovementState::EMS_Dodging)
+	{
+		if (!bIsAttacking && !bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
 			EquippedWeapon = LeftEquippedWeapon;
 			EquippedWeapon->Attack();
 		}
-		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference)) {
+		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference))
+		{
 			if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
 				if (const ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference)) {
 					// Setting the Telekinesis Prop Reference and Pulling it
@@ -530,18 +531,22 @@ void APlayerCharacter::LeftAttack() {
 }
 
 void APlayerCharacter::RightAttack() {
-	if (!bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
-		EquippedWeapon = RightEquippedWeapon;
-		EquippedWeapon->Attack();
-	}
-	// Telekinetic Dropping
-	else if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold)) {
-		if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
-			Interface->Execute_Drop(TelekineticPropReference);
-			TelekineticPropReference = nullptr;
+	if (EMovementState != EMovementState::EMS_Dodging)
+	{
+		if (!bIsAttacking && !bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
+			EquippedWeapon = RightEquippedWeapon;
+			EquippedWeapon->Attack();
+		}
+		// Telekinetic Dropping
+		else if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold))
+		{
+			if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
+				Interface->Execute_Drop(TelekineticPropReference);
+				TelekineticPropReference = nullptr;
 
-			// Stop Depleting Focus
-			GetWorldTimerManager().ClearTimer(FocusDepletionTimer);
+				// Stop Depleting Focus
+				GetWorldTimerManager().ClearTimer(FocusDepletionTimer);
+			}
 		}
 	}
 }
@@ -549,6 +554,7 @@ void APlayerCharacter::RightAttack() {
 #pragma region Attack Delegate Functions
 
 void APlayerCharacter::OnWeaponAttackStarted() {
+	bIsAttacking = true;
 	GetWorldTimerManager().ClearTimer(CombatTimer);
 	GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
 	
@@ -561,6 +567,7 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 	GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, StaminaDelay);
 	
 	// Combat
+	bIsAttacking = false;
 	bInCombat = true;
 	GetWorldTimerManager().ClearTimer(CombatTimer);
 	if (!CombatDirector->GetInCombat())
@@ -580,9 +587,11 @@ void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const U
 		Stats->Health -= Damage;
 		bInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 1.5f, false);
-		if (!GetWorldTimerManager().IsTimerActive(HealthRegenerationTimer))
-			GetWorldTimerManager().ClearTimer(HealthRegenerationTimer);
-		GetWorldTimerManager().SetTimer(HealthRegenerationTimer, this, &APlayerCharacter::RegenerateHealth, HealingDelay, true);
+		if (!CombatDirector->GetInCombat()) {
+			if (!GetWorldTimerManager().IsTimerActive(HealthRegenerationTimer))
+				GetWorldTimerManager().ClearTimer(HealthRegenerationTimer);
+			GetWorldTimerManager().SetTimer(HealthRegenerationTimer, this, &APlayerCharacter::RegenerateHealth, HealingDelay, true);
+		}
 	}
 }
 

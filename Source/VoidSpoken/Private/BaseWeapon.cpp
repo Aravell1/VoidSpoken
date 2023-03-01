@@ -61,8 +61,8 @@ void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter, FName Equ
 	EquippedCharacter = EquippingCharacter;
 	SetOwner(EquippingCharacter);
 
-	AddActorLocalOffset(FVector(0, 0, -48));
-	AddActorLocalRotation(FRotator(0, 0, -90));
+	WeaponMeshComponent->AddLocalOffset(LocalWeaponLocationOffset);
+	WeaponMeshComponent->AddLocalRotation(LocalWeaponRotationOffset);
 }
 
 void ABaseWeapon::Attack() {
