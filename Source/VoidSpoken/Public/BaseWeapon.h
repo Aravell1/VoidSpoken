@@ -266,11 +266,25 @@ public:
 
 	public:
 
+<<<<<<< Updated upstream
 	/// This keeps track of the current Attack to be executed.
 	///		-Cannot be edited by blueprints to prevent any unwanted behaviours
 	///		-Will only increment to the length of the ComboMontage - 1
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
 		TEnumAsByte<EAttackType> EAttackState = EAT_None;
+=======
+	// 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Location Offset")
+	FVector LocalWeaponLocationOffset = FVector(0, 0, 0);
+
+	//
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Rotation Offset")
+	FRotator LocalWeaponRotationOffset = FRotator(0, 0, 0);
+	
+	/// Will dictate in which side of the HUD will this be equipped to and bound to a button 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Equipped Slot", meta = (NoGetter))
+		EEquippedSlot EEquippedSlot = EEquippedSlot::EES_None;
+>>>>>>> Stashed changes
 
 	/*
 	/// Boolean for when the attack started (prevent spamming attack inputs)
