@@ -6,9 +6,6 @@
 #include "HealthPickup.h"
 #include "StaminaPickup.h"
 #include "CombatDirector.h"
-#include "Camera/PlayerCameraManager.h"
-
-// Need these weapons to show up as active!!! REMEMVER!@!
 
 #pragma region Constructor and Inheritied Functions
 
@@ -85,8 +82,8 @@ APlayerCharacter::APlayerCharacter()
 	Stats->SetBaseStamina(50.f);
 	Stats->GetBaseStamina();
 
-	HealAmount = 10.0f;
-	FocusAmount = 25.0f;
+	HealAmount = 10.f;
+	FocusAmount = 25.f;
 	StaminaAmount = 12.5f;
 
 	#pragma endregion
@@ -125,8 +122,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("Move Right/Left", this, &APlayerCharacter::MoveRight);
 
 	// Attacking
-	PlayerInputComponent->BindAction("LeftAttack", IE_Pressed, this, &APlayerCharacter::LeftAttack);
-	PlayerInputComponent->BindAction("RightAttack", IE_Pressed, this, &APlayerCharacter::RightAttack);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::Attack);
+	PlayerInputComponent->BindAction("AlternateAttack", IE_Pressed, this, &APlayerCharacter::AlternateAttack);
 
 	// Telekinesis
 	PlayerInputComponent->BindAction("Telekinesis", IE_Pressed, this, &APlayerCharacter::HandleTelekinesis);
@@ -141,13 +138,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// Checks Player levels to initialize stats
 	Stats->InitializeMaxStats();
 	Stats->InitializeMainStats();
 
-	EquipFromInventory(0, "Left");
-	EquipFromInventory(1, "Right");
+	EquipFromInventory(0, "LeftWeaponSocket");
 	DodgingMaterialInterface = GetMesh()->GetMaterial(0);
 	DodgingTrailComponent->Deactivate();
 
@@ -186,6 +182,15 @@ void APlayerCharacter::BeginPlay()
 	#pragma endregion
 
 	#pragma endregion
+
+	#pragma region Combat and Attacking Delegates Binding
+	
+	if (EquippedWeapon) {
+		EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
+		EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
+	}
+
+	#pragma endregion
 }
 
 void APlayerCharacter::Tick(float DeltaTime) {
@@ -217,24 +222,33 @@ void APlayerCharacter::Tick(float DeltaTime) {
 
 #pragma region Weapon and Inventories
 
-void APlayerCharacter::EquipFromInventory(int32 Index, FName EquippingSlot = FName("Left")) {
+void APlayerCharacter::EquipFromInventory(int32 Index, FName EquippingSocket = "LeftWeaponSocket") {
 	if (WeaponInventory.IsValidIndex(Index)) {
-		if (!GetMesh()->DoesSocketExist("LeftWeaponSocket")) return;
+		if (!GetMesh()->DoesSocketExist(EquippingSocket)) return;
 
-		ABaseWeapon* ActiveWeapon = GetWorld()->SpawnActor<ABaseWeapon>(WeaponInventory[Index]);
+		EquippedWeapon = GetWorld()->SpawnActor<ABaseWeapon>(WeaponInventory[Index]);
 		const FAttachmentTransformRules TransformRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
-		ActiveWeapon->AttachToComponent(GetMesh(), TransformRules, "LeftWeaponSocket");
+		EquippedWeapon->AttachToComponent(GetMesh(), TransformRules, EquippingSocket);
 
-		if (EquippingSlot == "Right") RightEquippedWeapon = ActiveWeapon;
-		else LeftEquippedWeapon = ActiveWeapon;
-		EquippedWeapon = ActiveWeapon;
-		
 		if (const IBaseWeaponInterface* SpawnedWeaponInterface = Cast<IBaseWeaponInterface>(EquippedWeapon)) {
-			SpawnedWeaponInterface->Execute_Equip(EquippedWeapon, this, EquippingSlot);
+			SpawnedWeaponInterface->Execute_Equip(EquippedWeapon, this);
 			EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
 			EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
 		}
 	}
+}
+
+void APlayerCharacter::SwapWeapons() {
+	// Swap weapons and rebind delegates
+
+	#pragma region Attacking Delegates Binding
+
+	if (EquippedWeapon) {
+		EquippedWeapon->OnAttackStarted.BindUObject(this, &APlayerCharacter::OnWeaponAttackStarted);
+		EquippedWeapon->OnAttackEnded.BindUObject(this, &APlayerCharacter::OnWeaponAttackEnded);
+	}
+
+	#pragma endregion
 }
 
 void APlayerCharacter::ResetCameraRotation() {
@@ -331,7 +345,7 @@ void APlayerCharacter::DetectTelekineticObject() {
 
 		FHitResult Hit;
 
-		const bool DidFindObject = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), StartTrace, EndTrace, DetectionRadius, ObjectTypes, false, { this, LeftEquippedWeapon, RightEquippedWeapon }, EDrawDebugTrace::ForOneFrame, Hit, true);
+		const bool DidFindObject = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), StartTrace, EndTrace, DetectionRadius, ObjectTypes, false, { this, EquippedWeapon }, EDrawDebugTrace::ForOneFrame, Hit, true);
 
 		if (!HighlightedReference && DidFindObject) {
 			// Find if the hit object has the desired interface
@@ -415,10 +429,8 @@ void APlayerCharacter::RunStop() {
 #pragma region Dodging
 
 void APlayerCharacter::Dodge() {
-	if (!bIsDodging && !LeftEquippedWeapon->bAttackDelay && !RightEquippedWeapon->bAttackDelay && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
-		LeftEquippedWeapon->Reset();
-		RightEquippedWeapon->Reset();
-		bIsAttacking = false;
+	if (!bIsDodging && !EquippedWeapon->bAttackDelay && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
+		EquippedWeapon->Reset();
 		Stats->Stamina -= DodgeStaminaCost;
 		bIsDodging = true;
 		GetMesh()->GetAnimInstance()->Montage_Play(DodgeAnimation);
@@ -466,6 +478,7 @@ void APlayerCharacter::DodgingFinished() {
 	DodgingTrailComponent->Deactivate();
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
+
 	if (bTelekinesis) GetCharacterMovement()->bOrientRotationToMovement = false;
 	else GetCharacterMovement()->bOrientRotationToMovement = true;
 
@@ -479,6 +492,8 @@ void APlayerCharacter::DodgingFinished() {
 	else GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, StaminaDelay);
 }
 
+
+
 void APlayerCharacter::ResetDodging() {
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 }
@@ -489,15 +504,11 @@ void APlayerCharacter::ResetDodging() {
 
 #pragma region Combat
 
-void APlayerCharacter::LeftAttack() {
-	if (EMovementState != EMovementState::EMS_Dodging)
-	{
-		if (!bIsAttacking && !bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
-			EquippedWeapon = LeftEquippedWeapon;
+void APlayerCharacter::Attack() {
+	if (EMovementState != EMovementState::EMS_Dodging) {
+		if (!bTelekinesis && EquippedWeapon && Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay()) 
 			EquippedWeapon->Attack();
-		}
-		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference))
-		{
+		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference)) {
 			if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
 				if (const ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference)) {
 					// Setting the Telekinesis Prop Reference and Pulling it
@@ -530,23 +541,17 @@ void APlayerCharacter::LeftAttack() {
 	}
 }
 
-void APlayerCharacter::RightAttack() {
-	if (EMovementState != EMovementState::EMS_Dodging)
-	{
-		if (!bIsAttacking && !bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
-			EquippedWeapon = RightEquippedWeapon;
-			EquippedWeapon->Attack();
-		}
-		// Telekinetic Dropping
-		else if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold))
-		{
-			if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
-				Interface->Execute_Drop(TelekineticPropReference);
-				TelekineticPropReference = nullptr;
+void APlayerCharacter::AlternateAttack() {
+	if (!bTelekinesis && EquippedWeapon) 
+		EquippedWeapon->ChargedAttack();
+	// Telekinetic Dropping
+	else if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold)) {
+		if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
+			Interface->Execute_Drop(TelekineticPropReference);
+			TelekineticPropReference = nullptr;
 
-				// Stop Depleting Focus
-				GetWorldTimerManager().ClearTimer(FocusDepletionTimer);
-			}
+			// Stop Depleting Focus
+			GetWorldTimerManager().ClearTimer(FocusDepletionTimer);
 		}
 	}
 }
@@ -554,7 +559,6 @@ void APlayerCharacter::RightAttack() {
 #pragma region Attack Delegate Functions
 
 void APlayerCharacter::OnWeaponAttackStarted() {
-	bIsAttacking = true;
 	GetWorldTimerManager().ClearTimer(CombatTimer);
 	GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
 	
@@ -567,7 +571,6 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 	GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, StaminaDelay);
 	
 	// Combat
-	bIsAttacking = false;
 	bInCombat = true;
 	GetWorldTimerManager().ClearTimer(CombatTimer);
 	if (!CombatDirector->GetInCombat())
@@ -587,11 +590,9 @@ void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const U
 		Stats->Health -= Damage;
 		bInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 1.5f, false);
-		if (!CombatDirector->GetInCombat()) {
-			if (!GetWorldTimerManager().IsTimerActive(HealthRegenerationTimer))
-				GetWorldTimerManager().ClearTimer(HealthRegenerationTimer);
-			GetWorldTimerManager().SetTimer(HealthRegenerationTimer, this, &APlayerCharacter::RegenerateHealth, HealingDelay, true);
-		}
+		if (!GetWorldTimerManager().IsTimerActive(HealthRegenerationTimer))
+			GetWorldTimerManager().ClearTimer(HealthRegenerationTimer);
+		GetWorldTimerManager().SetTimer(HealthRegenerationTimer, this, &APlayerCharacter::RegenerateHealth, HealingDelay, true);
 	}
 }
 
@@ -681,18 +682,20 @@ void APlayerCharacter::On_F_Release()
 	bIsFDown = false;
 }
 
-
 void APlayerCharacter::UseHealthConsumable()
 {
 	AVoidSpokenGameModeBase* GM;
 	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-	if (GM->HealPickup > 0)
+
+	if (GM->GetHealItem() > 0)
 	{
 		if (Stats->Health < Stats->GetMaxHealth())
 		{
 			Stats->Health += HealAmount;
-			GM->HealPickup -= 1;
+			GM->SetHealItem(-1);
+
+			UE_LOG(LogTemp, Warning, TEXT("HEALTH Items: %d"), GM->HealPickup);
 
 			if (Stats->Health >= Stats->GetMaxHealth())
 			{
@@ -709,12 +712,15 @@ void APlayerCharacter::UseFocusConsumable()
 	AVoidSpokenGameModeBase* GM;
 	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-	if (GM->FocusPickup > 0)
+
+	if (GM->GetFocusItem() > 0)
 	{
 		if (Stats->FocusPoints < Stats->GetMaxFocus())
 		{
 			Stats->FocusPoints += FocusAmount;
-			GM->FocusPickup -= 1;
+			GM->SetFocusItem(-1);
+
+			UE_LOG(LogTemp, Warning, TEXT("FOCUS Items: %d"), GM->FocusPickup);
 
 			if (Stats->FocusPoints >= Stats->GetMaxFocus())
 			{
@@ -728,14 +734,18 @@ void APlayerCharacter::UseFocusConsumable()
 
 void APlayerCharacter::UseStaminaConsumable()
 {
-	AVoidSpokenGameModeBase* GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	AVoidSpokenGameModeBase* GM;
+	GM = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-	if (GM && GM->StaminaPickup > 0)
+
+	if (GM->GetStaminaItem() > 0)
 	{
 		if (Stats->Stamina < Stats->GetMaxStamina())
 		{
 			Stats->Stamina += StaminaAmount;
-			GM->StaminaPickup -= 1;
+			GM->SetStaminaItem(-1);
+
+			UE_LOG(LogTemp, Warning, TEXT("STAMINA Items: %d"), GM->FocusPickup);
 
 			if (Stats->Stamina >= Stats->GetMaxStamina())
 			{
@@ -743,6 +753,8 @@ void APlayerCharacter::UseStaminaConsumable()
 			}
 		}
 	}
+	else
+		return;
 }
 
 #pragma endregion

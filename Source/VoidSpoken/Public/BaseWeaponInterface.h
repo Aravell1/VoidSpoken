@@ -6,6 +6,17 @@
 #include "UObject/Interface.h"
 #include "BaseWeaponInterface.generated.h"
 
+UCLASS()
+class UWeaponSockets : public UObject {
+
+	GENERATED_BODY()
+
+public:
+
+	static const FName LeftHand;
+	static const FName RightHand;
+};
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UBaseWeaponInterface : public UInterface
@@ -28,6 +39,6 @@ class VOIDSPOKEN_API IBaseWeaponInterface
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Base Weapon")
-		void Equip(ACharacter* EquippingCharacter, FName EquippingSlot);
+		void Equip(ACharacter* EquippingCharacter);
 
 };

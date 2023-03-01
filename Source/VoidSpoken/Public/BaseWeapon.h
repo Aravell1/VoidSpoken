@@ -33,18 +33,11 @@ DECLARE_DELEGATE(FOnAttackEndedDelegate);
 
 #pragma region Enums
 
-UENUM(BlueprintType) 
-enum class EEquippedSlot : uint8 {
-	EES_None = 0	UMETA(DisplayName = "None"),
-	EES_Left = 1	UMETA(DisplayName = "Left"),
-	EES_Right = 2	UMETA(DisplayName = "Right"),
-};
-
-UENUM(BlueprintType) 
-enum class EAttackWeaponType : uint8 {
-	EAW_None	UMETA(DisplayName = "None"),
-	EAW_Sword	UMETA(DisplayName = "Sword"),
-	EAW_Axe		UMETA(DisplayName = "Axe"),
+UENUM() 
+enum EAttackType {
+	EAT_None			UMETA(DisplayName = "None"),
+	EAT_NormalAttack	UMETA(DisplayName = "Normal Attack"),
+	EAT_ChargedAttack	UMETA(DisplayName = "Charged Attack"),
 };
 
 #pragma endregion 
@@ -120,7 +113,7 @@ public:
 	///		-Initialises the UAnimInstance from the Default (At the time of this Equip(), what was the UAnimInstance the Character had)
 	///		-Initialises the UCharacterMovementComponent from the given EquippedCharacter 
 	UFUNCTION(BlueprintCallable)
-		void Equip_Implementation(ACharacter* EquippingCharacter, FName EquippingSlot) override;
+		void Equip_Implementation(ACharacter* EquippingCharacter) override;
 
 	/// Function: Attack()
 	///		-Momentarily disables player movement
@@ -128,6 +121,14 @@ public:
 	///		-Will not play any animations if the ComboAnimationMontage are not set 
 	UFUNCTION(BlueprintCallable)
 		virtual void Attack();
+
+	/// Function: ChargedAttack()
+	///		-Momentarily disables player movement
+	///		-Set Timers (AttackDelay) to be active and delays for the respective UAnimMontage's PlayLength()
+	///		-Will not play any animations if the ComboAnimationMontage are not set 
+	///		-Can be play at any CurrentComboIndex, and will reset the CurrentComboIndex to 0
+	UFUNCTION(BlueprintCallable)
+		virtual void ChargedAttack();
 
 	/// Function: NextAttack()
 	///		-Re-Enables the player movement
@@ -153,7 +154,7 @@ public:
 		virtual void Reset();
 
 	/// Function: Clear()
-	///		-Clears the Overlapped Actors array Mid Attack
+	///		-Clears the OVerlapped Actors array Mid Attack
 	UFUNCTION(BlueprintCallable)
 		virtual void Clear();
 
@@ -216,6 +217,27 @@ public:
 
 	#pragma endregion
 
+	#pragma region Charged Attack
+
+	/// This Charged Attack Animation will be played if the Entity uses it
+	///		-This parameter can be uninitialized
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Charged Attack")
+		UAnimMontage* ChargedAttackMontage = nullptr;
+
+	/// This value will dictate how much of the Base Damage is accounted for
+	///		-Normalized Value (%)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Charged Attack")
+		float ChargedAttackComboMultiplier = 0;
+
+	/// How much Stamina is comsumed
+	///		-Will not player if Player doesn't have enough resources
+	///		-This is a subtractive value
+	///		-This value substracts from the Stats->Stamina
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Charged Attack")
+		float ChargedAttackConsumption = 0;
+
+	#pragma endregion
+
 	#pragma region Components of this class
 
 	public:
@@ -244,28 +266,21 @@ public:
 
 	public:
 
-	//
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Location Offset", meta = (NoGetter))
-	FVector LocalWeaponLocationOffset = FVector(0, 0, 0);
+	/// This keeps track of the current Attack to be executed.
+	///		-Cannot be edited by blueprints to prevent any unwanted behaviours
+	///		-Will only increment to the length of the ComboMontage - 1
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
+		TEnumAsByte<EAttackType> EAttackState = EAT_None;
 
-	//
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Rotation Offset", meta = (NoGetter))
-	FRotator LocalWeaponRotationOffset = FRotator(0, 0, 0);
-	
-	/// Will dictate in which side of the HUD will this be equipped to and bound to a button 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Equipped Slot", meta = (NoGetter))
-		EEquippedSlot EEquippedSlot = EEquippedSlot::EES_None;
-
-	/// This will Ensure that the weapons type will stay consistent
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, DisplayName = "Attack Weapon Type")
-		EAttackWeaponType EAttackWeapon = EAttackWeaponType::EAW_None;
+	/*
+	/// Boolean for when the attack started (prevent spamming attack inputs)
+	UPROPERTY(VisibleAnywhere, DisplayName = "Is Attacking")
+		bool bIsAttacking = false;
+	 */
 
 	/// Boolean for Checking Collisions for the weapon to deal Damage
 	UPROPERTY(VisibleAnywhere, DisplayName = "Check For Overlapped Actors")
 		bool bCheckForOverlappedActors = false;
-
-	UPROPERTY(VisibleAnywhere, DisplayName = "Active Weapon")
-		bool bIsActiveWeapon = false;
 
 	UFUNCTION(BlueprintCallable)
 	void SetCheckForOverlappedActors(bool State) { bCheckForOverlappedActors = State; };
