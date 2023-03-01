@@ -119,7 +119,7 @@ void AObelisk::Tick(float DeltaTime)
 
 }
 
-+ void AObelisk::SpawnDecal()
+void AObelisk::SpawnDecal()
 {
 	if (ChargeZoneDecalClass)
 	{
