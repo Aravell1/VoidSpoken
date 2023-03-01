@@ -6,10 +6,6 @@
 #include "HealthPickup.h"
 #include "StaminaPickup.h"
 #include "CombatDirector.h"
-<<<<<<< Updated upstream
-=======
-#include "Camera/PlayerCameraManager.h"
->>>>>>> Stashed changes
 
 #pragma region Constructor and Inheritied Functions
 
@@ -510,13 +506,7 @@ void APlayerCharacter::ResetDodging() {
 
 void APlayerCharacter::Attack() {
 	if (EMovementState != EMovementState::EMS_Dodging) {
-<<<<<<< Updated upstream
 		if (!bTelekinesis && EquippedWeapon && Stats->Stamina >= EquippedWeapon->GetStaminaCost() && !EquippedWeapon->GetAttackDelay()) 
-=======
-		if (!bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
-			EquippedWeapon = LeftEquippedWeapon;
-			RightEquippedWeapon->Reset();
->>>>>>> Stashed changes
 			EquippedWeapon->Attack();
 		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference)) {
 			if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
@@ -551,18 +541,9 @@ void APlayerCharacter::Attack() {
 	}
 }
 
-<<<<<<< Updated upstream
 void APlayerCharacter::AlternateAttack() {
 	if (!bTelekinesis && EquippedWeapon) 
 		EquippedWeapon->ChargedAttack();
-=======
-void APlayerCharacter::RightAttack() {
-	if (!bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
-		EquippedWeapon = RightEquippedWeapon;
-		LeftEquippedWeapon->Reset();
-		EquippedWeapon->Attack();
-	}
->>>>>>> Stashed changes
 	// Telekinetic Dropping
 	else if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold)) {
 		if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {

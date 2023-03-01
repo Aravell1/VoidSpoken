@@ -76,7 +76,6 @@ void ATelekineticProp::Pull_Implementation(ACharacter* Character) {
 	Execute_Highlight(this, false);
 	PlayerCharacter = Character;
 	LiftOff();
-	StaticMesh->SetSimulatePhysics(true);
 }
 
 void ATelekineticProp::Push_Implementation(FVector Destination, float Force) {
@@ -176,8 +175,6 @@ void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor*
 		State = ETelekinesisState::ETS_Default;
 
 		UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, PlayerCharacter, NULL);
-
-		// APPLY THE DESTRUCTABLE REFERENCE HERE
 	}
 }
 
