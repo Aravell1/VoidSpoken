@@ -48,7 +48,7 @@ enum class ETelekinesisAttackState : uint8 {
 
 UENUM(BlueprintType)
 enum class EMovementState : uint8 {
-	EMS_Idle = 0	UMETA(DisplayName = "Idle"),		// Idle
+	EMS_Idle = 0 UMETA(DisplayName = "Idle"),			// Idle
 	EMS_Walking = 1 UMETA(DisplayName = "Walking"),		// Walking
 	EMS_Running = 2 UMETA(DisplayName = "Running"),		// Running
 	EMS_Dodging = 3 UMETA(DisplayName = "Dodging"),		// Dodging
@@ -82,21 +82,18 @@ public:
 	#pragma region Weapons and Functions
 
 	public:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Active Equipped Weapon")
-	ABaseWeapon* EquippedWeapon = nullptr;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Left Weapon")
-	ABaseWeapon* LeftEquippedWeapon = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Right Weapon")
-	ABaseWeapon* RightEquippedWeapon = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+	ABaseWeapon* EquippedWeapon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TArray<TSubclassOf<ABaseWeapon>> WeaponInventory = {};
 
 	UFUNCTION(BlueprintCallable)
 	void EquipFromInventory(int32 Index, FName EquippingSocket);
+
+	UFUNCTION(BlueprintCallable)
+	void SwapWeapons();
 
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	bool GetInCombat() const { return bInCombat; }
@@ -293,35 +290,14 @@ public:
 
 	#pragma region Weapon Attacks and Delegates
 	
-	void LeftAttack();
-	void RightAttack();
+	void Attack();
+	void AlternateAttack();
 
 	void OnWeaponAttackStarted();
 	void OnWeaponAttackEnded();
 
 	#pragma endregion
 
-	#pragma region Consumables / Item Usage
-
-	UFUNCTION(BlueprintCallable)
-	void UseHealthConsumable();
-
-	UFUNCTION(BlueprintCallable)
-	void UseFocusConsumable();
-
-	UFUNCTION(BlueprintCallable)
-	void UseStaminaConsumable();
-
-	UPROPERTY()
-	float HealAmount;
-
-	UPROPERTY()
-	float FocusAmount;
-
-	UPROPERTY()
-	float StaminaAmount;
-
-	#pragma endregion
 
 	#pragma region Pickup Interaction
 
@@ -340,7 +316,22 @@ public:
 		OverlappingItem = OverlapItem;
 	}
 
+	UFUNCTION(BlueprintCallable)
+	void UseHealthConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseFocusConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseStaminaConsumable();
+
+	float HealAmount;
+	float FocusAmount;
+	float StaminaAmount;
+
 	#pragma endregion
+
+
 
 	#pragma region Invincible and Health Regeneration
 	public:
