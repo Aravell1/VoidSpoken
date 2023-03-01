@@ -124,24 +124,19 @@ void ACombatDirector::SpawnObeliskEnemy()
 		int SpawnCount = EnemiesToSpawn - ObeliskSpawns;
 		if (SpawnCount > SpawnPoints.Num())
 			SpawnCount = SpawnPoints.Num();
-		UE_LOG(LogTemp, Warning, TEXT("Spawn Count: %s"), *FString::FromInt(SpawnCount));
 
 		if (SpawnCount > 0)
 		{
 			for (int i = 0; i < SpawnCount; i++)
 			{
 				int RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
-				UE_LOG(LogTemp, Warning, TEXT("Spawn Points Count: %s"), *FString::FromInt(SpawnPoints.Num()));
-				UE_LOG(LogTemp, Warning, TEXT("Random Index: %s"), *FString::FromInt(RandomIndex));
+
 				while (SpawnPoints[RandomIndex]->bEnemySpawning && SpawnCount > 0)
 				{
 					SpawnPoints.RemoveAt(RandomIndex);
 					if (SpawnCount > SpawnPoints.Num())
 						SpawnCount = SpawnPoints.Num();
 					RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
-
-					UE_LOG(LogTemp, Warning, TEXT("Spawn Points Count: %s"), *FString::FromInt(SpawnPoints.Num()));
-					UE_LOG(LogTemp, Warning, TEXT("Random Index: %s"), *FString::FromInt(RandomIndex));
 				}
 
 				SpawnPoints[RandomIndex]->SpawnPortal(true);
@@ -311,10 +306,12 @@ void ACombatDirector::RemoveEnemy(ABaseEnemy* Enemy)
 	{
 		if (Enemies[i].Enemy == Enemy)
 		{
+			bool ObeliskSpawn = Enemies[i].ObeliskEnemy;
+
 			Enemies.RemoveAt(i);
 			ObeliskSpawns--;
 
-			if (Enemies[i].ObeliskEnemy && bObeliskMode)
+			if (ObeliskSpawn && bObeliskMode)
 			{
 				SpawnObeliskEnemy();
 			}
