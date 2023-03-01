@@ -50,7 +50,7 @@ void AEnemyPortalSpawn::SpawnEnemy()
 	{
 		int RandomType = FMath::RandRange(0, EnemyTypes.Num() - 1);
 
-		FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100 + FVector(0, 0, 95);
+		FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100;
 		FRotator SpawnRotation = GetActorRotation();
 		FActorSpawnParameters SpawnInfo;
 
