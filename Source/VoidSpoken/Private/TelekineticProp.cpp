@@ -13,7 +13,7 @@ ATelekineticProp::ATelekineticProp()
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	RootComponent = StaticMesh;
 
-	StaticMesh->SetSimulatePhysics(true);
+	StaticMesh->SetSimulatePhysics(false);
 	StaticMesh->SetNotifyRigidBodyCollision(true);
 	StaticMesh->SetCollisionProfileName("Telekinesis");
 	StaticMesh->CustomDepthStencilValue = 1;
@@ -75,6 +75,7 @@ void ATelekineticProp::Highlight_Implementation(bool bHighlight) {
 void ATelekineticProp::Pull_Implementation(ACharacter* Character) {
 	Execute_Highlight(this, false);
 	PlayerCharacter = Character;
+	StaticMesh->SetSimulatePhysics(true);
 	LiftOff();
 }
 
@@ -175,6 +176,8 @@ void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor*
 		State = ETelekinesisState::ETS_Default;
 
 		UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, PlayerCharacter, NULL);
+
+		// MAKE DESTRUCTABLE HERE!
 	}
 }
 
