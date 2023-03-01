@@ -58,15 +58,9 @@ void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
 	EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
 	EquippedCharacter = EquippingCharacter;
 	SetOwner(EquippingCharacter);
-	
-	WeaponMeshComponent->AddLocalOffset(LocalWeaponLocationOffset);
-	WeaponMeshComponent->AddLocalRotation(LocalWeaponRotationOffset);
 
-	/*
-	 Made for Sword
 	AddActorLocalOffset(FVector(0, 0, -48));
 	AddActorLocalRotation(FRotator(0, 0, -90));
-	 */
 }
 
 void ABaseWeapon::Attack() {
