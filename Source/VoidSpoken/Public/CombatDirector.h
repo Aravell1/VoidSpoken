@@ -9,7 +9,6 @@
 #include "BaseBoss.h"
 #include "EnemyPortalSpawn.h"
 #include "Obelisk.h"
-#include "../VoidSpokenGameModeBase.h"
 #include "CombatDirector.generated.h"
 
 USTRUCT()
@@ -59,7 +58,6 @@ private:
 	
 	TArray<FEnemyData> Enemies;
 	APlayerCharacter* Player;
-	AVoidSpokenGameModeBase* GameMode;
 
 	TArray<AEnemyPortalSpawn*> EnemySpawnPoints;
 	TArray<AObelisk*> Obelisks;
@@ -73,8 +71,7 @@ private:
 	int EnemiesToSpawn = 2;
 	int SpawnTicks = 0;
 	const int InreaseSpawnsThreshold = 5;
-	const float EnemySpawnDistance = 1500.0f;
-	const float AdditionalSpawnDistance = 500.0f;
+	const float EnemySpawnDistance = 2500.0f;
 	FTimerHandle SpawnEnemiesTimer;
 	const float SpawnTimerDuration = 30.0f;
 

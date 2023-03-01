@@ -7,7 +7,6 @@
 #include "StatsMasterClass.h"
 #include "Kismet/GameplayStatics.h"
 #include "VoidSpoken/VoidSpokenGameModeBase.h"
-#include "PlayerCharacter.h"
 #include "InventorySystem.generated.h"
 
 
@@ -30,9 +29,22 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(BlueprintCallable)
+	void UseHealthConsumable();
 
+	UFUNCTION(BlueprintCallable)
+	void UseFocusConsumable();
+
+	UFUNCTION(BlueprintCallable)
+	void UseStaminaConsumable();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stats")
+	class UStatsMasterClass* Stats;
 
 private:
 
+	float HealAmount;
+	float FocusAmount;
+	float StaminaAmount;
 	
 };
