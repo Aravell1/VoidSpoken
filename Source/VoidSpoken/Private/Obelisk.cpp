@@ -33,17 +33,12 @@ void AObelisk::SetObeliskState(EActivationState NewState)
 	case EActivationState::Charging:
 		EnableCharge.Broadcast(this);
 		ActivationSphere->SetSphereRadius(EnemyDetectionRadius);
-		
-		SpawnDecal();
 		break;
 
 	case EActivationState::Activated:
 		DisableCharge.Broadcast(this);
 		GameMode->AddSubtractObeliskCount(-1);
 		ActivationSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-		if (ChargeZoneDecal)
-			ChargeZoneDecal->GetDecal()->SetFadeOut(0, 1.0f, true);
 		break;
 	}
 }
@@ -117,15 +112,5 @@ void AObelisk::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-void AObelisk::SpawnDecal()
-{
-	if (ChargeZoneDecalClass)
-	{
-		FActorSpawnParameters SpawnInfo;
-		ChargeZoneDecal = GetWorld()->SpawnActor<ADecalActor>(ChargeZoneDecalClass, GetActorLocation(), GetActorRotation(), SpawnInfo);
-		ChargeZoneDecal->GetDecal()->DecalSize = FVector(5, EnemyDetectionRadius / 2, EnemyDetectionRadius / 2);
-	}
 }
 

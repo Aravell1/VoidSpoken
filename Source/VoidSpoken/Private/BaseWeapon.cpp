@@ -49,18 +49,20 @@ void ABaseWeapon::Tick(const float DeltaTime) {
 
 	// Change for player based input, still moving into walls and such
 	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "Equipped Character Forward: " + EquippedCharacter->GetActorForwardVector().ToString() + " Forward Delta: " + FString::SanitizeFloat(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)"))));
-
+	EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0));
 	//EquippedCharacter->AddMovementInput(EquippedCharacter->GetActorForwardVector(), EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
-	//EquippedCharacter->AddMovementInput(EquippedCharacter->GetActorForwardVector() ,EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
 }
 
-void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter) {
+void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter, FName EquippingSlot = FName("Left")) {
+	if (EquippingSlot == "Left") EEquippedSlot = EEquippedSlot::EES_Left;
+	else if (EquippingSlot == "Right") EEquippedSlot = EEquippedSlot::EES_Right;
+	
 	EquippedCharacterMovementComponent = EquippingCharacter->GetCharacterMovement();
 	EquippedCharacter = EquippingCharacter;
 	SetOwner(EquippingCharacter);
 
-	AddActorLocalOffset(FVector(0, 0, -48));
-	AddActorLocalRotation(FRotator(0, 0, -90));
+	WeaponMeshComponent->AddLocalOffset(LocalWeaponLocationOffset);
+	WeaponMeshComponent->AddLocalRotation(LocalWeaponRotationOffset);
 }
 
 void ABaseWeapon::Attack() {
@@ -74,8 +76,7 @@ void ABaseWeapon::Attack() {
 
 			//Disabling Actors movement while attacking
 			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
-			
-			EAttackState = EAT_NormalAttack;
+
 			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
 		}
 	}
@@ -86,25 +87,15 @@ void ABaseWeapon::NextAttack() {
 	OnAttackEnded.ExecuteIfBound();
 	CurrentComboIndex++;
 	bAttackDelay = false;
-	EAttackState = EAT_None;
 	OverlappedActors.Empty();
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
 }
 
 void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent) {
 	float DamageMultiplier;
-	switch (EAttackState) {
-	case (EAT_NormalAttack):
-		if (ComboAttackMultipliers.IsValidIndex(CurrentComboIndex))
-			DamageMultiplier = ComboAttackMultipliers[CurrentComboIndex];
-		else DamageMultiplier = 1;
-		break;
-	case (EAT_ChargedAttack):
-		DamageMultiplier = ChargedAttackComboMultiplier;
-		break;
-	default:
-		DamageMultiplier = 1.0f;
-	}
+	if (ComboAttackMultipliers.IsValidIndex(CurrentComboIndex))
+		DamageMultiplier = ComboAttackMultipliers[CurrentComboIndex];
+	else DamageMultiplier = 1;
 	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * DamageMultiplier, NULL, EquippedCharacter, UDamageTypeStagger::StaticClass());
 }
 
@@ -123,31 +114,12 @@ void ABaseWeapon::Clear() {
 }
 
 void ABaseWeapon::Reset() {
-	EAttackState = EAT_None;
 	CurrentComboIndex = 0;
 	OverlappedActors.Empty();
 
 	//Re-Enabling Actors movement just in case the attacks do not reset the characters movement
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_Walking);
 }
-
-#pragma region Deprecated Functions / To be implemented
-
-[[deprecated]] void ABaseWeapon::ChargedAttack()
-{
-	if (!bAttackDelay && CheckMovementMode()) {
-		if (ChargedAttackMontage && EquippedCharacter->FindComponentByClass<UStatsMasterClass>()->Stamina >= ChargedAttackConsumption) {
-
-			//Disabling Actors movement while attacking
-			EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
-
-			EAttackState = EAT_ChargedAttack;
-			EquippedCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ComboAnimationMontage[CurrentComboIndex]);
-		}
-	}
-}
-
-#pragma endregion
 
 #pragma region Collision Functions
 
