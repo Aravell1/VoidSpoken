@@ -40,7 +40,7 @@ void APortalSpawn::SpawnEnemy()
 	{
 		int EnemyIndex = FMath::RandRange(0, EnemyArray.Num() - 1);
 
-		FVector SpawnLocation = FVector(GetActorLocation().X + FMath::RandRange(-150.0f, 50.0f), GetActorLocation().Y + FMath::RandRange(-150.0f, 150.0f), GetActorLocation().Z + 95);
+		FVector SpawnLocation = FVector(GetActorLocation().X + FMath::RandRange(-150.0f, 50.0f), GetActorLocation().Y + FMath::RandRange(-150.0f, 150.0f), GetActorLocation().Z);
 		float zLook = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation()).Yaw;
 		FRotator SpawnRotation = FRotator(0, zLook, 0);
 		FActorSpawnParameters SpawnInfo;
