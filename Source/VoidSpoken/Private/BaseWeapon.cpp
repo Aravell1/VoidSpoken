@@ -20,6 +20,10 @@ ABaseWeapon::ABaseWeapon()
 	WeaponCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Collision Box"));
 	WeaponMeshComponent->SetHiddenInGame(false, true);
 	RootComponent = WeaponMeshComponent;
+
+	static ConstructorHelpers::FObjectFinder<UCurveFloat>C_WeaponOpaqueCurve(TEXT("/Game/Blueprints/Weapons/Weapon_Opaque_Curve.Weapon_Opaque_Curve"));
+	if (C_WeaponOpaqueCurve.Succeeded())
+		WeaponOpaqueCurve = C_WeaponOpaqueCurve.Object;
 }
 
 // Called when the game starts or when spawned
@@ -28,6 +32,14 @@ void ABaseWeapon::BeginPlay()
 	Super::BeginPlay();
 
 	WeaponMaterialInterface = WeaponMeshComponent->GetMaterial(0);
+
+	#pragma region Timeline Bindings
+
+	FOnTimelineFloat WeaponOpaqueUpdate;
+	WeaponOpaqueUpdate.BindUFunction(this, FName("WeaponOpaqueUpdate"));
+	WeaponOpaqueTimeline.AddInterpFloat(WeaponOpaqueCurve, WeaponOpaqueUpdate);
+
+	#pragma endregion
 }
 
 void ABaseWeapon::PostInitializeComponents() {
@@ -47,10 +59,14 @@ void ABaseWeapon::PostInitializeComponents() {
 void ABaseWeapon::Tick(const float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	// Change for player based input, still moving into walls and such
-	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "Equipped Character Forward: " + EquippedCharacter->GetActorForwardVector().ToString() + " Forward Delta: " + FString::SanitizeFloat(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)"))));
 	EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0));
-	//EquippedCharacter->AddMovementInput(EquippedCharacter->GetActorForwardVector(), EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+	WeaponOpaqueTimeline.TickTimeline(DeltaTime);
+}
+
+void ABaseWeapon::WeaponOpaqueUpdate(const float Alpha) const {
+	UMaterialInstanceDynamic* DynWeaponMaterial = UMaterialInstanceDynamic::Create(WeaponMaterialInterface, WeaponMeshComponent);
+	DynWeaponMaterial->SetScalarParameterValue("Opaque", Alpha);
+	WeaponMeshComponent->SetMaterial(0, DynWeaponMaterial);
 }
 
 void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter, FName EquippingSlot = FName("Left")) {

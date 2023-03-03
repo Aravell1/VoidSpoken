@@ -13,6 +13,9 @@
 #include "Engine.h"
 #include "DamageTypeStagger.h"
 #include "Engine/EngineTypes.h"
+#include "TimerManager.h"
+#include "Components/TimelineComponent.h"
+
 #include "BaseWeapon.generated.h"
 
 /*
@@ -157,6 +160,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void Clear();
 
+	UFUNCTION(BlueprintCallable)
+	void Show() { WeaponOpaqueTimeline.Play(); };
+	
+	UFUNCTION(BlueprintCallable)
+	void Hide() { WeaponOpaqueTimeline.Reverse(); }
+
+	UFUNCTION(BlueprintCallable)
+	void HideCompletely(){
+		UMaterialInstanceDynamic* DynWeaponMaterial = UMaterialInstanceDynamic::Create(WeaponMaterialInterface, WeaponMeshComponent);
+		DynWeaponMaterial->SetScalarParameterValue("Opaque", 0);
+		WeaponMeshComponent->SetMaterial(0, DynWeaponMaterial);
+	}
+
 	#pragma endregion
 
 	protected:
@@ -187,6 +203,14 @@ public:
 	///		-This is called everytime a overlap beings
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (NoGetter))
 	TArray<AActor*> OverlappedActors = {};
+
+	FTimeline WeaponOpaqueTimeline;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (NoGetter))
+	UCurveFloat* WeaponOpaqueCurve = nullptr;
+
+	UFUNCTION()
+	void WeaponOpaqueUpdate(const float Alpha) const;
 
 	#pragma endregion
 

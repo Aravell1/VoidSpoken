@@ -8,7 +8,7 @@ public class VoidSpoken : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Json", "JsonUtilities", "Niagara", "NavigationSystem", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Json", "JsonUtilities", "Niagara", "NavigationSystem", "UMG"});
 
         PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 

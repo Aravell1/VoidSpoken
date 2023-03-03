@@ -55,15 +55,7 @@ void ATelekineticProp::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	LiftTimeline.TickTimeline(DeltaTime);
-
-	switch (State) {
-	case ETelekinesisState::ETS_Default:
-		break;
-	case ETelekinesisState::ETS_Pulled:
-		ReachCharacter();
-	default:
-		break;
-	}
+	if (State == ETelekinesisState::ETS_Pulled)	ReachCharacter();
 }
 
 #pragma region Highlights
@@ -87,7 +79,7 @@ void ATelekineticProp::Push_Implementation(FVector Destination, float Force) {
 	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
 
-	FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f) * Force);
+	const FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f) * Force);
 	StaticMesh->SetEnableGravity(true);
 	StaticMesh->AddImpulse(Impulse, NAME_None, true);
 	
@@ -159,25 +151,19 @@ void ATelekineticProp::StopLift() {
 #pragma region Collision Events
 
 void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
-	if (State == ETelekinesisState::ETS_Pushed /*|| State == ETelekinesisState::ETS_Pulled*/) {
+	if (State == ETelekinesisState::ETS_Pushed) {
 		StaticMesh->SetEnableGravity(true);
-		if (State == ETelekinesisState::ETS_Pulled) {
+		if (State == ETelekinesisState::ETS_Pulled)
 			Drop_Implementation();
-		}
-
-		float Mass = StaticMesh->GetMass();
-		float Velocity = GetVelocity().Size();
-		float Damage = ((Mass + FMath::Pow(Velocity, 0.25f) / (Mass / Velocity))) / 32;
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "M: " + FString::SanitizeFloat(Mass) + " V: " + FString::SanitizeFloat(Velocity) + " Damage: " + FString::SanitizeFloat(Damage));
-
+		
 		StaticMesh->SetAllPhysicsLinearVelocity(FVector());
 		StaticMesh->AddImpulse(UKismetMathLibrary::Multiply_VectorFloat(NormalImpulse, 0.2f));
 		State = ETelekinesisState::ETS_Default;
-
-		UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, PlayerCharacter, NULL);
-
-		// MAKE DESTRUCTABLE HERE!
+		
+		UGameplayStatics::ApplyDamage(OtherActor, PropDamage, NULL, PlayerCharacter, NULL);
+		if (!GetWorldTimerManager().IsTimerActive(SimulatePhysicsDelay)) {
+			GetWorldTimerManager().SetTimer(SimulatePhysicsDelay, this, &ATelekineticProp::ToggleSimulatePhysics, 2.0f, true);
+		} 
 	}
 }
 
