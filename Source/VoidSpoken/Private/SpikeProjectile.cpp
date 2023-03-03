@@ -59,6 +59,7 @@ void ASpikeProjectile::BeginPlay()
 
 void ASpikeProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *OtherComponent->GetName());
 	if (OtherActor != GetOwner())
 	{
 		if (UseCollision)
