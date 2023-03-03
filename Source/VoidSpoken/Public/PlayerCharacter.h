@@ -373,7 +373,10 @@ public:
 	bool bIsDamaged = false;
 
 	UFUNCTION()
-	void ResetInvincibility() { bInvincible = false; }
+	void ResetInvincibility() {
+		bInvincible = false;
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
 
 	#pragma endregion
 

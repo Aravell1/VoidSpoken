@@ -584,7 +584,7 @@ void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const U
 		GetMesh()->GetAnimInstance()->Montage_Play(HitMontage);
 		Stats->Health -= Damage;
 		bInvincible = true;
-		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 1.5f, false);
+		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 0.75f, false);
 		if (!CombatDirector->GetInCombat()) {
 			if (!GetWorldTimerManager().IsTimerActive(HealthRegenerationTimer))
 				GetWorldTimerManager().ClearTimer(HealthRegenerationTimer);
