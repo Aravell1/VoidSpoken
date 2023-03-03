@@ -7,6 +7,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "DamageTypeStagger.h"
 #include "SpikeProjectile.generated.h"
 
 UCLASS()

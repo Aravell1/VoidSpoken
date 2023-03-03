@@ -262,7 +262,7 @@ void AGhoul::SpikeBurst()
 		{
 			if (OutActors[i] == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 			{
-				UGameplayStatics::ApplyDamage(OutActors[i], Damage, NULL, this, NULL);
+				UGameplayStatics::ApplyDamage(OutActors[i], Damage, NULL, this, UDamageTypeStagger::StaticClass());
 				return;
 			}
 		}
@@ -390,7 +390,7 @@ void AGhoul::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	{
 		if (OtherActor == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 		{
-			UGameplayStatics::ApplyDamage(OtherActor, GetAttack(), NULL, this, NULL);
+			UGameplayStatics::ApplyDamage(OtherActor, GetAttack(), NULL, this, UDamageTypeStagger::StaticClass());
 		}
 	}
 }

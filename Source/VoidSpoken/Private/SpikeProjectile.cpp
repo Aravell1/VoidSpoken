@@ -66,7 +66,7 @@ void ASpikeProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAct
 		{
 			if (OtherActor == Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
 			{
-				UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, this, NULL);
+				UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, this, UDamageTypeStagger::StaticClass());
 			}
 		}
 		Destroy();
