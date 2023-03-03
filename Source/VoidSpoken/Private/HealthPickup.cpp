@@ -5,8 +5,7 @@
 
 AHealthPickup::AHealthPickup()
 {
-	TextTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Text Trigger Box"));
-	TextTriggerBox->SetupAttachment(RootComponent);
+	
 }
 
 void AHealthPickup::BeginPlay()
