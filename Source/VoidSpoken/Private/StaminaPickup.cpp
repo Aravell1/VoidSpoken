@@ -5,8 +5,7 @@
 
 AStaminaPickup::AStaminaPickup()
 {
-	TextTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Text Trigger Box"));
-	TextTriggerBox->SetupAttachment(RootComponent);
+	
 }
 
 void AStaminaPickup::BeginPlay()

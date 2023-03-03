@@ -5,8 +5,7 @@
 
 AFocusPickup::AFocusPickup()
 {
-	TextTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Text Trigger Box"));
-	TextTriggerBox->SetupAttachment(RootComponent);
+
 }
 
 void AFocusPickup::BeginPlay()
