@@ -59,13 +59,14 @@ void ASpikeProjectile::BeginPlay()
 
 void ASpikeProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *OtherComponent->GetName());
 	if (OtherActor != GetOwner())
 	{
 		if (UseCollision)
 		{
 			if (OtherActor == Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
 			{
-				UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, this, NULL);
+				UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, this, UDamageTypeStagger::StaticClass());
 			}
 		}
 		Destroy();

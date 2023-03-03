@@ -19,7 +19,7 @@ struct FEnemyData
 
 	ABaseEnemy* Enemy = nullptr;
 	float EnemyValue = 0;
-	bool ObeliskEnemy = false;
+	bool SpawnedEnemy = false;
 };
 
 UCLASS()
@@ -69,7 +69,9 @@ private:
 	bool bObeliskMode = false;
 	bool bAttackOnSpawn = false;
 
-	int ObeliskSpawns = 0;
+	int EnemySpawns = 0;
+	const int EnemyHardCap = 10;
+	int MaxEnemiesSpawned = 4;
 	int EnemiesToSpawn = 2;
 	int SpawnTicks = 0;
 	const int InreaseSpawnsThreshold = 5;
