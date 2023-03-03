@@ -579,9 +579,6 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) {
 	if ((!bInvincible || !bIsDodging) && HitMontage) {
 		ABaseEntity::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
-		EquippedWeapon->Reset();
-		GetCharacterMovement()->SetMovementMode(MOVE_None);
-		GetMesh()->GetAnimInstance()->Montage_Play(HitMontage);
 		Stats->Health -= Damage;
 		bInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 0.75f, false);
@@ -591,6 +588,13 @@ void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const U
 			GetWorldTimerManager().SetTimer(HealthRegenerationTimer, this, &APlayerCharacter::RegenerateHealth, HealingDelay, true);
 		}
 	}
+}
+
+void APlayerCharacter::OnStaggered() {
+	EquippedWeapon->Reset();
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	GetMesh()->GetAnimInstance()->Montage_Play(HitMontage);
+	GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 0.75f, false);
 }
 
 void APlayerCharacter::DepleteFocus() {

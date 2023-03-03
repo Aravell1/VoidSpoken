@@ -361,6 +361,7 @@ public:
 	void SetInvincibility(const bool State) { bInvincible = State; }
 
 	protected:
+	void OnStaggered() override;
 	void RegenerateHealth();
 	FTimerHandle InvincibilityTimer;
 	FTimerHandle HealthRegenerationTimer;
