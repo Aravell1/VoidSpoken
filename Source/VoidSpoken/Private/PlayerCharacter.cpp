@@ -31,6 +31,10 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>C_HitMontage(TEXT("/Game/Blueprints/Player/Animations/Sequences/Montages/Anim_Hit_Montage.Anim_Hit_Montage"));
+	if (C_HitMontage.Succeeded())
+		HitMontage = C_HitMontage.Object;
+
 	#pragma region Dodging
 
 	DodgingTrailComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Dodge Trail Component"));
@@ -138,8 +142,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	//PlayerInputComponent->BindAction("Use", IE_Pressed, this, &APlayerCharacter::);
 }
 
-void APlayerCharacter::BeginPlay()
-{
+void APlayerCharacter::BeginPlay() {
 	Super::BeginPlay();
 	
 	// Checks Player levels to initialize stats
@@ -169,11 +172,7 @@ void APlayerCharacter::BeginPlay()
 	FOnTimelineFloat ZoomUpdate;
 	ZoomUpdate.BindUFunction(this, FName("ZoomUpdate"));
 
-	FOnTimelineEvent ZoomFinishedEvent;
-	ZoomFinishedEvent.BindUFunction(this, FName("ZoomFinished"));
-
 	ZoomTimeline.AddInterpFloat(ZoomCurve, ZoomUpdate);
-	ZoomTimeline.SetTimelineFinishedFunc(ZoomFinishedEvent);
 
 	#pragma endregion
 
@@ -190,24 +189,20 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-	
-	if (bTelekinesis)
-		AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
-	else
-		AddMovementInput(GetActorForwardVector(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
 
 	DetermineMovementState();
+	AddMovementInput(bTelekinesis ? GetVelocity() : GetActorForwardVector(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
 
-	if (CombatDirector && bInCombat != CombatDirector->GetInCombat() && !GetWorldTimerManager().IsTimerActive(CombatTimer))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "In Combat");
+	if (CombatDirector && bInCombat != CombatDirector->GetInCombat() && !GetWorldTimerManager().IsTimerActive(CombatTimer)) {
 		GetWorldTimerManager().ClearTimer(CombatTimer);
 		bInCombat = CombatDirector->GetInCombat();
+
+		if (bInCombat) EquippedWeapon->Show();
 	}
 
 	ZoomTimeline.TickTimeline(DeltaTime);
 	if (bTelekinesis)
-		APlayerCharacter::DetectTelekineticObject();
+		DetectTelekineticObject();
 
 	if (bIsDodging)
 		DodgingTimer.TickTimeline(DeltaTime);
@@ -228,6 +223,7 @@ void APlayerCharacter::EquipFromInventory(int32 Index, FName EquippingSlot = FNa
 		if (EquippingSlot == "Right") RightEquippedWeapon = ActiveWeapon;
 		else LeftEquippedWeapon = ActiveWeapon;
 		EquippedWeapon = ActiveWeapon;
+		EquippedWeapon->HideCompletely();
 		
 		if (const IBaseWeaponInterface* SpawnedWeaponInterface = Cast<IBaseWeaponInterface>(EquippedWeapon)) {
 			SpawnedWeaponInterface->Execute_Equip(EquippedWeapon, this, EquippingSlot);
@@ -269,10 +265,6 @@ void APlayerCharacter::ZoomUpdate(const float Alpha) const {
 	
 	const int32 NewArmLength = FMath::Lerp(300, 125, Alpha);
 	CameraArm->TargetArmLength = NewArmLength;
-}
-
-void APlayerCharacter::ZoomFinished() {
-
 }
 
 #pragma endregion
@@ -490,9 +482,11 @@ void APlayerCharacter::ResetDodging() {
 #pragma region Combat
 
 void APlayerCharacter::LeftAttack() {
-	if (EMovementState != EMovementState::EMS_Dodging)
-	{
+	if (EMovementState != EMovementState::EMS_Dodging) {
 		if (!bIsAttacking && !bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
+			if (RightEquippedWeapon) RightEquippedWeapon->Reset();
+			LeftEquippedWeapon->Show();
+			RightEquippedWeapon->Hide();
 			EquippedWeapon = LeftEquippedWeapon;
 			EquippedWeapon->Attack();
 		}
@@ -531,9 +525,11 @@ void APlayerCharacter::LeftAttack() {
 }
 
 void APlayerCharacter::RightAttack() {
-	if (EMovementState != EMovementState::EMS_Dodging)
-	{
+	if (EMovementState != EMovementState::EMS_Dodging) {
 		if (!bIsAttacking && !bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
+			if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
+			RightEquippedWeapon->Show();
+			LeftEquippedWeapon->Hide();
 			EquippedWeapon = RightEquippedWeapon;
 			EquippedWeapon->Attack();
 		}
@@ -581,9 +577,11 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 #pragma region Stat Manipulation
 
 void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) {
-	if (!bInvincible || !bIsDodging)
-	{
+	if ((!bInvincible || !bIsDodging) && HitMontage) {
 		ABaseEntity::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
+		EquippedWeapon->Reset();
+		GetCharacterMovement()->SetMovementMode(MOVE_None);
+		GetMesh()->GetAnimInstance()->Montage_Play(HitMontage);
 		Stats->Health -= Damage;
 		bInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 1.5f, false);
@@ -604,8 +602,7 @@ void APlayerCharacter::DepleteFocus() {
 		ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
 
 		if (TelekineticPropReference) {
-			ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference);
-			if (Interface) {
+			if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
 				Interface->Execute_Drop(TelekineticPropReference);
 				TelekineticPropReference = nullptr;
 			}

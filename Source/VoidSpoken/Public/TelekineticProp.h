@@ -31,8 +31,22 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		ETelekinesisState State = ETelekinesisState::ETS_Default;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float PropDamage = 0;
+	
+	FTimerHandle SimulatePhysicsDelay;
+
+	void ToggleSimulatePhysics() {
+		if (StaticMesh->GetComponentVelocity().Size() <= 0.5f) {
+			StaticMesh->SetSimulatePhysics(false);
+			GetWorldTimerManager().ClearTimer(SimulatePhysicsDelay);
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "DID IT");
+		}
+	}
 
 	#pragma region Liftting Functions and Parameters
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		FVector LiftStart;
 
@@ -68,6 +82,7 @@ protected:
 		UCurveFloat* LiftCurve = nullptr;
 
 	#pragma endregion
+
 	#pragma endregion
 
 public:	

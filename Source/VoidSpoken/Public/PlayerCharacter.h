@@ -121,7 +121,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Combat", DisplayName = "Combat Delay (s)")
 	float CombatDelay = 5.0f;
 	
-	void SetCombatState() { bInCombat = !bInCombat; };
+	void SetCombatState() {
+		bInCombat = !bInCombat;
+		
+		if (!bInCombat) {
+			if (LeftEquippedWeapon) LeftEquippedWeapon->Hide();
+			if (RightEquippedWeapon) RightEquippedWeapon->Hide();
+		}
+	};
 
 	FTimerHandle CombatTimer;
 
@@ -140,9 +147,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	UCameraComponent* FollowCamera;
-
-	class UCapsuleComponent* PlayerCapsule;
-	class USkeletalMeshComponent* PlayerMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* TelekinesisSource = nullptr; // FVector(-190, 40, 147)
@@ -164,9 +168,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	FVector PlayerInput;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-		FVector GetPlayerInputDirection() { return PlayerInput.X * FollowCamera->GetForwardVector() + PlayerInput.Y * FollowCamera->GetRightVector(); }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FVector GetPlayerInput() { return PlayerInput; }
@@ -247,9 +248,6 @@ public:
 
 	UFUNCTION()
 	void ZoomUpdate(const float Alpha) const;
-
-	UFUNCTION()
-	static void ZoomFinished();
 
 	#pragma endregion
 
@@ -353,9 +351,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Health", DisplayName = "Healing Rate ( /s )")
 		float HealingRate = 2.5f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		UAnimMontage* HitMontage = nullptr;
+
 	/// Flips the bool Invincible
-	void SetInvincibility() { bInvincible = !bInvincible; };
-	void SetInvincibility(const bool State) { bInvincible = State; };
+	UFUNCTION(BlueprintCallable)
+	bool GetInvincible() { return bInvincible; }
+	void SetInvincibility() { bInvincible = !bInvincible; }
+	void SetInvincibility(const bool State) { bInvincible = State; }
 
 	protected:
 	void RegenerateHealth();
@@ -366,8 +369,11 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Stats", DisplayName = "Invincible")
 	bool bInvincible = false;
 
+	UPROPERTY(VisibleAnywhere, Category = "Stats", DisplayName = "Is Damaged")
+	bool bIsDamaged = false;
+
 	UFUNCTION()
-	void ResetInvincibility() { bInvincible = false; };
+	void ResetInvincibility() { bInvincible = false; }
 
 	#pragma endregion
 
