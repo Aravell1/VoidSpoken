@@ -25,10 +25,10 @@ public:
 		TArray<AActor*> GatekeeperEnemySpawns;
 
 	UFUNCTION(BlueprintPure)
-		int GetObeliskCount() { return ObeliskCount; }
+		int GetObeliskRequiredKills() { return ObeliskRequiredKills; }
 
 	UFUNCTION(BlueprintCallable)
-		void AddSubtractObeliskCount(int Count);
+		void AddSubtractObeliskRequiredKills(int Count) { ObeliskRequiredKills += Count; }
 
 	UFUNCTION()
 	void SetHealItem(int health);
@@ -79,7 +79,7 @@ public:
 
 private:
 
-	int ObeliskCount = 0;
+	int ObeliskRequiredKills = 2;
 
 public:
 

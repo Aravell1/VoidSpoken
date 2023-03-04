@@ -60,7 +60,7 @@ void ACombatDirector::BeginPlay()
 
 void ACombatDirector::SpawnEnemy()
 {
-	if (GameMode->GetObeliskCount() > 0)
+	if (Obelisks.Num() > 0)
 	{
 		bAttackOnSpawn = true;
 
@@ -354,11 +354,19 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 	ActivatedObelisk = nullptr;
 	for (int i = 0; i < Obelisks.Num(); i++)
 	{
-		if (Obelisks[i] != ActivatedObelisk && Obelisks[i]->GetObeliskState() == EActivationState::Inactive)
+		if (Obelisks[i] == Obelisk || Obelisks[i]->GetObeliskState() == EActivationState::Activated)
+		{
+			Obelisks.RemoveAt(i);
+			i--;
+		}
+		else if (Obelisks[i]->GetObeliskState() == EActivationState::Inactive)
 		{
 			Obelisks[i]->SetCanBeginCharging(true);
 		}
 	}
+
+	if (Obelisk->GetObeliskState() == EActivationState::Activated)
+		GameMode->AddSubtractObeliskRequiredKills(2);
 }
 
 void ACombatDirector::EnableObeliskMode(AObelisk* Obelisk)

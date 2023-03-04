@@ -83,7 +83,7 @@ private:
 	const float EnemySpawnDistance = 1500.0f;
 	const float AdditionalSpawnDistance = 500.0f;
 	FTimerHandle SpawnEnemiesTimer;
-	const float SpawnTimerDuration = 30.0f;
+	const float SpawnTimerDuration = 60.0f;
 
 	void CalculateEnemyActions();
 	float GetEnemyAngle(int Index);

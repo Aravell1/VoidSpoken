@@ -24,7 +24,7 @@ UDELEGATE()
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActivationDelegate, AObelisk*, Obelisk);
 
 UCLASS()
-class VOIDSPOKEN_API AObelisk : public AActor
+class VOIDSPOKEN_API AObelisk : public APawn
 {
 	GENERATED_BODY()
 	
@@ -39,9 +39,6 @@ public:
 		void SetObeliskState(EActivationState NewState);
 
 	UFUNCTION(BlueprintPure)
-		float GetTotalRequiredCharge() { return TotalRequiredCharge; }
-
-	UFUNCTION(BlueprintPure)
 		float GetObeliskCharge() { return ObeliskCharge; }
 
 	void SetCanBeginCharging(bool CanCharge) { bCanBeginCharging = CanCharge; }
@@ -52,9 +49,9 @@ public:
 	UPROPERTY(EditAnywhere)
 		TArray<AEnemyPortalSpawn*> NearbySpawnPoints;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		USphereComponent* ActivationSphere;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		USkeletalMeshComponent* ObeliskMesh;
 
 	UPROPERTY(BlueprintAssignable, Category = "Charge Widget")
@@ -88,9 +85,8 @@ private:
 	ADecalActor* ChargeZoneDecal;
 
 	const float PlayerDetectionRadius = 750.0f;
-	const float EnemyDetectionRadius = 2500.0f;
+	const float EnemyDetectionRadius = 3000.0f;
 
-	const float TotalRequiredCharge = 10.0f;
 	float ObeliskCharge = 0;
 
 	//False if another Obelisk is already charging

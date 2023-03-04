@@ -19,16 +19,6 @@ void AVoidSpokenGameModeBase::KillGatekeeperSpawns()
 	}
 }
 
-void AVoidSpokenGameModeBase::AddSubtractObeliskCount(int Count)
-{
-	ObeliskCount += Count;
-
-	if (ObeliskCount <= 0)
-	{
-		//Code to open or unlock portal to cathedral
-	}
-}
-
 void AVoidSpokenGameModeBase::SetHealItem(int health)
 {
 	HealPickup += health;

@@ -39,7 +39,6 @@ void AObelisk::SetObeliskState(EActivationState NewState)
 
 	case EActivationState::Activated:
 		DisableCharge.Broadcast(this);
-		GameMode->AddSubtractObeliskCount(-1);
 		ActivationSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
 		if (ChargeZoneDecal)
@@ -53,11 +52,11 @@ void AObelisk::AddCharge(ABaseEnemy* EnemyTrigger)
 	if (GetObeliskState() == EActivationState::Charging)
 	{
 		if (GameMode)
-			ObeliskCharge += GameMode->GetObeliskCount();
+			ObeliskCharge++;
 
 		UpdateChargeWidget.Broadcast();
 		
-		if (ObeliskCharge >= TotalRequiredCharge)
+		if (ObeliskCharge >= GameMode->GetObeliskRequiredKills())
 			SetObeliskState(EActivationState::Activated);
 	}
 }
@@ -68,8 +67,6 @@ void AObelisk::BeginPlay()
 	Super::BeginPlay();
 	
 	GameMode = Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (GameMode)
-		GameMode->AddSubtractObeliskCount(1);
 
 	if (ActivationSphere)
 		ActivationSphere->OnComponentBeginOverlap.AddDynamic(this, &AObelisk::OnComponentBeginOverlap);
@@ -125,6 +122,6 @@ void AObelisk::SpawnDecal()
 	{
 		FActorSpawnParameters SpawnInfo;
 		ChargeZoneDecal = GetWorld()->SpawnActor<ADecalActor>(ChargeZoneDecalClass, GetActorLocation(), GetActorRotation(), SpawnInfo);
-		ChargeZoneDecal->GetDecal()->DecalSize = FVector(5, EnemyDetectionRadius / 2, EnemyDetectionRadius / 2);
+		ChargeZoneDecal->GetDecal()->DecalSize = FVector(10, EnemyDetectionRadius / 2, EnemyDetectionRadius / 2);
 	}
 }
