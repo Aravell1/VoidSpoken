@@ -43,7 +43,8 @@ APlayerCharacter::APlayerCharacter()
 	if (C_DodgeCurve.Succeeded())
 		DodgingCurve = C_DodgeCurve.Object;
 	
-	static ConstructorHelpers::FObjectFinder<UAnimMontage>C_DodgingAnimation(TEXT("/Game/Blueprints/Player/Animations/Sequences/Montages/Dodging_Montage.Dodging_Montage"));
+	//static ConstructorHelpers::FObjectFinder<UAnimMontage>C_DodgingAnimation(TEXT("/Game/Blueprints/Player/Animations/Sequences/Montages/Dodging_Montage.Dodging_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>C_DodgingAnimation(TEXT("/Game/Blueprints/Player/Animations/Sequences/Montages/Anim_AttemptDodge_Montage.Anim_AttemptDodge_Montage"));
 	if (C_DodgingAnimation.Succeeded())
 		DodgeAnimation = C_DodgingAnimation.Object;
 
@@ -441,7 +442,7 @@ void APlayerCharacter::DodgingStarted()
 }
 
 void APlayerCharacter::DodgingUpdate(const float Alpha) {
-	AddMovementInput(DodgingDirection, 1.0f);
+	AddMovementInput(DodgingDirection, 0.1f);
 	
 	UMaterialInstanceDynamic* DynPlayerMaterial = UMaterialInstanceDynamic::Create(DodgingMaterialInterface, GetMesh());
 	DynPlayerMaterial->SetScalarParameterValue("Opaque", Alpha);
