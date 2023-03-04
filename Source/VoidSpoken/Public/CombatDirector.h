@@ -22,6 +22,8 @@ struct FEnemyData
 	bool SpawnedEnemy = false;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatDirectorDelegate, bool, bInCombatChange);
+
 UCLASS()
 class VOIDSPOKEN_API ACombatDirector : public AActor
 {
@@ -30,6 +32,9 @@ class VOIDSPOKEN_API ACombatDirector : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ACombatDirector();
+
+	UPROPERTY(BlueprintAssignable)
+		FCombatDirectorDelegate OnInCombatChanged;
 
 	UFUNCTION()
 		void AddToMap(ABaseEnemy* Enemy, bool ObeliskSpawn);

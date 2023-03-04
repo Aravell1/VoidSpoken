@@ -216,7 +216,12 @@ void ACombatDirector::CalculateEnemyActions()
 			EnemySpawns++;
 	}
 
-	bInCombat = EnemiesInCombat > 0;
+	if (bInCombat != EnemiesInCombat > 0)
+	{
+		bInCombat = EnemiesInCombat > 0;
+
+		OnInCombatChanged.Broadcast(bInCombat);
+	}
 }
 
 float ACombatDirector::GetEnemyAngle(int Index)
