@@ -192,7 +192,7 @@ void APlayerCharacter::Tick(float DeltaTime) {
 
 	DetermineMovementState();
 	AddMovementInput(bTelekinesis ? GetVelocity() : GetActorForwardVector(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
-
+	
 	if (CombatDirector && bInCombat != CombatDirector->GetInCombat() && !GetWorldTimerManager().IsTimerActive(CombatTimer)) {
 		GetWorldTimerManager().ClearTimer(CombatTimer);
 		bInCombat = CombatDirector->GetInCombat();
@@ -444,17 +444,19 @@ void APlayerCharacter::DodgingUpdate(const float Alpha) {
 	AddMovementInput(DodgingDirection, 1.0f);
 	
 	UMaterialInstanceDynamic* DynPlayerMaterial = UMaterialInstanceDynamic::Create(DodgingMaterialInterface, GetMesh());
-	UMaterialInstanceDynamic* DynWeaponMaterial = UMaterialInstanceDynamic::Create(EquippedWeapon->WeaponMaterialInterface, EquippedWeapon);
-	DynPlayerMaterial->SetScalarParameterValue("Dither", Alpha);
-	DynWeaponMaterial->SetScalarParameterValue("Dither", Alpha);
+	DynPlayerMaterial->SetScalarParameterValue("Opaque", Alpha);
 	GetMesh()->SetMaterial(0, DynPlayerMaterial);
-	EquippedWeapon->WeaponMeshComponent->SetMaterial(0, DynWeaponMaterial);
+
+	if (bInCombat) {
+		UMaterialInstanceDynamic* DynWeaponMaterial = UMaterialInstanceDynamic::Create(EquippedWeapon->WeaponMaterialInterface, EquippedWeapon);
+		DynWeaponMaterial->SetScalarParameterValue("Opaque", Alpha);
+		EquippedWeapon->WeaponMeshComponent->SetMaterial(0, DynWeaponMaterial);
+	}
 }
 
 void APlayerCharacter::DodgingFinished() {
 	bIsDodging = false;
 	bInvincible = false;
-	EMovementState = EMovementState::EMS_Idle;
 	DodgingTrailComponent->Deactivate();
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
@@ -482,7 +484,7 @@ void APlayerCharacter::ResetDodging() {
 #pragma region Combat
 
 void APlayerCharacter::LeftAttack() {
-	if (EMovementState != EMovementState::EMS_Dodging) {
+	if (!bIsDodging) {
 		if (!bIsAttacking && !bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
 			if (RightEquippedWeapon) RightEquippedWeapon->Reset();
 			LeftEquippedWeapon->Show();
@@ -525,7 +527,7 @@ void APlayerCharacter::LeftAttack() {
 }
 
 void APlayerCharacter::RightAttack() {
-	if (EMovementState != EMovementState::EMS_Dodging) {
+	if (!bIsDodging) {
 		if (!bIsAttacking && !bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
 			if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
 			RightEquippedWeapon->Show();
