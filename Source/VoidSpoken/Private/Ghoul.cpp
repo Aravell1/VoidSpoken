@@ -136,7 +136,8 @@ void AGhoul::SetAttacking(UAnimMontage* Montage, bool Attacking)
 	}
 	else if (Montage == Attack3Montage)
 	{
-
+		AttackingLeft = Attacking;
+		AttackingRight = Attacking;
 	}
 }
 
@@ -391,6 +392,8 @@ void AGhoul::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 		if (OtherActor == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 		{
 			UGameplayStatics::ApplyDamage(OtherActor, GetAttack(), NULL, this, UDamageTypeStagger::StaticClass());
+			AttackingLeft = false;
+			AttackingRight = false;
 		}
 	}
 }

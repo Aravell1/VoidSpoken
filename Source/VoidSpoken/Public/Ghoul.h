@@ -68,6 +68,10 @@ public:
 	void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		UAnimMontage* IdleBreak01Montage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		UAnimMontage* IdleBreak02Montage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* Attack1Montage = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* Attack2Montage = nullptr;
