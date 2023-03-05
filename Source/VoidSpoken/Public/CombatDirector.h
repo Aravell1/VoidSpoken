@@ -41,8 +41,11 @@ public:
 	UFUNCTION()
 		void RemoveEnemy(ABaseEnemy* Enemy);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure)
 		bool GetInCombat() { return bInCombat; }
+
+	UFUNCTION(BlueprintPure)
+		int GetRemainingObeliskCount() { return Obelisks.Num(); }
 
 	UFUNCTION()
 		void EnableObeliskMode(AObelisk* Obelisk);

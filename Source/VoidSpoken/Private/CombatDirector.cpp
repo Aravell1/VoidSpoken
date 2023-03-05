@@ -352,7 +352,7 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 	bObeliskMode = false;
 	
 	ActivatedObelisk = nullptr;
-	for (int i = 0; i < Obelisks.Num(); i++)
+	for (int i = 0; i < Obelisks.Num() && Obelisks.Num() > 0; i++)
 	{
 		if (Obelisks[i] == Obelisk || Obelisks[i]->GetObeliskState() == EActivationState::Activated)
 		{
@@ -365,7 +365,18 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 		}
 	}
 
-	if (Obelisk->GetObeliskState() == EActivationState::Activated)
+	if (Obelisks.Num() <= 0)
+	{
+		for (int j = 0; j < Enemies.Num(); j++)
+		{
+			if (!Cast<ABaseBoss>(Enemies[j].Enemy))
+			{
+				UGameplayStatics::ApplyDamage(Enemies[j].Enemy, 10000, NULL, NULL, NULL);
+			}
+		}
+	}
+
+	if (Obelisk->GetObeliskState() == EActivationState::Activated && Obelisks.Num() > 0)
 		GameMode->AddSubtractObeliskRequiredKills(2);
 }
 

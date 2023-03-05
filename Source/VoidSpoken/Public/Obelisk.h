@@ -57,10 +57,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Charge Widget")
 		FChargeDelegate UpdateChargeWidget;
 
-	UPROPERTY(BlueprintAssignable, Category = "Charge Widget")
+	UPROPERTY(BlueprintAssignable, Category = "Obelisk State")
 		FActivationDelegate EnableCharge;
 
-	UPROPERTY(BlueprintAssignable, Category = "Charge Widget")
+	UPROPERTY(BlueprintAssignable, Category = "Obelisk State")
 		FActivationDelegate DisableCharge;
 
 protected:
