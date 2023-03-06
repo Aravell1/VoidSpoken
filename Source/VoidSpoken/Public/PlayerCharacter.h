@@ -192,7 +192,7 @@ public:
 	
 	/// Determines how fast the Running Speed the player moves
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Run Speed")
-	float RunSpeed = 500.0f;
+	float RunSpeed = 450.0f;
 
 	#pragma endregion 
 
