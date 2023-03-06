@@ -36,6 +36,7 @@ protected:
 		float PropDamage = 0;
 	
 	FTimerHandle SimulatePhysicsDelay;
+	FTimerHandle EnableGravityDelay;
 
 	void ToggleSimulatePhysics() {
 		if (StaticMesh->GetComponentVelocity().Size() <= 0.5f) {
@@ -104,6 +105,8 @@ public:
 	void LiftOff();
 
 	void StopLift();
+
+	void SetGravity() const { StaticMesh->SetEnableGravity(!StaticMesh->IsGravityEnabled()); }
 
 	// Collision Events
 

@@ -586,6 +586,11 @@ void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const U
 		Stats->Health -= Damage;
 		bInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 0.75f, false);
+
+		if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
+		if (RightEquippedWeapon) RightEquippedWeapon->Reset();
+		bIsAttacking = false;
+		
 		if (!CombatDirector->GetInCombat()) {
 			if (!GetWorldTimerManager().IsTimerActive(HealthRegenerationTimer))
 				GetWorldTimerManager().ClearTimer(HealthRegenerationTimer);

@@ -5,10 +5,6 @@
 #include "PlayerCharacter.h"
 
 void UDodgingResetNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
-	#if WITH_EDITOR
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, __FUNCTION__);
-	#endif
-
 	APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
 	if (Player)
 		Player->ResetDodging();
