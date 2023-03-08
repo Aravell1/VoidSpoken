@@ -164,7 +164,7 @@ void AGhoul::TriggerAttack()
 
 void AGhoul::BeginAttack()
 {
-	if (AIController->LineOfSightTo(AttackTarget) && FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) <= ReachTargetDistance)
+	if (AIController->LineOfSightTo(AttackTarget) && FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) <= CheckingDistance)
 	{
 		SetSpeed();
 		if (GetEnemyType() == EEnemyType::Melee)
@@ -327,7 +327,7 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 			break;
 
 		case EGhoulState::Attack:
-			if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) <= ReachTargetDistance && AIController->LineOfSightTo(AttackTarget))
+			if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) <= CheckingDistance && AIController->LineOfSightTo(AttackTarget))
 			{
 				if (GetEnemyType() == EEnemyType::Melee)
 				{
@@ -535,7 +535,7 @@ void AGhoul::CirclePlayer()
 				&AGhoul::CombatIdle,
 				10);*/
 		}
-		else if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) > ReachTargetDistance)
+		else if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) > CheckingDistance)
 		{
 			if (TestPathExists(AttackTarget))
 			{
@@ -699,6 +699,8 @@ void AGhoul::BeginPlay()
 		ReachTargetDistance = MeleeTargetDistance;
 	else
 		ReachTargetDistance = RangedTargetDistance;
+
+	CheckingDistance = ReachTargetDistance + 85;
 
 	if (!HitBoxRight)
 		HitBoxRight = Cast<UBoxComponent>(GetDefaultSubobjectByName(TEXT("Hit Box Right")));

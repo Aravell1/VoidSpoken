@@ -281,13 +281,13 @@ void ACombatDirector::TriggerEnemyAttack()
 			int AdditionalDistanceIndex = 0;
 			for (int i = 0; i < Enemies.Num(); i++)
 			{
-				if (Enemies[i].Enemy->bInCombat)
+				if (Enemies[i].Enemy->bInCombat && !Cast<ABaseBoss>(Enemies[i].Enemy))
 				{
 					if (i == HighestValueIndex && HighestEnemyValue > 0)
 					{
 						Enemies[i].Enemy->TriggerAttack();
 					}
-					else
+					else if (Enemies[i].Enemy->bCanAttack)
 					{
 						if (DirectionCounter >= DirectionThreshold)
 						{
@@ -316,7 +316,7 @@ void ACombatDirector::TriggerEnemyAttack()
 
 void ACombatDirector::AddToMap(ABaseEnemy* Enemy, bool SpawnedEnemy)
 {
-	if (Obelisks.Num() <= 0)
+	if (Obelisks.Num() <= 0 && !Cast<ABaseBoss>(Enemy))
 	{
 		UGameplayStatics::ApplyDamage(Enemy, 10000, NULL, NULL, NULL);
 		return;
