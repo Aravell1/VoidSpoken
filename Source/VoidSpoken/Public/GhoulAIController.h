@@ -9,8 +9,6 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "EnvironmentQuery/EnvQueryTypes.h"
-#include "EnvironmentQuery/EnvQueryManager.h"
 #include "GhoulAIController.generated.h"
 
 class UBehaviorTreeComponent;
@@ -26,11 +24,6 @@ class VOIDSPOKEN_API AGhoulAIController : public AAIController
 public:
 	AGhoulAIController();
 	virtual void SeePlayer(APawn* Player);
-
-	UFUNCTION(BlueprintCallable)
-		void FindLocationWithLOS(UEnvQuery* LOSQuery);
-
-	void MoveToQueryResult(TSharedPtr<FEnvQueryResult> result);
 
 
 protected:

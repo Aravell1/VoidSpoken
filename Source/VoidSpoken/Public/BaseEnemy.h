@@ -33,9 +33,6 @@ class VOIDSPOKEN_API ABaseEnemy : public ABaseEntity
 public:
 	ABaseEnemy();
 
-	virtual bool TestPathExists(AActor* Target) { return false; }
-	virtual bool TestPathExists(FVector Target) { return false; }
-
 	UPROPERTY(BlueprintAssignable, Category = "HealthBar")
 		FBroadcastDelegate UpdateHealthBar;
 
