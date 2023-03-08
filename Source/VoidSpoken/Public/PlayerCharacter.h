@@ -354,6 +354,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* HitMontage = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats", DisplayName = "Is Dead")
 	bool bIsDead = false;
 	
 	UFUNCTION(BlueprintNativeEvent)
