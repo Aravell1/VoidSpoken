@@ -72,7 +72,7 @@ APlayerCharacter::APlayerCharacter()
 
 	#pragma region Stats Initializing
 
-	Stats->SetBaseHealth(30.f);
+	Stats->SetBaseHealth(50.f);
 	Stats->GetBaseHealth();
 
 	Stats->SetBaseFocus(50.f);
