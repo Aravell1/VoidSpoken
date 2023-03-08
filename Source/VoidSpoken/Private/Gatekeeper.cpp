@@ -67,8 +67,8 @@ void AGatekeeper::BeginPlay()
 
 void AGatekeeper::Tick(float DeltaTime)
 {
-	if (Attacking)
-		TrackPlayer();
+	//if (Attacking)
+		//TrackPlayer();
 
 	if (GKState != GatekeeperState::Start && GKState != GatekeeperState::Dead && GKState != GatekeeperState::Staggered)
 	{
