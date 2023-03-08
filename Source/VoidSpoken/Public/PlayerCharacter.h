@@ -354,6 +354,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* HitMontage = nullptr;
 
+	bool bIsDead = false;
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void Death();
+
 	/// Flips the bool Invincible
 	UFUNCTION(BlueprintCallable)
 	bool GetInvincible() { return bInvincible; }
@@ -376,7 +381,8 @@ public:
 	UFUNCTION()
 	void ResetInvincibility() {
 		bInvincible = false;
-		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		if (GetCharacterMovement()->MovementMode == MOVE_None)
+			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	}
 
 	#pragma endregion
@@ -448,12 +454,6 @@ public:
 	protected:
 
 	#pragma region VFXs
-	
-	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Dodging Trail Component")
-	UNiagaraComponent* DodgingTrailComponent;
-
-	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Dodging Trail")
-	UNiagaraSystem* DodgingTrailSystem;
 
 	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Dodging Material")
 	UMaterialInterface* DodgingMaterialInterface;

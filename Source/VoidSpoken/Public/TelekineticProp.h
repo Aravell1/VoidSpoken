@@ -106,7 +106,10 @@ public:
 
 	void StopLift();
 
-	void SetGravity() const { StaticMesh->SetEnableGravity(!StaticMesh->IsGravityEnabled()); }
+	void SetGravity() const { StaticMesh->SetEnableGravity(bEnableGravityDelay); }
+
+	UPROPERTY(EditDefaultsOnly, DisplayName = "Enable Stupid Feature")
+		bool bEnableGravityDelay = false;
 
 	// Collision Events
 

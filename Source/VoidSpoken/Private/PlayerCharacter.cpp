@@ -37,8 +37,6 @@ APlayerCharacter::APlayerCharacter()
 
 	#pragma region Dodging
 
-	DodgingTrailComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Dodge Trail Component"));
-
 	static ConstructorHelpers::FObjectFinder<UCurveFloat>C_DodgeCurve(TEXT("/Game/Blueprints/Player/Animations/Sequences/Dodging/Dodge.Dodge"));
 	if (C_DodgeCurve.Succeeded())
 		DodgingCurve = C_DodgeCurve.Object;
@@ -47,13 +45,6 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>C_DodgingAnimation(TEXT("/Game/Blueprints/Player/Animations/Sequences/Montages/Anim_AttemptDodge_Montage.Anim_AttemptDodge_Montage"));
 	if (C_DodgingAnimation.Succeeded())
 		DodgeAnimation = C_DodgingAnimation.Object;
-
-	static ConstructorHelpers::FObjectFinder<UNiagaraSystem>C_DodgeTrail(TEXT("/Game/Blueprints/Player/Trails_And_Decals/DashTrail.DashTrail"));
-	if (C_DodgeTrail.Succeeded()) {
-		DodgingTrailSystem = C_DodgeTrail.Object;
-		DodgingTrailComponent->SetAsset(DodgingTrailSystem, true);
-		DodgingTrailComponent->SetAutoActivate(false);
-	}
 
 	#pragma endregion
 
@@ -153,7 +144,6 @@ void APlayerCharacter::BeginPlay() {
 	EquipFromInventory(0, "Left");
 	EquipFromInventory(1, "Right");
 	DodgingMaterialInterface = GetMesh()->GetMaterial(0);
-	DodgingTrailComponent->Deactivate();
 
 	#pragma region Combat Director Declaration
 
@@ -438,7 +428,6 @@ void APlayerCharacter::DodgingStarted()
 	DodgingDirection = NewDirection;
 
 	DodgingTimer.PlayFromStart();
-	DodgingTrailComponent->Activate();
 	GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
 }
 
@@ -459,7 +448,6 @@ void APlayerCharacter::DodgingUpdate(const float Alpha) {
 void APlayerCharacter::DodgingFinished() {
 	bIsDodging = false;
 	bInvincible = false;
-	DodgingTrailComponent->Deactivate();
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 	if (bTelekinesis) GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -538,8 +526,7 @@ void APlayerCharacter::RightAttack() {
 			EquippedWeapon->Attack();
 		}
 		// Telekinetic Dropping
-		else if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold))
-		{
+		else if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold)) {
 			if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
 				Interface->Execute_Drop(TelekineticPropReference);
 				TelekineticPropReference = nullptr;
@@ -581,9 +568,16 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 #pragma region Stat Manipulation
 
 void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) {
-	if ((!bInvincible || !bIsDodging) && HitMontage) {
+	if ((!bInvincible || !bIsDodging)) {
+		if (!bIsDead && Stats->Health <= 0) {
+			Death();
+			bIsDead = true;
+		}
+		else if (bIsDead) return;
+		
 		ABaseEntity::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
 		Stats->Health -= Damage;
+		
 		bInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 0.75f, false);
 
@@ -600,11 +594,27 @@ void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const U
 }
 
 void APlayerCharacter::OnStaggered() {
-	EquippedWeapon->Reset();
+	if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
+	if (RightEquippedWeapon) RightEquippedWeapon->Reset();
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
 	GetMesh()->GetAnimInstance()->Montage_Play(HitMontage);
 	GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 0.75f, false);
+
+	if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold)) {
+		if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
+			Interface->Execute_Drop(TelekineticPropReference);
+			TelekineticPropReference = nullptr;
+
+			// Stop Depleting Focus
+			GetWorldTimerManager().ClearTimer(FocusDepletionTimer);
+		}
+	}
 }
+
+void APlayerCharacter::Death_Implementation() {
+	
+}
+
 
 void APlayerCharacter::DepleteFocus() {
 	Stats->FocusPoints -= ConstantFocusRate * 0.25f;
