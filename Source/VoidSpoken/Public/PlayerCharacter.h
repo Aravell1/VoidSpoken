@@ -177,6 +177,7 @@ public:
 
 	void RunStart();
 	void RunStop();
+	UPROPERTY(BlueprintReadOnly)
 	bool bIsRunning = false;
 
 	/// Controls the available movement restrictions and keeps track of the player's current actions
