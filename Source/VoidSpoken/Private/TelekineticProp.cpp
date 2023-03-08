@@ -82,7 +82,7 @@ void ATelekineticProp::Push_Implementation(FVector Destination, float Force) {
 	const FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f) * Force);
 
 	if (!GetWorldTimerManager().IsTimerActive(EnableGravityDelay))
-		GetWorldTimerManager().SetTimer(EnableGravityDelay, this, &ATelekineticProp::SetGravity, 1.0f, false);
+		GetWorldTimerManager().SetTimer(EnableGravityDelay, this, &ATelekineticProp::SetGravity, 0.5f, false);
 	//StaticMesh->SetEnableGravity(true);
 	StaticMesh->AddImpulse(Impulse, NAME_None, true);
 	

@@ -132,7 +132,7 @@ void ACombatDirector::SpawnEnemy()
 
 void ACombatDirector::SpawnObeliskEnemy()
 {
-	if (ActivatedObelisk)
+	if (ActivatedObelisk && bObeliskMode)
 	{
 		TArray<AEnemyPortalSpawn*> SpawnPoints = ActivatedObelisk->NearbySpawnPoints;
 		int SpawnCount = EnemiesToSpawn - EnemySpawns;
@@ -162,9 +162,12 @@ void ACombatDirector::SpawnObeliskEnemy()
 					RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
 				}
 
-				SpawnPoints[RandomIndex]->SpawnPortal(true);
+				if (SpawnPoints.Num() > 0)
+				{
+					SpawnPoints[RandomIndex]->SpawnPortal(true);
 
-				SpawnPoints.RemoveAt(RandomIndex);
+					SpawnPoints.RemoveAt(RandomIndex);
+				}
 			}
 		}
 	}
@@ -251,7 +254,7 @@ int ACombatDirector::GetBestEnemy(float &EnemyValue)
 			GEngine->AddOnScreenDebugMessage(-1, AttackCheckInterval, FColor::Red, "Compare: " + Enemies[i].Enemy->GetName() + ": " + FString::SanitizeFloat(Enemies[i].EnemyValue));
 		}
 		
-		if (Enemies[i].EnemyValue > Enemies[HighestValueIndex].EnemyValue && Enemies[i].Enemy->CheckLineOfSight(Player))
+		if (Enemies[i].EnemyValue > Enemies[HighestValueIndex].EnemyValue && (Enemies[i].Enemy->CheckLineOfSight(Player) || Enemies[i].Enemy->TestPathExists(Player)))
 		{
 			HighestValueIndex = i;
 			EnemyValue = Enemies[i].EnemyValue;
@@ -286,22 +289,22 @@ void ACombatDirector::TriggerEnemyAttack()
 					}
 					else
 					{
-						if (Enemies[i].Enemy->GetEnemyType() == EEnemyType::Melee)
+						if (DirectionCounter >= DirectionThreshold)
 						{
-							if (DirectionCounter >= DirectionThreshold)
+							if (Enemies[i].Enemy->GetEnemyType() == EEnemyType::Melee)
 							{
 								Enemies[i].Enemy->SetCirclePlayer(true, DistanceMultiplier * AdditionalDistanceIndex);
 								DirectionCounter = 0;
 							}
 							else
-							{
-								Enemies[i].Enemy->SetCirclePlayer(false, DistanceMultiplier * AdditionalDistanceIndex);
-								DirectionCounter++;
-							}
-							AdditionalDistanceIndex++;
+								Enemies[i].Enemy->SetCombatIdle();
 						}
 						else
-							Enemies[i].Enemy->SetCombatIdle();
+						{
+							//Enemies[i].Enemy->SetCirclePlayer(false, DistanceMultiplier * AdditionalDistanceIndex);
+							DirectionCounter++;
+						}
+						AdditionalDistanceIndex++;
 					}
 				}
 			}
@@ -313,6 +316,12 @@ void ACombatDirector::TriggerEnemyAttack()
 
 void ACombatDirector::AddToMap(ABaseEnemy* Enemy, bool SpawnedEnemy)
 {
+	if (Obelisks.Num() <= 0)
+	{
+		UGameplayStatics::ApplyDamage(Enemy, 10000, NULL, NULL, NULL);
+		return;
+	}
+
 	FEnemyData NewEnemy;
 	NewEnemy.Enemy = Enemy;
 	NewEnemy.SpawnedEnemy = SpawnedEnemy;
@@ -339,7 +348,10 @@ void ACombatDirector::RemoveEnemy(ABaseEnemy* Enemy)
 
 			if (bObeliskMode)
 			{
-				SpawnObeliskEnemy();
+				GetWorldTimerManager().SetTimer(SpawnDelayTimer,
+					this,
+					&ACombatDirector::SpawnObeliskEnemy,
+					SpawnDelayDuration);
 			}
 
 			return;

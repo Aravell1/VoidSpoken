@@ -24,7 +24,7 @@ enum EGhoulState
 {
 	Idle	UMETA(DisplayName = "Idle"),
 	Patrol	UMETA(DisplayName = "Patrol"),
-	CallAllies	UMETA(DisplayName = "Call Allies"),
+	//CallAllies	UMETA(DisplayName = "Call Allies"),
 	Chase	UMETA(DisplayName = "Chase"),
 	Attack	UMETA(DisplayName = "Attack"),
 	AttackCooldown	UMETA(DisplayName = "Attack Cooldown"),
@@ -41,6 +41,9 @@ class VOIDSPOKEN_API AGhoul : public ABaseEnemy
 	
 public:
 	AGhoul();
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+		UEnvQuery* FindLocationWithLOSEQS;
 
 	UFUNCTION(BlueprintPure)
 		enum EGhoulState GetState();
@@ -61,6 +64,8 @@ public:
 	void SpikeThrow();
 	void CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision, float InitVel = 0);
 
+	bool TestPathExists(AActor* Target) override;
+	bool TestPathExists(FVector Target) override;
 	void OnSeePawn(APawn* OtherPawn) override;
 	void OnStaggered() override;
 	bool CheckLineOfSight(AActor* OtherActor) override;
@@ -123,11 +128,10 @@ private:
 	void EnterCombat(APawn* OtherPawn, bool Cooldown) override;
 	void CirclePlayer();
 	void CombatIdle();
+	void PlayRandomIdle();
 
 	void CheckPatrolReset();
 	void PatrolReset();
-	bool TestPathExists(AActor* Target);
-	bool TestPathExists(FVector Target);
 
 	UPROPERTY(VisibleAnywhere)
 		TEnumAsByte<EGhoulState> GhState = EGhoulState::Idle;
@@ -145,7 +149,7 @@ private:
 
 	float ReachTargetDistance = 0;
 	float CircleTargetDistance = 0;
-	const float MeleeTargetDistance = 75.0f;
+	const float MeleeTargetDistance = 125.0f;
 	const float RangedTargetDistance = 1500.0f;
 
 	FTimerHandle PatrolTimerHandle;
@@ -163,7 +167,7 @@ private:
 
 	const float BurstSpikeSpawnDistance = 50.0f;
 	const float BurstRadius = 500.0f;
-	const float ProjectileSpeed = 2500.0f;
+	const float ProjectileSpeed = 1500.0f;
 
 	const float CallAlliesRange = 1200.0f;
 	const float MeleeSpreadRange = 500.0f;
