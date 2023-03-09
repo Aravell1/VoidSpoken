@@ -236,8 +236,11 @@ public:
 	float DetectionRadius = 25.0f;
 
 	/// Determines the max distance the SphereTrace can travel
-	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities" , DisplayName = "Telekinetic Range")
+	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities" , DisplayName = "Maximum Telekinetic Range")
 		float TelekineticRange = 250000.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities", DisplayName = "Minimum Telekinetic Range")
+		float MinTelekineticRange = 250.0f;
 
 	#pragma region Timelines and Curve Variables
 	
