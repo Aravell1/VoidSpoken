@@ -26,7 +26,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 		UStaticMeshComponent* StaticMesh = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		ACharacter* PlayerCharacter = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -47,10 +47,10 @@ protected:
 
 	#pragma region Liftting Functions and Parameters
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		FVector LiftStart;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		FVector LiftEnd;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -58,7 +58,7 @@ protected:
 
 	FTimeline LiftTimeline;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		FVector PushTarget;
 
 	#pragma region Visual Effects Prototypes

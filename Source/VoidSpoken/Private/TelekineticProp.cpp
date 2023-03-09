@@ -79,10 +79,11 @@ void ATelekineticProp::Push_Implementation(FVector Destination, float Force) {
 	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
 
-	const FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 10.0f, 5.0f) * Force);
-
+	//const FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 10.0f, 5.0f) * Force);
+	const FVector Impulse = UKismetMathLibrary::Subtract_VectorVector(Destination, GetActorLocation()).GetSafeNormal() * UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 10.0f, 5.0f) * Force;
+	
 	if (bEnableGravityDelay && !GetWorldTimerManager().IsTimerActive(EnableGravityDelay))
-		GetWorldTimerManager().SetTimer(EnableGravityDelay, this, &ATelekineticProp::SetGravity, 1.25f, false);
+		GetWorldTimerManager().SetTimer(EnableGravityDelay, this, &ATelekineticProp::SetGravity, 0.3f, false);
 	else StaticMesh->SetEnableGravity(true);
 	
 	StaticMesh->AddImpulse(Impulse, NAME_None, true);

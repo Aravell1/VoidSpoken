@@ -411,8 +411,7 @@ void APlayerCharacter::Dodge() {
 	}
 }
 
-void APlayerCharacter::DodgingStarted()
-{
+void APlayerCharacter::DodgingStarted() {
 	EMovementState = EMovementState::EMS_Dodging;
 	bInvincible = true;
 	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
@@ -501,12 +500,13 @@ void APlayerCharacter::LeftAttack() {
 				}
 			}
 			else if (Stats->FocusPoints >= PushFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold) {
-				const FVector EndTrace = UKismetMathLibrary::Add_VectorVector(FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange));
-
+				FHitResult Hit;
+				GetWorld()->LineTraceSingleByChannel(Hit, FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), ECC_Camera);
+				
 				if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
 					ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
 
-					Interface->Execute_Push(TelekineticPropReference, EndTrace, PushForce);
+					Interface->Execute_Push(TelekineticPropReference, Hit.HasValidHitObjectHandle() ? Hit.ImpactPoint : UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), PushForce);
 					TelekineticPropReference = nullptr;
 
 					// Stop Depleting Focus

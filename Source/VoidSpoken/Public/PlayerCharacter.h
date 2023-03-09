@@ -227,8 +227,8 @@ public:
 	AActor* TelekineticPropReference = nullptr;
 
 	/// Determines how hard the "Push" Telekinetic ability can push a TelekineticProp object
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Push Force")
-	float PushForce = 450.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Telekinetic Abilities", DisplayName = "Push Force")
+	float PushForce = 250.0f;
 	
 	/// Determines how large the SphereTrace of detecting TelekineticProps are
 	///		- Making it too large can make the player start constantly being triggered
