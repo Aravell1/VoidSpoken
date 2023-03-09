@@ -96,6 +96,7 @@ void ATelekineticProp::Drop_Implementation() {
 	State = ETelekinesisState::ETS_Default;
 	StopLift();
 
+	StaticMesh->SetCollisionProfileName("Telekinesis");
 	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
 
@@ -112,8 +113,8 @@ void ATelekineticProp::LiftUpdate(const float Alpha) {
 }
 
 void ATelekineticProp::LiftFinished() {
+	StaticMesh->SetCollisionProfileName("Telekinesis");
 	StaticMesh->AddAngularImpulseInDegrees(UKismetMathLibrary::Multiply_VectorFloat(PlayerCharacter->GetActorUpVector(), 800.0f), NAME_None, true);
-
 	StaticMesh->SetEnableGravity(false);
 	StaticMesh->SetLinearDamping(20.0f);
 	StaticMesh->SetAngularDamping(2.0f);
@@ -142,7 +143,7 @@ void ATelekineticProp::ReachCharacter() {
 
 void ATelekineticProp::LiftOff() {
 	Highlight_Implementation(false);
-
+	StaticMesh->SetCollisionProfileName("NoCollision");
 	LiftStart = GetActorLocation();
 	LiftEnd = GetActorLocation() + FVector(0, 0, 100);
 	LiftTimeline.PlayFromStart();

@@ -30,8 +30,6 @@
 #include "TelekinesisInterface.h"
 #include "BaseWeapon.h"
 
-#include "../../../../../Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
-
 #include "UObject/UObjectGlobals.h"
 
 #include "PlayerCharacter.generated.h"
@@ -178,6 +176,8 @@ public:
 	void RunStart();
 	void RunStop();
 	bool bIsRunning = false;
+	UFUNCTION(BlueprintCallable)
+	bool GetRunning() { return bIsRunning; }
 
 	/// Controls the available movement restrictions and keeps track of the player's current actions
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Movement State")

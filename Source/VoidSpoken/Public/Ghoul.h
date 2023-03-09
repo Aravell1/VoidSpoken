@@ -53,8 +53,6 @@ public:
 	void BehaviourStateEvent();
 
 	void SetAttacking(UAnimMontage* Montage, bool Attacking);
-	void SetAttackingRight(bool right);
-	void SetAttackingLeft(bool left);
 
 	void TriggerAttack() override;
 	void BeginAttack();
@@ -76,6 +74,8 @@ public:
 		UAnimMontage* IdleBreak01Montage = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* IdleBreak02Montage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		UAnimMontage* JumpBackMontage = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* Attack1Montage = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -129,9 +129,12 @@ private:
 	void CirclePlayer();
 	void CombatIdle();
 	void PlayRandomIdle();
+	void AttackLOSCheck();
 
 	void CheckPatrolReset();
 	void PatrolReset();
+
+	void AddCurveMovement();
 
 	UPROPERTY(VisibleAnywhere)
 		TEnumAsByte<EGhoulState> GhState = EGhoulState::Idle;
@@ -150,7 +153,7 @@ private:
 	float ReachTargetDistance = 0;
 	float CheckingDistance = 0;
 	float CircleTargetDistance = 0;
-	const float MeleeTargetDistance = 100.0f;
+	const float MeleeTargetDistance = 150.0f;
 	const float RangedTargetDistance = 1500.0f;
 
 	FTimerHandle PatrolTimerHandle;
@@ -158,6 +161,9 @@ private:
 	const float PatrolResetDistance = 4000.0f;
 	const float PatrolResetTime = 15.0f;
 	float PResetTimer = 0;
+
+	const float LOSCheckDuration = 0.5f;
+	FTimerHandle LOSCheckTimer;
 
 	const float BackUpSpeed = 100.0f;
 	const float BackOffRange = 500.0f;
