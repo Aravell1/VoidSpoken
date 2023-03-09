@@ -42,7 +42,6 @@ protected:
 		if (StaticMesh->GetComponentVelocity().Size() <= 0.5f) {
 			StaticMesh->SetSimulatePhysics(false);
 			GetWorldTimerManager().ClearTimer(SimulatePhysicsDelay);
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "DID IT");
 		}
 	}
 
@@ -79,7 +78,7 @@ protected:
 	UFUNCTION()
 		void LiftFinished();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UCurveFloat* LiftCurve = nullptr;
 
 	#pragma endregion
