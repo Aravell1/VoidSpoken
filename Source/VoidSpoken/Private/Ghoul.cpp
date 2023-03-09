@@ -262,6 +262,9 @@ void AGhoul::SpikeBurst()
 		}
 	}
 
+	if (FlameBurstCue)
+		PlaySoundAtLocation(FlameBurstCue, GetActorLocation(), GetActorRotation());
+
 	TArray<AActor*> ActorsToIgnore = { GetOwner() };
 	TArray<AActor*> OutActors;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
@@ -300,6 +303,8 @@ void AGhoul::SpikeThrow()
 	Rotation.Pitch = InitAngle;
 
 	CreateSpike(Rotation, ThrowPoint->GetComponentLocation(), true, InitVel);
+	if (ProjectileLaunchedCue)
+		PlaySoundAtLocation(ProjectileLaunchedCue, ThrowPoint->GetComponentLocation(), Rotation);
 }
 
 void AGhoul::CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision, float InitVel)
@@ -407,8 +412,6 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 
 		if (MontageArray.Contains(Montage) || Montage == RangedAttackMontage || Montage == BurstMontage)
 		{
-			GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
 			if (GhState == EGhoulState::Attack)
 			{
 				if (GetEnemyType() == EEnemyType::Melee)
@@ -482,7 +485,9 @@ void AGhoul::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 			UGameplayStatics::ApplyDamage(OtherActor, GetAttack(), NULL, this, UDamageTypeStagger::StaticClass());
 			AttackingLeft = false;
 			AttackingRight = false;
-			GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			if (GhoulHittingPlayerCue)
+				PlaySoundAtLocation(GhoulHittingPlayerCue, OtherComponent->GetComponentLocation(), GetActorRotation());
 		}
 	}
 }

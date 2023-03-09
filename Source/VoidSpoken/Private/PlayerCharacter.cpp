@@ -320,8 +320,11 @@ void APlayerCharacter::DetectTelekineticObject() {
 		if (!HighlightedReference && DidFindObject) {
 			// Find if the hit object has the desired interface
 			if (ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(Hit.GetActor())) {
-				HighlightedReference = Hit.GetActor();
-				Interface->Execute_Highlight(Hit.GetActor(), true);
+				if (FVector::Distance(Hit.GetActor()->GetActorLocation(), GetActorLocation()) >= MinTelekineticRange)
+				{
+					HighlightedReference = Hit.GetActor();
+					Interface->Execute_Highlight(Hit.GetActor(), true);
+				}
 			}
 		}
 		else if (HighlightedReference != Hit.GetActor()) {
@@ -329,6 +332,17 @@ void APlayerCharacter::DetectTelekineticObject() {
 				Interface->Execute_Highlight(HighlightedReference, false);
 				TelekineticPropReference = nullptr;
 				HighlightedReference = nullptr;
+			}
+		}
+		else if (HighlightedReference)
+		{
+			if (FVector::Distance(Hit.GetActor()->GetActorLocation(), GetActorLocation()) < MinTelekineticRange)
+			{
+				if (ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(HighlightedReference)) {
+					Interface->Execute_Highlight(HighlightedReference, false);
+					TelekineticPropReference = nullptr;
+					HighlightedReference = nullptr;
+				}
 			}
 		}
 	}
