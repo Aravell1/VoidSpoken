@@ -99,8 +99,8 @@ private:
 	FTimerHandle CombatAttackTimer;
 	const float MinTimeBetweenAttacks = 5.0f;
 
-	int DirectionCounter = 5;
-	const int DirectionThreshold = 5;
+	int DirectionCounter = 2;
+	const int DirectionThreshold = 2;
 	const float DistanceMultiplier = 50;
 
 	float EnemiesInCombat = 0;
