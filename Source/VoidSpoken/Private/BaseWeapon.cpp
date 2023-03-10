@@ -58,8 +58,7 @@ void ABaseWeapon::PostInitializeComponents() {
 // Called every frame
 void ABaseWeapon::Tick(const float DeltaTime) {
 	Super::Tick(DeltaTime);
-
-	EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0));
+	EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0), true);
 	WeaponOpaqueTimeline.TickTimeline(DeltaTime);
 }
 

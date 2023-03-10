@@ -30,8 +30,6 @@
 #include "TelekinesisInterface.h"
 #include "BaseWeapon.h"
 
-#include "../../../../../Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
-
 #include "UObject/UObjectGlobals.h"
 
 #include "PlayerCharacter.generated.h"
@@ -179,6 +177,8 @@ public:
 	void RunStop();
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsRunning = false;
+	UFUNCTION(BlueprintCallable)
+	bool GetRunning() { return bIsRunning; }
 
 	/// Controls the available movement restrictions and keeps track of the player's current actions
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Movement State")
@@ -193,7 +193,7 @@ public:
 	
 	/// Determines how fast the Running Speed the player moves
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Run Speed")
-	float RunSpeed = 500.0f;
+	float RunSpeed = 450.0f;
 
 	#pragma endregion 
 
@@ -228,8 +228,8 @@ public:
 	AActor* TelekineticPropReference = nullptr;
 
 	/// Determines how hard the "Push" Telekinetic ability can push a TelekineticProp object
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Push Force")
-	float PushForce = 450.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Telekinetic Abilities", DisplayName = "Push Force")
+	float PushForce = 250.0f;
 	
 	/// Determines how large the SphereTrace of detecting TelekineticProps are
 	///		- Making it too large can make the player start constantly being triggered
@@ -237,8 +237,11 @@ public:
 	float DetectionRadius = 25.0f;
 
 	/// Determines the max distance the SphereTrace can travel
-	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities" , DisplayName = "Telekinetic Range")
+	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities" , DisplayName = "Maximum Telekinetic Range")
 		float TelekineticRange = 250000.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities", DisplayName = "Minimum Telekinetic Range")
+		float MinTelekineticRange = 250.0f;
 
 	#pragma region Timelines and Curve Variables
 	
@@ -355,6 +358,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		UAnimMontage* HitMontage = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats", DisplayName = "Is Dead")
+	bool bIsDead = false;
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void Death();
+
 	/// Flips the bool Invincible
 	UFUNCTION(BlueprintCallable)
 	bool GetInvincible() { return bInvincible; }
@@ -377,7 +386,8 @@ public:
 	UFUNCTION()
 	void ResetInvincibility() {
 		bInvincible = false;
-		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		if (GetCharacterMovement()->MovementMode == MOVE_None)
+			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	}
 
 	#pragma endregion
@@ -449,12 +459,6 @@ public:
 	protected:
 
 	#pragma region VFXs
-	
-	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Dodging Trail Component")
-	UNiagaraComponent* DodgingTrailComponent;
-
-	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Dodging Trail")
-	UNiagaraSystem* DodgingTrailSystem;
 
 	UPROPERTY(VisibleAnywhere, Category = "Dodging", DisplayName = "Dodging Material")
 	UMaterialInterface* DodgingMaterialInterface;

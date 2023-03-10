@@ -7,12 +7,26 @@ AGhoulAIController::AGhoulAIController()
 {
 	BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("Behavior Tree Component"));
 	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard Component"));
-
 }
 
 void AGhoulAIController::SeePlayer(APawn* Player)
 {
 	SetFocus(Player);
+}
+
+void AGhoulAIController::FindLocationWithLOS(UEnvQuery* LOSQuery)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Query Called"));
+
+	FEnvQueryRequest LineOfSightQueryRequest = FEnvQueryRequest(LOSQuery, GetPawn());
+	LineOfSightQueryRequest.Execute(EEnvQueryRunMode::SingleResult, this, &AGhoulAIController::MoveToQueryResult);
+}
+
+void AGhoulAIController::MoveToQueryResult(TSharedPtr<FEnvQueryResult> result)
+{
+	if (result->IsSuccessful()) {
+		MoveToLocation(result->GetItemAsLocation(0));
+	}
 }
 
 void AGhoulAIController::BeginPlay()
@@ -24,6 +38,7 @@ void AGhoulAIController::BeginPlay()
 		RunBehaviorTree(BehaviorTree.Get());
 		BehaviorTreeComponent->StartTree(*BehaviorTree.Get());
 	}
+
 }
 
 void AGhoulAIController::OnPossess(APawn* InPawn)

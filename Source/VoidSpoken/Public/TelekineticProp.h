@@ -26,7 +26,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 		UStaticMeshComponent* StaticMesh = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		ACharacter* PlayerCharacter = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -36,21 +36,21 @@ protected:
 		float PropDamage = 0;
 	
 	FTimerHandle SimulatePhysicsDelay;
+	FTimerHandle EnableGravityDelay;
 
 	void ToggleSimulatePhysics() {
 		if (StaticMesh->GetComponentVelocity().Size() <= 0.5f) {
 			StaticMesh->SetSimulatePhysics(false);
 			GetWorldTimerManager().ClearTimer(SimulatePhysicsDelay);
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "DID IT");
 		}
 	}
 
 	#pragma region Liftting Functions and Parameters
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		FVector LiftStart;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		FVector LiftEnd;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -58,7 +58,7 @@ protected:
 
 	FTimeline LiftTimeline;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		FVector PushTarget;
 
 	#pragma region Visual Effects Prototypes
@@ -78,7 +78,7 @@ protected:
 	UFUNCTION()
 		void LiftFinished();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UCurveFloat* LiftCurve = nullptr;
 
 	#pragma endregion
@@ -104,6 +104,11 @@ public:
 	void LiftOff();
 
 	void StopLift();
+
+	void SetGravity() const { StaticMesh->SetEnableGravity(bEnableGravityDelay); }
+
+	UPROPERTY(EditDefaultsOnly, DisplayName = "Enable Stupid Feature")
+		bool bEnableGravityDelay = false;
 
 	// Collision Events
 

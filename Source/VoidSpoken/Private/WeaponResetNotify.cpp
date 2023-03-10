@@ -11,11 +11,7 @@
 
 void UWeaponResetNotify::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) {
 	const APlayerCharacter* Player = Cast<APlayerCharacter>(MeshComponent->GetOwner());
-
 	/// NULL Check
 	if (Player != nullptr && Player->EquippedWeapon != nullptr)
 		Player->EquippedWeapon->Reset();
-	#if WITH_ENGINE
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Orange, __FUNCTION__);
-	#endif
 }

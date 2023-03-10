@@ -86,6 +86,8 @@ private:
 	const float EnemySpawnDistance = 1500.0f;
 	const float AdditionalSpawnDistance = 500.0f;
 	FTimerHandle SpawnEnemiesTimer;
+	FTimerHandle SpawnDelayTimer;
+	const float SpawnDelayDuration = 0.5f;
 	const float SpawnTimerDuration = 60.0f;
 
 	void CalculateEnemyActions();
@@ -97,8 +99,8 @@ private:
 	FTimerHandle CombatAttackTimer;
 	const float MinTimeBetweenAttacks = 5.0f;
 
-	int DirectionCounter = 5;
-	const int DirectionThreshold = 5;
+	int DirectionCounter = 2;
+	const int DirectionThreshold = 2;
 	const float DistanceMultiplier = 50;
 
 	float EnemiesInCombat = 0;

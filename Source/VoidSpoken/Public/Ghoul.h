@@ -24,7 +24,7 @@ enum EGhoulState
 {
 	Idle	UMETA(DisplayName = "Idle"),
 	Patrol	UMETA(DisplayName = "Patrol"),
-	CallAllies	UMETA(DisplayName = "Call Allies"),
+	//CallAllies	UMETA(DisplayName = "Call Allies"),
 	Chase	UMETA(DisplayName = "Chase"),
 	Attack	UMETA(DisplayName = "Attack"),
 	AttackCooldown	UMETA(DisplayName = "Attack Cooldown"),
@@ -42,6 +42,9 @@ class VOIDSPOKEN_API AGhoul : public ABaseEnemy
 public:
 	AGhoul();
 
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+		UEnvQuery* FindLocationWithLOSEQS;
+
 	UFUNCTION(BlueprintPure)
 		enum EGhoulState GetState();
 
@@ -50,8 +53,6 @@ public:
 	void BehaviourStateEvent();
 
 	void SetAttacking(UAnimMontage* Montage, bool Attacking);
-	void SetAttackingRight(bool right);
-	void SetAttackingLeft(bool left);
 
 	void TriggerAttack() override;
 	void BeginAttack();
@@ -61,43 +62,73 @@ public:
 	void SpikeThrow();
 	void CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision, float InitVel = 0);
 
+	bool TestPathExists(AActor* Target) override;
+	bool TestPathExists(FVector Target) override;
 	void OnSeePawn(APawn* OtherPawn) override;
 	void OnStaggered() override;
 	bool CheckLineOfSight(AActor* OtherActor) override;
 	void SetCombatIdle() override;
 	void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UFUNCTION(BlueprintImplementableEvent)
+		void PlaySoundAtLocation(USoundCue* SoundToPlay, FVector SoundLocation, FRotator SoundRotation);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* WalkingOnStoneCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* RunningOnStoneCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* WalkingOnCarpetCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* RunningOnCarpetCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* WalkingOnWoodCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* RunningOnWoodCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* WalkingOnMetalCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* RunningOnMetalCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* GhoulHittingPlayerCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* ProjectileLaunchedCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* FlameBurstCue;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* IdleBreak01Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* IdleBreak02Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
+		UAnimMontage* JumpBackMontage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* Attack1Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* Attack2Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* Attack3Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* RangedAttackMontage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* BurstMontage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* StaggerMontage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* ScreechMontage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UBoxComponent* HitBoxRight;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UBoxComponent* HitBoxLeft;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UBoxComponent* ThrowPoint;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UBoxComponent* HeadLocation;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 		TSubclassOf<ASpikeProjectile> Spike;
 
 protected:
@@ -123,11 +154,13 @@ private:
 	void EnterCombat(APawn* OtherPawn, bool Cooldown) override;
 	void CirclePlayer();
 	void CombatIdle();
+	void PlayRandomIdle();
+	void AttackLOSCheck();
 
 	void CheckPatrolReset();
 	void PatrolReset();
-	bool TestPathExists(AActor* Target);
-	bool TestPathExists(FVector Target);
+
+	void AddCurveMovement();
 
 	UPROPERTY(VisibleAnywhere)
 		TEnumAsByte<EGhoulState> GhState = EGhoulState::Idle;
@@ -144,8 +177,9 @@ private:
 	const float GhoulRunSpeed = 300.0f;
 
 	float ReachTargetDistance = 0;
+	float CheckingDistance = 0;
 	float CircleTargetDistance = 0;
-	const float MeleeTargetDistance = 75.0f;
+	const float MeleeTargetDistance = 150.0f;
 	const float RangedTargetDistance = 1500.0f;
 
 	FTimerHandle PatrolTimerHandle;
@@ -153,6 +187,9 @@ private:
 	const float PatrolResetDistance = 4000.0f;
 	const float PatrolResetTime = 15.0f;
 	float PResetTimer = 0;
+
+	const float LOSCheckDuration = 0.5f;
+	FTimerHandle LOSCheckTimer;
 
 	const float BackUpSpeed = 100.0f;
 	const float BackOffRange = 500.0f;
@@ -163,7 +200,7 @@ private:
 
 	const float BurstSpikeSpawnDistance = 50.0f;
 	const float BurstRadius = 500.0f;
-	const float ProjectileSpeed = 2500.0f;
+	const float ProjectileSpeed = 1500.0f;
 
 	const float CallAlliesRange = 1200.0f;
 	const float MeleeSpreadRange = 500.0f;

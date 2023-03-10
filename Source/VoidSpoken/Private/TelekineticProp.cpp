@@ -79,8 +79,13 @@ void ATelekineticProp::Push_Implementation(FVector Destination, float Force) {
 	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	Player->SetTelekineticAttackState(ETelekinesisAttackState::ETA_None);
 
-	const FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 5.0f, 1.0f) * Force);
-	StaticMesh->SetEnableGravity(true);
+	//const FVector Impulse = UKismetMathLibrary::Multiply_VectorFloat(UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), PushTarget), UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 10.0f, 5.0f) * Force);
+	const FVector Impulse = UKismetMathLibrary::Subtract_VectorVector(Destination, GetActorLocation()).GetSafeNormal() * UKismetMathLibrary::MapRangeClamped(StaticMesh->GetMass(), 50.0f, 700.0f, 10.0f, 5.0f) * Force;
+	
+	if (bEnableGravityDelay && !GetWorldTimerManager().IsTimerActive(EnableGravityDelay))
+		GetWorldTimerManager().SetTimer(EnableGravityDelay, this, &ATelekineticProp::SetGravity, 0.3f, false);
+	else StaticMesh->SetEnableGravity(true);
+	
 	StaticMesh->AddImpulse(Impulse, NAME_None, true);
 	
 	StaticMesh->SetLinearDamping(0.1f);
@@ -101,6 +106,7 @@ void ATelekineticProp::Drop_Implementation() {
 }
 
 #pragma region Visual Touches
+
 void ATelekineticProp::LiftUpdate(const float Alpha) {
 	const FVector NewLocation = FMath::Lerp(LiftStart, LiftEnd, Alpha);
 	SetActorLocation(NewLocation);
@@ -108,7 +114,6 @@ void ATelekineticProp::LiftUpdate(const float Alpha) {
 
 void ATelekineticProp::LiftFinished() {
 	StaticMesh->AddAngularImpulseInDegrees(UKismetMathLibrary::Multiply_VectorFloat(PlayerCharacter->GetActorUpVector(), 800.0f), NAME_None, true);
-
 	StaticMesh->SetEnableGravity(false);
 	StaticMesh->SetLinearDamping(20.0f);
 	StaticMesh->SetAngularDamping(2.0f);
@@ -137,7 +142,6 @@ void ATelekineticProp::ReachCharacter() {
 
 void ATelekineticProp::LiftOff() {
 	Highlight_Implementation(false);
-
 	LiftStart = GetActorLocation();
 	LiftEnd = GetActorLocation() + FVector(0, 0, 100);
 	LiftTimeline.PlayFromStart();
@@ -146,6 +150,7 @@ void ATelekineticProp::LiftOff() {
 void ATelekineticProp::StopLift() {
 	LiftTimeline.Stop();
 }
+
 #pragma endregion
 
 #pragma region Collision Events
@@ -161,9 +166,8 @@ void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor*
 		State = ETelekinesisState::ETS_Default;
 		
 		UGameplayStatics::ApplyDamage(OtherActor, PropDamage, NULL, PlayerCharacter, NULL);
-		if (!GetWorldTimerManager().IsTimerActive(SimulatePhysicsDelay)) {
+		if (!GetWorldTimerManager().IsTimerActive(SimulatePhysicsDelay))
 			GetWorldTimerManager().SetTimer(SimulatePhysicsDelay, this, &ATelekineticProp::ToggleSimulatePhysics, 2.0f, true);
-		} 
 	}
 }
 
