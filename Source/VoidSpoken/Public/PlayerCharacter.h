@@ -175,6 +175,7 @@ public:
 
 	void RunStart();
 	void RunStop();
+	UPROPERTY(BlueprintReadOnly)
 	bool bIsRunning = false;
 	UFUNCTION(BlueprintCallable)
 	bool GetRunning() { return bIsRunning; }
