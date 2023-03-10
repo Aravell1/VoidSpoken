@@ -74,22 +74,6 @@ public:
 		void PlaySoundAtLocation(USoundCue* SoundToPlay, FVector SoundLocation, FRotator SoundRotation);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* WalkingOnStoneCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* RunningOnStoneCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* WalkingOnCarpetCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* RunningOnCarpetCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* WalkingOnWoodCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* RunningOnWoodCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* WalkingOnMetalCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* RunningOnMetalCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
 		USoundCue* GhoulHittingPlayerCue;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
 		USoundCue* ProjectileLaunchedCue;
