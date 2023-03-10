@@ -262,6 +262,9 @@ void AGhoul::SpikeBurst()
 		}
 	}
 
+	if (FlameBurstCue)
+		PlaySoundAtLocation(FlameBurstCue, GetActorLocation(), GetActorRotation());
+
 	TArray<AActor*> ActorsToIgnore = { GetOwner() };
 	TArray<AActor*> OutActors;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
@@ -300,6 +303,8 @@ void AGhoul::SpikeThrow()
 	Rotation.Pitch = InitAngle;
 
 	CreateSpike(Rotation, ThrowPoint->GetComponentLocation(), true, InitVel);
+	if (ProjectileLaunchedCue)
+		PlaySoundAtLocation(ProjectileLaunchedCue, ThrowPoint->GetComponentLocation(), Rotation);
 }
 
 void AGhoul::CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision, float InitVel)
@@ -407,8 +412,6 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 
 		if (MontageArray.Contains(Montage) || Montage == RangedAttackMontage || Montage == BurstMontage)
 		{
-			GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
 			if (GhState == EGhoulState::Attack)
 			{
 				if (GetEnemyType() == EEnemyType::Melee)
@@ -482,7 +485,9 @@ void AGhoul::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 			UGameplayStatics::ApplyDamage(OtherActor, GetAttack(), NULL, this, UDamageTypeStagger::StaticClass());
 			AttackingLeft = false;
 			AttackingRight = false;
-			GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			if (GhoulHittingPlayerCue)
+				PlaySoundAtLocation(GhoulHittingPlayerCue, OtherComponent->GetComponentLocation(), GetActorRotation());
 		}
 	}
 }
@@ -577,7 +582,7 @@ void AGhoul::CombatIdle()
 					if (FindLocationWithLOSEQS)
 						AIController->FindLocationWithLOS(FindLocationWithLOSEQS);
 			}
-			else
+			else if (!AIController->IsFollowingAPath())
 			{
 				PlayRandomIdle();
 			}
@@ -606,14 +611,23 @@ void AGhoul::CombatIdle()
 				if (FindLocationWithLOSEQS)
 					AIController->FindLocationWithLOS(FindLocationWithLOSEQS);
 			}
-			else
+			else if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) < BackOffRange)
+			{
+				FVector Direction = (GetActorLocation() - AttackTarget->GetActorLocation()).GetSafeNormal();
+				FVector TargetLocation = GetActorLocation() + Direction * BackUpDistance;
+				if (TestPathExists(TargetLocation))
+				{
+					AIController->MoveToLocation(TargetLocation, 50);
+				}
+			}
+			else if (!AIController->IsFollowingAPath())
 			{
 				PlayRandomIdle();
 			}
 			GetWorldTimerManager().SetTimer(AttackCooldownTimer,
 				this,
 				&AGhoul::CombatIdle,
-				FMath::RandRange(8.0f, 12.0f));
+				FMath::RandRange(8.0f, 10.0f));
 		}
 	}
 }

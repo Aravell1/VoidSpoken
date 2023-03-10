@@ -70,39 +70,49 @@ public:
 	void SetCombatIdle() override;
 	void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UFUNCTION(BlueprintImplementableEvent)
+		void PlaySoundAtLocation(USoundCue* SoundToPlay, FVector SoundLocation, FRotator SoundRotation);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* GhoulHittingPlayerCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* ProjectileLaunchedCue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* FlameBurstCue;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* IdleBreak01Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* IdleBreak02Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* JumpBackMontage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* Attack1Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* Attack2Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* Attack3Montage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* RangedAttackMontage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* BurstMontage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* StaggerMontage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* ScreechMontage = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UAnimMontage* RandomMontage = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UBoxComponent* HitBoxRight;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UBoxComponent* HitBoxLeft;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UBoxComponent* ThrowPoint;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UBoxComponent* HeadLocation;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 		TSubclassOf<ASpikeProjectile> Spike;
 
 protected:
