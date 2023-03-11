@@ -117,6 +117,9 @@ public:
 
 	#pragma region Weapon Functions
 
+	UFUNCTION(BlueprintCallable)
+	void SetInputDirection(const FVector NewDirection) { InputDirection = NewDirection; }
+
 	/// Function: Equip(ACharacter* EquippingCharacter) 
 	///		-This functions sets the variable EquippedCharacter
 	///		-Will Also set this Weapon's owner as EquippedCharacter
@@ -205,6 +208,10 @@ public:
 	TArray<AActor*> OverlappedActors = {};
 
 	FTimeline WeaponOpaqueTimeline;
+
+	FTimerHandle MovementModeDelay;
+	FTimerHandle InputDirectionDelay;
+	FVector InputDirection;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (NoGetter))
 	UCurveFloat* WeaponOpaqueCurve = nullptr;

@@ -6,14 +6,12 @@
 #include "HealthPickup.h"
 #include "StaminaPickup.h"
 #include "CombatDirector.h"
+#include "BaseWeapon.h"
 #include "Camera/PlayerCameraManager.h"
-
-// Need these weapons to show up as active!!! REMEMVER!@!
 
 #pragma region Constructor and Inheritied Functions
 
-APlayerCharacter::APlayerCharacter()
-{
+APlayerCharacter::APlayerCharacter() {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -184,6 +182,9 @@ void APlayerCharacter::Tick(float DeltaTime) {
 	DetermineMovementState();
 	//AddMovementInput(bTelekinesis ? GetVelocity() : GetActorForwardVector(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
 	AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+
+	if (LeftEquippedWeapon) LeftEquippedWeapon->SetInputDirection(PlayerInput);
+	if (RightEquippedWeapon) RightEquippedWeapon->SetInputDirection(PlayerInput);
 	
 	if (CombatDirector && bInCombat != CombatDirector->GetInCombat() && !GetWorldTimerManager().IsTimerActive(CombatTimer)) {
 		GetWorldTimerManager().ClearTimer(CombatTimer);
