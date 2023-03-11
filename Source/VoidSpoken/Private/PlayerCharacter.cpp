@@ -182,9 +182,6 @@ void APlayerCharacter::Tick(float DeltaTime) {
 	DetermineMovementState();
 	//AddMovementInput(bTelekinesis ? GetVelocity() : GetActorForwardVector(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
 	AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
-
-	if (LeftEquippedWeapon) LeftEquippedWeapon->SetInputDirection(PlayerInput);
-	if (RightEquippedWeapon) RightEquippedWeapon->SetInputDirection(PlayerInput);
 	
 	if (CombatDirector && bInCombat != CombatDirector->GetInCombat() && !GetWorldTimerManager().IsTimerActive(CombatTimer)) {
 		GetWorldTimerManager().ClearTimer(CombatTimer);
@@ -300,6 +297,7 @@ void APlayerCharacter::TelekineticEnd() {
 
 void APlayerCharacter::DetectTelekineticObject() {
 	/// Tracing for Telekinetic Objects
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	if (!TelekineticPropReference) {
 		FVector StartTrace = FollowCamera->GetComponentLocation() + UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), DetectionRadius);
 		FVector EndTrace = FollowCamera->GetComponentLocation() + UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange);

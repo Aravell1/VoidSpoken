@@ -10,11 +10,9 @@
 */
 
 #include "BaseWeapon.h"
-#include "Utils.h"
 
 // Sets default values
-ABaseWeapon::ABaseWeapon()
-{
+ABaseWeapon::ABaseWeapon() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	WeaponMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Mesh Component"));
@@ -28,8 +26,7 @@ ABaseWeapon::ABaseWeapon()
 }
 
 // Called when the game starts or when spawned
-void ABaseWeapon::BeginPlay()
-{
+void ABaseWeapon::BeginPlay() {
 	Super::BeginPlay();
 
 	WeaponMaterialInterface = WeaponMeshComponent->GetMaterial(0);
@@ -137,6 +134,7 @@ void ABaseWeapon::Reset() {
 	CurrentComboIndex = 0;
 	OverlappedActors.Empty();
 	EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
+	if (GetWorldTimerManager().IsTimerActive(MovementModeDelay)) GetWorldTimerManager().ClearTimer(MovementModeDelay);
 
 	//Re-Enabling Actors movement just in case the attacks do not reset the characters movement
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_Walking);

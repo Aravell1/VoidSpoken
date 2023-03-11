@@ -359,7 +359,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Health", DisplayName = "Healing Rate ( /s )")
 		float HealingRate = 2.5f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UAnimMontage* HitMontage = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats", DisplayName = "Is Dead")
