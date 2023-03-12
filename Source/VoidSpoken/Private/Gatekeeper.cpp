@@ -470,6 +470,15 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 	}
 }
 
+void AGatekeeper::SpawnFromAllPortals()
+{
+	FActorSpawnParameters SpawnInfo;
+	for (int i = 0; i < PortalSpawns.Num(); i++)
+	{
+		GetWorld()->SpawnActor<APortalSpawn>(Portal, PortalSpawns[i]->GetActorLocation(), FRotator(PortalSpawns[i]->GetActorRotation()), SpawnInfo);
+	}
+}
+
 GatekeeperState AGatekeeper::GetState()
 {
 	return GKState;

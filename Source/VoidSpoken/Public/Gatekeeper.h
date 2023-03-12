@@ -88,6 +88,10 @@ public:
 		bool bBeginCutsceneAnimation = false;
 
 	void AttackTrace(UAnimMontage* AnimTrigger) override;
+
+	UFUNCTION(BlueprintCallable)
+		void SpawnFromAllPortals();
+
 protected:
 	void BeginPlay() override;
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
