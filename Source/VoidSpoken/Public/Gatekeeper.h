@@ -87,6 +87,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void BeginCutsceneAnimation() { bBeginCutsceneAnimation = true; }
 
+	UFUNCTION(BlueprintPure)
+		bool GetBeginCutsceneAnimation() { return bBeginCutsceneAnimation; }
+
 	void AttackTrace(UAnimMontage* AnimTrigger) override;
 
 	UFUNCTION(BlueprintCallable)
