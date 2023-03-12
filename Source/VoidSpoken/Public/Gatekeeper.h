@@ -84,6 +84,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		float StompImpulseForce = 6000;
 
+	UPROPERTY(BlueprintReadWrite)
+		bool bBeginCutsceneAnimation = false;
+
 	void AttackTrace(UAnimMontage* AnimTrigger) override;
 protected:
 	void BeginPlay() override;
