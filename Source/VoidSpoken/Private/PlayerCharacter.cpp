@@ -6,14 +6,12 @@
 #include "HealthPickup.h"
 #include "StaminaPickup.h"
 #include "CombatDirector.h"
+#include "BaseWeapon.h"
 #include "Camera/PlayerCameraManager.h"
-
-// Need these weapons to show up as active!!! REMEMVER!@!
 
 #pragma region Constructor and Inheritied Functions
 
-APlayerCharacter::APlayerCharacter()
-{
+APlayerCharacter::APlayerCharacter() {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -299,6 +297,7 @@ void APlayerCharacter::TelekineticEnd() {
 
 void APlayerCharacter::DetectTelekineticObject() {
 	/// Tracing for Telekinetic Objects
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	if (!TelekineticPropReference) {
 		FVector StartTrace = FollowCamera->GetComponentLocation() + UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), DetectionRadius);
 		FVector EndTrace = FollowCamera->GetComponentLocation() + UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange);

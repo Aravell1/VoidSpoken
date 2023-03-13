@@ -205,6 +205,8 @@ public:
 	TArray<AActor*> OverlappedActors = {};
 
 	FTimeline WeaponOpaqueTimeline;
+
+	FTimerHandle MovementModeDelay;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (NoGetter))
 	UCurveFloat* WeaponOpaqueCurve = nullptr;

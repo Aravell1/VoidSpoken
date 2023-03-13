@@ -28,7 +28,6 @@
 #include "Components/TimelineComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "TelekinesisInterface.h"
-#include "BaseWeapon.h"
 
 #include "UObject/UObjectGlobals.h"
 
@@ -55,6 +54,7 @@ enum class EMovementState : uint8 {
 #pragma endregion
 
 class ACombatDirector;
+class ABaseWeapon;
 
 UCLASS()
 class VOIDSPOKEN_API APlayerCharacter : public ABaseEntity {
@@ -164,21 +164,25 @@ public:
 
 	#pragma region Player Movement States and Variables
 
+	public:
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool GetRunning() { return bIsRunning; }
+	
+	protected:
+
 	UPROPERTY(VisibleAnywhere)
 	FVector PlayerInput;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-		FVector GetPlayerInput() { return PlayerInput; }
+	FVector GetPlayerInput() { return PlayerInput; }
 	
 	void MoveForward(float Axis);
 	void MoveRight(float Axis);
 
 	void RunStart();
 	void RunStop();
-	UPROPERTY(BlueprintReadOnly)
 	bool bIsRunning = false;
-	UFUNCTION(BlueprintCallable)
-	bool GetRunning() { return bIsRunning; }
 
 	/// Controls the available movement restrictions and keeps track of the player's current actions
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Movement State")
@@ -355,7 +359,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Health", DisplayName = "Healing Rate ( /s )")
 		float HealingRate = 2.5f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UAnimMontage* HitMontage = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats", DisplayName = "Is Dead")
