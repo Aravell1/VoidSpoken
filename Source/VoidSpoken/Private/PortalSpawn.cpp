@@ -51,6 +51,8 @@ void APortalSpawn::SpawnEnemy()
 		Enemy->OnSeePawn(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		Cast<AVoidSpokenGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()))->AddGatekeeperSpawn(Enemy);
 
+		DisableEnemyHealthBar(Enemy);
+
 		CombatDirector->AddToMap(Enemy, false);
 
 		SetLifeSpan(7);
