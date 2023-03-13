@@ -191,7 +191,7 @@ void APlayerCharacter::Tick(float DeltaTime) {
 
 		if (bInCombat) EquippedWeapon->Show();
 	}
-
+	
 	ZoomTimeline.TickTimeline(DeltaTime);
 	if (bTelekinesis)
 		DetectTelekineticObject();
@@ -320,8 +320,11 @@ void APlayerCharacter::DetectTelekineticObject() {
 		if (!HighlightedReference && DidFindObject) {
 			// Find if the hit object has the desired interface
 			if (ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(Hit.GetActor())) {
-				HighlightedReference = Hit.GetActor();
-				Interface->Execute_Highlight(Hit.GetActor(), true);
+				if (FVector::Distance(Hit.GetActor()->GetActorLocation(), GetActorLocation()) >= MinTelekineticRange)
+				{
+					HighlightedReference = Hit.GetActor();
+					Interface->Execute_Highlight(Hit.GetActor(), true);
+				}
 			}
 		}
 		else if (HighlightedReference != Hit.GetActor()) {
@@ -329,6 +332,17 @@ void APlayerCharacter::DetectTelekineticObject() {
 				Interface->Execute_Highlight(HighlightedReference, false);
 				TelekineticPropReference = nullptr;
 				HighlightedReference = nullptr;
+			}
+		}
+		else if (HighlightedReference)
+		{
+			if (FVector::Distance(Hit.GetActor()->GetActorLocation(), GetActorLocation()) < MinTelekineticRange)
+			{
+				if (ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(HighlightedReference)) {
+					Interface->Execute_Highlight(HighlightedReference, false);
+					TelekineticPropReference = nullptr;
+					HighlightedReference = nullptr;
+				}
 			}
 		}
 	}
@@ -339,6 +353,7 @@ void APlayerCharacter::DetectTelekineticObject() {
 #pragma region Character Movement
 
 void APlayerCharacter::MoveForward(const float Axis) {
+	if (bIsDead) return;
 	PlayerInput.X = Axis;
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -355,6 +370,7 @@ void APlayerCharacter::MoveForward(const float Axis) {
 }
 
 void APlayerCharacter::MoveRight(const float Axis) {
+	if (bIsDead) return;
 	PlayerInput.Y = Axis;
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -399,7 +415,7 @@ void APlayerCharacter::RunStop() {
 #pragma region Dodging
 
 void APlayerCharacter::Dodge() {
-	if (!bIsDodging && !LeftEquippedWeapon->bAttackDelay && !RightEquippedWeapon->bAttackDelay && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
+	if (!bIsDead && !bIsDodging && !LeftEquippedWeapon->bAttackDelay && !RightEquippedWeapon->bAttackDelay && EMovementState != EMovementState::EMS_Dodging && DodgeAnimation && Stats->Stamina >= DodgeStaminaCost) {
 		LeftEquippedWeapon->Reset();
 		RightEquippedWeapon->Reset();
 		bIsAttacking = false;
@@ -409,8 +425,7 @@ void APlayerCharacter::Dodge() {
 	}
 }
 
-void APlayerCharacter::DodgingStarted()
-{
+void APlayerCharacter::DodgingStarted() {
 	EMovementState = EMovementState::EMS_Dodging;
 	bInvincible = true;
 	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
@@ -474,7 +489,7 @@ void APlayerCharacter::ResetDodging() {
 #pragma region Combat
 
 void APlayerCharacter::LeftAttack() {
-	if (!bIsDodging) {
+	if (!bIsDodging && !bIsDead) {
 		if (!bIsAttacking && !bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
 			if (RightEquippedWeapon) RightEquippedWeapon->Reset();
 			LeftEquippedWeapon->Show();
@@ -499,12 +514,13 @@ void APlayerCharacter::LeftAttack() {
 				}
 			}
 			else if (Stats->FocusPoints >= PushFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold) {
-				const FVector EndTrace = UKismetMathLibrary::Add_VectorVector(FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange));
-
+				FHitResult Hit;
+				GetWorld()->LineTraceSingleByChannel(Hit, FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), ECC_Camera);
+				
 				if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
 					ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
 
-					Interface->Execute_Push(TelekineticPropReference, EndTrace, PushForce);
+					Interface->Execute_Push(TelekineticPropReference, Hit.HasValidHitObjectHandle() ? Hit.ImpactPoint : UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), PushForce);
 					TelekineticPropReference = nullptr;
 
 					// Stop Depleting Focus
@@ -517,7 +533,7 @@ void APlayerCharacter::LeftAttack() {
 }
 
 void APlayerCharacter::RightAttack() {
-	if (!bIsDodging) {
+	if (!bIsDodging && !bIsDead) {
 		if (!bIsAttacking && !bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
 			if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
 			RightEquippedWeapon->Show();
@@ -569,21 +585,21 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 
 void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) {
 	if ((!bInvincible || !bIsDodging)) {
+		ABaseEntity::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
+		Stats->Health -= Damage;
+
 		if (!bIsDead && Stats->Health <= 0) {
-			Death();
+			if (LeftEquippedWeapon) LeftEquippedWeapon->Hide();
+			if (RightEquippedWeapon) RightEquippedWeapon->Hide();
+			GetCharacterMovement()->SetMovementMode(MOVE_None);
 			bIsDead = true;
+			Death();
 		}
 		else if (bIsDead) return;
 		
-		ABaseEntity::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
-		Stats->Health -= Damage;
-		
 		bInvincible = true;
-		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 0.75f, false);
-
-		if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
-		if (RightEquippedWeapon) RightEquippedWeapon->Reset();
-		bIsAttacking = false;
+		GetWorldTimerManager().ClearTimer(InvincibilityTimer);
+		GetWorldTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 0.7f, false);
 		
 		if (!CombatDirector->GetInCombat()) {
 			if (!GetWorldTimerManager().IsTimerActive(HealthRegenerationTimer))
@@ -614,7 +630,6 @@ void APlayerCharacter::OnStaggered() {
 void APlayerCharacter::Death_Implementation() {
 	
 }
-
 
 void APlayerCharacter::DepleteFocus() {
 	Stats->FocusPoints -= ConstantFocusRate * 0.25f;

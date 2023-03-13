@@ -68,6 +68,11 @@ void ASpikeProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAct
 				UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, this, UDamageTypeStagger::StaticClass());
 			}
 		}
+		if (ProjectileHittingCue)
+		{
+			PlaySoundAtLocation(ProjectileHittingCue, GetActorLocation(), GetActorRotation());
+		}
+
 		Destroy();
 	}
 }

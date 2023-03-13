@@ -28,6 +28,12 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 		UStaticMeshComponent* ProjectileMeshComponent;
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void PlaySoundAtLocation(USoundCue* SoundToPlay, FVector SoundLocation, FRotator SoundRotation);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* ProjectileHittingCue;
+
 	void SetDamage(float NewDamage, bool Collision = true, float LifeTime = 3);
 	void SetSpeed(float InitialSpeed);
 

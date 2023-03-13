@@ -12,7 +12,7 @@
 #include "Obelisk.generated.h"
 
 UENUM()
-enum EActivationState
+enum class EActivationState : uint8
 {
 	Inactive	UMETA(DisplayName = "Inactive"),
 	Charging	UMETA(DisplayName = "Charging"),
@@ -31,6 +31,12 @@ class VOIDSPOKEN_API AObelisk : public APawn
 public:	
 	// Sets default values for this actor's properties
 	AObelisk();
+
+	UFUNCTION(BlueprintPure, Category = "Obelisk")
+	FString GetObeliskName() const { return ObeliskName; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString ObeliskName;
 
 	UFUNCTION(BlueprintPure)
 		EActivationState GetObeliskState() { return ObeliskState; }
@@ -84,8 +90,8 @@ private:
 		TSubclassOf<ADecalActor> ChargeZoneDecalClass;
 	ADecalActor* ChargeZoneDecal;
 
-	const float PlayerDetectionRadius = 750.0f;
-	const float EnemyDetectionRadius = 3000.0f;
+	const float PlayerDetectionRadius = 1000.0f;
+	const float EnemyDetectionRadius = 3500.0f;
 
 	float ObeliskCharge = 0;
 

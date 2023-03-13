@@ -5,6 +5,8 @@
 
 AGatekeeper::AGatekeeper()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	RootComponent = GetCapsuleComponent();
 	GetCapsuleComponent()->SetRelativeScale3D(FVector(2.5, 2.5, 2.5));
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88);
@@ -44,7 +46,7 @@ void AGatekeeper::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!AIController)
+	/*if (!AIController)
 		AIController = GetController<AGatekeeperAIController>();
 	if (AIController)
 		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &AGatekeeper::OnMoveCompleted);
@@ -62,15 +64,17 @@ void AGatekeeper::BeginPlay()
 	if (WeaponCollider)
 		WeaponCollider->OnComponentBeginOverlap.AddDynamic(this, &AGatekeeper::OnComponentBeginOverlap);
 
-	SetState(GatekeeperState::Start);
+	SetState(GatekeeperState::Start);*/
 }
 
 void AGatekeeper::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+
 	//if (Attacking)
 		//TrackPlayer();
 
-	if (GKState != GatekeeperState::Start && GKState != GatekeeperState::Dead && GKState != GatekeeperState::Staggered)
+	/*if (GKState != GatekeeperState::Start && GKState != GatekeeperState::Dead && GKState != GatekeeperState::Staggered)
 	{
 		if (FVector::Distance(AttackTarget->GetActorLocation(), GetActorLocation()) > ReachTargetDistance && !AIController->IsFollowingAPath())
 		{
@@ -90,12 +94,14 @@ void AGatekeeper::Tick(float DeltaTime)
 			GetCharacterMovement()->MaxWalkSpeed = GetRunSpeed();
 			RunTimer = 0;
 		}
-	}
+	}*/
 }
 
 void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 {
-	AttackTarget = OtherPawn;
+	bBeginCutsceneAnimation = true;
+
+	/*AttackTarget = OtherPawn;
 	bInCombat = true;
 	AIController->SeePlayer(AttackTarget);
 
@@ -103,7 +109,7 @@ void AGatekeeper::OnSeePawn(APawn* OtherPawn)
 
 	SetState(GatekeeperState::Chase);
 
-	PawnSensing->SetSensingUpdatesEnabled(false);
+	PawnSensing->SetSensingUpdatesEnabled(false);*/
 }
 
 void AGatekeeper::SetCanWeaponApplyDamage(bool ApplyDamage)
@@ -461,6 +467,15 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 			}
 
 		}
+	}
+}
+
+void AGatekeeper::SpawnFromAllPortals()
+{
+	FActorSpawnParameters SpawnInfo;
+	for (int i = 0; i < PortalSpawns.Num(); i++)
+	{
+		GetWorld()->SpawnActor<APortalSpawn>(Portal, PortalSpawns[i]->GetActorLocation(), FRotator(PortalSpawns[i]->GetActorRotation()), SpawnInfo);
 	}
 }
 
