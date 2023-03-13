@@ -181,7 +181,8 @@ void APlayerCharacter::Tick(float DeltaTime) {
 
 	DetermineMovementState();
 	//AddMovementInput(bTelekinesis ? GetVelocity() : GetActorForwardVector(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
-	AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+	//AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+	AddActorLocalOffset(FVector(GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0), true);
 	
 	if (CombatDirector && bInCombat != CombatDirector->GetInCombat() && !GetWorldTimerManager().IsTimerActive(CombatTimer)) {
 		GetWorldTimerManager().ClearTimer(CombatTimer);
@@ -488,7 +489,7 @@ void APlayerCharacter::ResetDodging() {
 #pragma region Combat
 
 void APlayerCharacter::LeftAttack() {
-	if (!bIsDodging && !bIsDead) {
+	if (!bIsDodging && !bIsDead && !GetCharacterMovement()->IsFalling()) {
 		if (!bIsAttacking && !bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
 			if (RightEquippedWeapon) RightEquippedWeapon->Reset();
 			LeftEquippedWeapon->Show();
@@ -532,7 +533,7 @@ void APlayerCharacter::LeftAttack() {
 }
 
 void APlayerCharacter::RightAttack() {
-	if (!bIsDodging && !bIsDead) {
+	if (!bIsDodging && !bIsDead && !GetCharacterMovement()->IsFalling()) {
 		if (!bIsAttacking && !bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
 			if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
 			RightEquippedWeapon->Show();

@@ -144,7 +144,7 @@ public:
 	///		-Length of this function is determined in each of the ComboAnimationMontage
 	///		-Uses the Notify and NotifyState systems in each Animation
 	UFUNCTION(BlueprintCallable)
-		virtual void DealDamage(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent);
+		virtual void DealDamage(AActor* OtherActor);
 
 	/// Function: Reset() 
 	///		-Resets the player back into their Default Animation Instance
