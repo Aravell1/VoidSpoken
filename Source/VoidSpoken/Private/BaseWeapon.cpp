@@ -79,24 +79,18 @@ void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter, FName Equ
 }
 
 void ABaseWeapon::Attack() {
-	if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0)
-	{
-		if (EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurrentActiveMontage() != ComboAnimationMontage[CurrentComboIndex] && !bAttackDelay && CheckMovementMode())
-		{
+	if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0) {
+		if (EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurrentActiveMontage() != ComboAnimationMontage[CurrentComboIndex] && !bAttackDelay && CheckMovementMode()) {
 			// On Attack Started
 			OnAttackStarted.ExecuteIfBound();
 			if (GetWorldTimerManager().IsTimerActive(MovementModeDelay)) GetWorldTimerManager().ClearTimer(MovementModeDelay);
 			EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
 
 			Clear();
-			if (OverlappedActors.Num() > 0) {
-				for (AActor* HitActor : OverlappedActors) {
-					if (bCheckForOverlappedActors && HitActor && (HitActor != this) && (HitActor != EquippedCharacter) && HitActor) {
-						if (!OverlappedActors.Contains(HitActor)) DealDamage(HitActor);
-					}
-				}
-			}
-			
+			for (AActor* HitActor :OverlappedActors)
+				if (HitActor && HitActor != this && HitActor != EquippedCharacter && !Cast<ABaseWeapon>(HitActor))
+					DealDamage(HitActor);
+
 			//Check the current index to make sure we do not reference something unwanted
 			if (CurrentComboIndex >= GetComboLength()) Reset();
 
@@ -114,7 +108,7 @@ void ABaseWeapon::NextAttack() {
 	EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	CurrentComboIndex++;
 	bAttackDelay = false;
-	OverlappedActors.Empty();
+	Clear();
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_Walking);
 	GetWorldTimerManager().SetTimer(MovementModeDelay, [&]() { EquippedCharacterMovementComponent->SetMovementMode(MOVE_None); }, 0.25f, false);
 }
