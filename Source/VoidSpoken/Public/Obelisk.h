@@ -12,7 +12,7 @@
 #include "Obelisk.generated.h"
 
 UENUM()
-enum EActivationState
+enum class EActivationState : uint8
 {
 	Inactive	UMETA(DisplayName = "Inactive"),
 	Charging	UMETA(DisplayName = "Charging"),
@@ -31,6 +31,12 @@ class VOIDSPOKEN_API AObelisk : public APawn
 public:	
 	// Sets default values for this actor's properties
 	AObelisk();
+
+	UFUNCTION(BlueprintPure, Category = "Obelisk")
+	FString GetObeliskName() const { return ObeliskName; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString ObeliskName;
 
 	UFUNCTION(BlueprintPure)
 		EActivationState GetObeliskState() { return ObeliskState; }
