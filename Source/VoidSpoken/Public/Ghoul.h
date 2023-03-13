@@ -164,7 +164,7 @@ private:
 	float CheckingDistance = 0;
 	float CircleTargetDistance = 0;
 	const float MeleeTargetDistance = 150.0f;
-	const float RangedTargetDistance = 1500.0f;
+	const float RangedTargetDistance = 1250.0f;
 
 	FTimerHandle PatrolTimerHandle;
 	const float PTHandleInterval = 0.5f;
@@ -184,7 +184,7 @@ private:
 
 	const float BurstSpikeSpawnDistance = 50.0f;
 	const float BurstRadius = 500.0f;
-	const float ProjectileSpeed = 1500.0f;
+	const float ProjectileSpeed = 1250.0f;
 
 	const float CallAlliesRange = 1200.0f;
 	const float MeleeSpreadRange = 500.0f;

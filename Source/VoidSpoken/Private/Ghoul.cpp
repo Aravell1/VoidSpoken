@@ -462,9 +462,15 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 					}
 				}
 			}*/
-
-			if (GetState() == EGhoulState::Attack)
+			if (GetState() == EGhoulState::Idle)
+			{
+				SetState(EGhoulState::Chase);
+			}
+			else if (GetState() == EGhoulState::Attack)
+			{
 				BeginAttack();
+			}
+
 		}
 		else if (Montage == IdleBreak01Montage || IdleBreak02Montage)
 		{
@@ -674,7 +680,8 @@ void AGhoul::OnSeePawn(APawn* OtherPawn)
 	PawnSensing->SetSensingUpdatesEnabled(false);
 	UpdateHealthBar.Broadcast();
 
-	SetState(EGhoulState::Chase);
+	GetMesh()->GetAnimInstance()->Montage_Play(ScreechMontage);
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, ScreechMontage);
 }
 
 void AGhoul::OnStaggered()

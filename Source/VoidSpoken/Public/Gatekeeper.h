@@ -84,7 +84,17 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		float StompImpulseForce = 6000;
 
+	UFUNCTION(BlueprintCallable)
+		void BeginCutsceneAnimation() { bBeginCutsceneAnimation = true; }
+
+	UFUNCTION(BlueprintPure)
+		bool GetBeginCutsceneAnimation() { return bBeginCutsceneAnimation; }
+
 	void AttackTrace(UAnimMontage* AnimTrigger) override;
+
+	UFUNCTION(BlueprintCallable)
+		void SpawnFromAllPortals();
+
 protected:
 	void BeginPlay() override;
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -120,6 +130,8 @@ private:
 	AGatekeeperAIController* AIController;
 	FOnMontageEnded MontageEndDelegate;
 	FTimerHandle TimerHandle;
+	
+	bool bBeginCutsceneAnimation = false;
 
 	const float ReachTargetDistance = 320.0f;
 	const float TimeToRun = 4.0f;

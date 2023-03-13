@@ -6,14 +6,12 @@
 #include "HealthPickup.h"
 #include "StaminaPickup.h"
 #include "CombatDirector.h"
+#include "BaseWeapon.h"
 #include "Camera/PlayerCameraManager.h"
-
-// Need these weapons to show up as active!!! REMEMVER!@!
 
 #pragma region Constructor and Inheritied Functions
 
-APlayerCharacter::APlayerCharacter()
-{
+APlayerCharacter::APlayerCharacter() {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -183,7 +181,8 @@ void APlayerCharacter::Tick(float DeltaTime) {
 
 	DetermineMovementState();
 	//AddMovementInput(bTelekinesis ? GetVelocity() : GetActorForwardVector(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
-	AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+	//AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+	AddActorLocalOffset(FVector(GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0), true);
 	
 	if (CombatDirector && bInCombat != CombatDirector->GetInCombat() && !GetWorldTimerManager().IsTimerActive(CombatTimer)) {
 		GetWorldTimerManager().ClearTimer(CombatTimer);
@@ -299,6 +298,7 @@ void APlayerCharacter::TelekineticEnd() {
 
 void APlayerCharacter::DetectTelekineticObject() {
 	/// Tracing for Telekinetic Objects
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	if (!TelekineticPropReference) {
 		FVector StartTrace = FollowCamera->GetComponentLocation() + UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), DetectionRadius);
 		FVector EndTrace = FollowCamera->GetComponentLocation() + UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange);
@@ -489,7 +489,7 @@ void APlayerCharacter::ResetDodging() {
 #pragma region Combat
 
 void APlayerCharacter::LeftAttack() {
-	if (!bIsDodging && !bIsDead) {
+	if (!bIsDodging && !bIsDead && !GetCharacterMovement()->IsFalling()) {
 		if (!bIsAttacking && !bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
 			if (RightEquippedWeapon) RightEquippedWeapon->Reset();
 			LeftEquippedWeapon->Show();
@@ -533,7 +533,7 @@ void APlayerCharacter::LeftAttack() {
 }
 
 void APlayerCharacter::RightAttack() {
-	if (!bIsDodging && !bIsDead) {
+	if (!bIsDodging && !bIsDead && !GetCharacterMovement()->IsFalling()) {
 		if (!bIsAttacking && !bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
 			if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
 			RightEquippedWeapon->Show();

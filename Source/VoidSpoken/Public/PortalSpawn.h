@@ -24,6 +24,8 @@ public:
 	APortalSpawn();
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void DisableEnemyHealthBar(ABaseEnemy* SpawnedEnemy);
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<ABaseEnemy> EnemyClass = ABaseEnemy::StaticClass();

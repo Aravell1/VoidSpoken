@@ -12,8 +12,7 @@
 #include "BaseWeapon.h"
 
 // Sets default values
-ABaseWeapon::ABaseWeapon()
-{
+ABaseWeapon::ABaseWeapon() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	WeaponMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Mesh Component"));
@@ -27,8 +26,7 @@ ABaseWeapon::ABaseWeapon()
 }
 
 // Called when the game starts or when spawned
-void ABaseWeapon::BeginPlay()
-{
+void ABaseWeapon::BeginPlay() {
 	Super::BeginPlay();
 
 	WeaponMaterialInterface = WeaponMeshComponent->GetMaterial(0);
@@ -58,7 +56,7 @@ void ABaseWeapon::PostInitializeComponents() {
 // Called every frame
 void ABaseWeapon::Tick(const float DeltaTime) {
 	Super::Tick(DeltaTime);
-	EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0), true);
+	//EquippedCharacter->AddActorLocalOffset(FVector(EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0), true);
 	WeaponOpaqueTimeline.TickTimeline(DeltaTime);
 }
 
@@ -81,11 +79,24 @@ void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter, FName Equ
 }
 
 void ABaseWeapon::Attack() {
-	if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0) {
-		if (EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurrentActiveMontage() != ComboAnimationMontage[CurrentComboIndex] && !bAttackDelay && CheckMovementMode()) {
+	if (ComboAnimationMontage.IsValidIndex(CurrentComboIndex) && GetComboLength() > 0)
+	{
+		if (EquippedCharacter->GetMesh()->GetAnimInstance()->GetCurrentActiveMontage() != ComboAnimationMontage[CurrentComboIndex] && !bAttackDelay && CheckMovementMode())
+		{
 			// On Attack Started
 			OnAttackStarted.ExecuteIfBound();
+			if (GetWorldTimerManager().IsTimerActive(MovementModeDelay)) GetWorldTimerManager().ClearTimer(MovementModeDelay);
+			EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
 
+			Clear();
+			if (OverlappedActors.Num() > 0) {
+				for (AActor* HitActor : OverlappedActors) {
+					if (bCheckForOverlappedActors && HitActor && (HitActor != this) && (HitActor != EquippedCharacter) && HitActor) {
+						if (!OverlappedActors.Contains(HitActor)) DealDamage(HitActor);
+					}
+				}
+			}
+			
 			//Check the current index to make sure we do not reference something unwanted
 			if (CurrentComboIndex >= GetComboLength()) Reset();
 
@@ -100,13 +111,15 @@ void ABaseWeapon::Attack() {
 void ABaseWeapon::NextAttack() {
 	// On Attack Ended
 	OnAttackEnded.ExecuteIfBound();
+	EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	CurrentComboIndex++;
 	bAttackDelay = false;
 	OverlappedActors.Empty();
-	EquippedCharacterMovementComponent->SetMovementMode(MOVE_None);
+	EquippedCharacterMovementComponent->SetMovementMode(MOVE_Walking);
+	GetWorldTimerManager().SetTimer(MovementModeDelay, [&]() { EquippedCharacterMovementComponent->SetMovementMode(MOVE_None); }, 0.25f, false);
 }
 
-void ABaseWeapon::DealDamage(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent) {
+void ABaseWeapon::DealDamage(AActor* OtherActor) {
 	float DamageMultiplier;
 	if (ComboAttackMultipliers.IsValidIndex(CurrentComboIndex))
 		DamageMultiplier = ComboAttackMultipliers[CurrentComboIndex];
@@ -126,11 +139,14 @@ bool ABaseWeapon::CheckMovementMode() const {
 
 void ABaseWeapon::Clear() {
 	OverlappedActors.Empty();
+	WeaponCollisionBox->GetOverlappingActors(OverlappedActors);
 }
 
 void ABaseWeapon::Reset() {
 	CurrentComboIndex = 0;
 	OverlappedActors.Empty();
+	EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
+	if (GetWorldTimerManager().IsTimerActive(MovementModeDelay)) GetWorldTimerManager().ClearTimer(MovementModeDelay);
 
 	//Re-Enabling Actors movement just in case the attacks do not reset the characters movement
 	EquippedCharacterMovementComponent->SetMovementMode(MOVE_Walking);
@@ -142,7 +158,7 @@ void ABaseWeapon::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedC
 {
 	if (bCheckForOverlappedActors && OtherActor && (OtherActor != this) && (OtherActor != EquippedCharacter) && OtherComponent) {
 		if (!OverlappedActors.Contains(OtherActor)) {
-			DealDamage(OverlappedComponent, OtherActor, OtherComponent);
+			DealDamage(OtherActor);
 			OverlappedActors.AddUnique(OtherActor);
 		}
 	}
