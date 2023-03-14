@@ -19,17 +19,17 @@ public:
 	// Sets default values for this actor's properties
 	ASpikeProjectile();
 
-	UPROPERTY(VisibleAnywhere, Category = Projectile)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Projectile)
 		UProjectileMovementComponent* ProjectileMovementComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Projectile)
 		USphereComponent* CollisionComponent;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-		UStaticMeshComponent* ProjectileMeshComponent;
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void PlaySoundAtLocation(USoundCue* SoundToPlay, FVector SoundLocation, FRotator SoundRotation);
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void DeactivateParticleSystem();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
 		USoundCue* ProjectileHittingCue;
@@ -44,9 +44,14 @@ protected:
 	UFUNCTION()
 		void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
+	UFUNCTION()
+		void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	FTimerHandle DeactivationTimer;
 
 	float Damage = 3;
 	bool UseCollision = true;

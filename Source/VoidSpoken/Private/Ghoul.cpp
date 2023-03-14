@@ -310,16 +310,18 @@ void AGhoul::SpikeThrow()
 void AGhoul::CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision, float InitVel)
 {
 	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.Owner = this;
 	ASpikeProjectile* CreatedSpike = GetWorld()->SpawnActor<ASpikeProjectile>(Spike, Location, Rotation, SpawnInfo);
 	if (UseSpikeCollision)
 	{
 		CreatedSpike->SetDamage(Attack);
 		CreatedSpike->SetSpeed(InitVel);
 		CreatedSpike->ProjectileMovementComponent->ProjectileGravityScale = 1.0f;
-		CreatedSpike->SetOwner(this);
 	}
 	else
-		CreatedSpike->SetDamage(0, false, 0.25f);
+	{
+		CreatedSpike->SetDamage(0, false, 0.5f);
+	}
 }
 
 void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
