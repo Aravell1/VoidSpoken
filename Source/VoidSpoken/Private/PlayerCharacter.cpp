@@ -529,12 +529,12 @@ void APlayerCharacter::LeftAttack() {
 					}
 					else if (Stats->FocusPoints >= PushFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold) {
 						FHitResult Hit;
-						GetWorld()->LineTraceSingleByChannel(Hit, FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), ECC_Camera);
+						GetWorld()->LineTraceSingleByChannel(Hit, FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), 250000.0f), ECC_Camera);
 				
 						if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
 							ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
 
-							Interface->Execute_Push(TelekineticPropReference, Hit.HasValidHitObjectHandle() ? Hit.ImpactPoint : UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), PushForce);
+							Interface->Execute_Push(TelekineticPropReference, Hit.HasValidHitObjectHandle() ? Hit.ImpactPoint : UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), 250000.0f), PushForce);
 							TelekineticPropReference = nullptr;
 
 							// Stop Depleting Focus

@@ -437,11 +437,11 @@ public:
 
 	/// The regeneration rate of Stamina, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Stamina Regeneration Rate ( /s )")
-	float StaminaRate = 5.5f;
+	float StaminaRate = 11.0f;
 
 	/// The Cost of the Running, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Running Stamina Depletion Rate ( /s )")
-	float RunningStaminaDepletionRate = 2.5f;
+	float RunningStaminaDepletionRate = 1.5f;
 
 	protected:
 	void RegenerateStamina();
