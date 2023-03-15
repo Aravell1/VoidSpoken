@@ -165,7 +165,13 @@ void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor*
 		StaticMesh->AddImpulse(UKismetMathLibrary::Multiply_VectorFloat(NormalImpulse, 0.2f));
 		State = ETelekinesisState::ETS_Default;
 		
-		UGameplayStatics::ApplyDamage(OtherActor, PropDamage, NULL, PlayerCharacter, NULL);
+		if (OtherActor != PlayerCharacter)
+		{
+			UGameplayStatics::ApplyDamage(OtherActor, PropDamage, NULL, PlayerCharacter, UDamageTypeTelekinesis::StaticClass());
+			SetLifeSpan(3);
+			bCanBeLifted = false;
+		}
+		
 		if (!GetWorldTimerManager().IsTimerActive(SimulatePhysicsDelay))
 			GetWorldTimerManager().SetTimer(SimulatePhysicsDelay, this, &ATelekineticProp::ToggleSimulatePhysics, 2.0f, true);
 	}

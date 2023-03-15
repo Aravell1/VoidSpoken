@@ -28,7 +28,6 @@
 #include "Components/TimelineComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "TelekinesisInterface.h"
-#include "BaseWeapon.h"
 
 #include "UObject/UObjectGlobals.h"
 
@@ -55,6 +54,7 @@ enum class EMovementState : uint8 {
 #pragma endregion
 
 class ACombatDirector;
+class ABaseWeapon;
 
 UCLASS()
 class VOIDSPOKEN_API APlayerCharacter : public ABaseEntity {
@@ -66,6 +66,8 @@ public:
 	#pragma region Camera Functions
 	
 	protected:
+
+	bool bGodMode = false;
 	
 	float GamepadTurnRate = 50.0f;
 
@@ -164,21 +166,25 @@ public:
 
 	#pragma region Player Movement States and Variables
 
+	public:
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool GetRunning() { return bIsRunning; }
+	
+	protected:
+
 	UPROPERTY(VisibleAnywhere)
 	FVector PlayerInput;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-		FVector GetPlayerInput() { return PlayerInput; }
+	FVector GetPlayerInput() { return PlayerInput; }
 	
 	void MoveForward(float Axis);
 	void MoveRight(float Axis);
 
 	void RunStart();
 	void RunStop();
-	UPROPERTY(BlueprintReadOnly)
 	bool bIsRunning = false;
-	UFUNCTION(BlueprintCallable)
-	bool GetRunning() { return bIsRunning; }
 
 	/// Controls the available movement restrictions and keeps track of the player's current actions
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Movement State")
@@ -202,7 +208,13 @@ public:
 	#pragma region Getter / Setter
 
 	public:
-	
+
+	UFUNCTION(BlueprintCallable)
+	void SetGodMode() { bGodMode = !bGodMode; }
+
+	UFUNCTION(BlueprintPure)
+	bool GetGodModeEnabled() { return bGodMode; }
+
 	UFUNCTION()
 	void SetTelekineticAttackState(const ETelekinesisAttackState State) { ETelekineticAttackState = State; };
 
@@ -238,7 +250,7 @@ public:
 
 	/// Determines the max distance the SphereTrace can travel
 	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities" , DisplayName = "Maximum Telekinetic Range")
-		float TelekineticRange = 250000.0f;
+		float TelekineticRange = 2500.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities", DisplayName = "Minimum Telekinetic Range")
 		float MinTelekineticRange = 250.0f;
@@ -355,7 +367,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Health", DisplayName = "Healing Rate ( /s )")
 		float HealingRate = 2.5f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		UAnimMontage* HitMontage = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats", DisplayName = "Is Dead")
@@ -425,11 +437,11 @@ public:
 
 	/// The regeneration rate of Stamina, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Stamina Regeneration Rate ( /s )")
-	float StaminaRate = 5.5f;
+	float StaminaRate = 11.0f;
 
 	/// The Cost of the Running, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Running Stamina Depletion Rate ( /s )")
-	float RunningStaminaDepletionRate = 2.5f;
+	float RunningStaminaDepletionRate = 1.5f;
 
 	protected:
 	void RegenerateStamina();

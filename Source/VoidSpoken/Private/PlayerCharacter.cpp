@@ -6,14 +6,14 @@
 #include "HealthPickup.h"
 #include "StaminaPickup.h"
 #include "CombatDirector.h"
+#include "BaseWeapon.h"
+#include "Obelisk.h"
+#include "TelekineticProp.h"
 #include "Camera/PlayerCameraManager.h"
-
-// Need these weapons to show up as active!!! REMEMVER!@!
 
 #pragma region Constructor and Inheritied Functions
 
-APlayerCharacter::APlayerCharacter()
-{
+APlayerCharacter::APlayerCharacter() {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -72,7 +72,7 @@ APlayerCharacter::APlayerCharacter()
 
 	#pragma region Stats Initializing
 
-	Stats->SetBaseHealth(50.f);
+	Stats->SetBaseHealth(40.f);
 	Stats->GetBaseHealth();
 
 	Stats->SetBaseFocus(50.f);
@@ -183,7 +183,8 @@ void APlayerCharacter::Tick(float DeltaTime) {
 
 	DetermineMovementState();
 	//AddMovementInput(bTelekinesis ? GetVelocity() : GetActorForwardVector(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
-	AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+	//AddMovementInput(GetVelocity(), GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")));
+	AddActorLocalOffset(FVector(GetMesh()->GetAnimInstance()->GetCurveValue(FName("Movement Delta (Forward)")), 0, 0), true);
 	
 	if (CombatDirector && bInCombat != CombatDirector->GetInCombat() && !GetWorldTimerManager().IsTimerActive(CombatTimer)) {
 		GetWorldTimerManager().ClearTimer(CombatTimer);
@@ -299,6 +300,7 @@ void APlayerCharacter::TelekineticEnd() {
 
 void APlayerCharacter::DetectTelekineticObject() {
 	/// Tracing for Telekinetic Objects
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	if (!TelekineticPropReference) {
 		FVector StartTrace = FollowCamera->GetComponentLocation() + UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), DetectionRadius);
 		FVector EndTrace = FollowCamera->GetComponentLocation() + UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange);
@@ -489,7 +491,7 @@ void APlayerCharacter::ResetDodging() {
 #pragma region Combat
 
 void APlayerCharacter::LeftAttack() {
-	if (!bIsDodging && !bIsDead) {
+	if (!bIsDodging && !bIsDead && !GetCharacterMovement()->IsFalling()) {
 		if (!bIsAttacking && !bTelekinesis && LeftEquippedWeapon && Stats->Stamina >= LeftEquippedWeapon->GetStaminaCost() && !LeftEquippedWeapon->GetAttackDelay()) {
 			if (RightEquippedWeapon) RightEquippedWeapon->Reset();
 			LeftEquippedWeapon->Show();
@@ -499,33 +501,47 @@ void APlayerCharacter::LeftAttack() {
 		}
 		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference))
 		{
-			if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
-				if (const ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference)) {
-					// Setting the Telekinesis Prop Reference and Pulling it
-					ETelekineticAttackState = ETelekinesisAttackState::ETA_Pull;
-					TelekineticPropReference = HighlightedReference;
+			AActor* Target;
+			if (TelekineticPropReference)
+				Target = TelekineticPropReference;
+			else
+				Target = HighlightedReference;
 
-					InterfaceFromProp->Execute_Pull(HighlightedReference, this);
+			if (Cast<AObelisk>(Target))
+				Cast<AObelisk>(Target)->BeginCharging();
+			else if (ATelekineticProp* PropTarget = Cast<ATelekineticProp>(Target))
+			{
+				if (PropTarget->bCanBeLifted)
+				{
+					if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
+						if (const ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference)) {
+							// Setting the Telekinesis Prop Reference and Pulling it
+							ETelekineticAttackState = ETelekinesisAttackState::ETA_Pull;
+							TelekineticPropReference = HighlightedReference;
 
-					// Start Depleting Focus
-					Stats->FocusPoints -= PullFocusCost;
-					if (!GetWorldTimerManager().IsTimerActive(FocusDepletionTimer))
-						GetWorldTimerManager().SetTimer(FocusDepletionTimer, this, &APlayerCharacter::DepleteFocus, 0.25f, true);
-				}
-			}
-			else if (Stats->FocusPoints >= PushFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold) {
-				FHitResult Hit;
-				GetWorld()->LineTraceSingleByChannel(Hit, FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), ECC_Camera);
+							InterfaceFromProp->Execute_Pull(HighlightedReference, this);
+
+							// Start Depleting Focus
+							Stats->FocusPoints -= PullFocusCost;
+							if (!GetWorldTimerManager().IsTimerActive(FocusDepletionTimer))
+								GetWorldTimerManager().SetTimer(FocusDepletionTimer, this, &APlayerCharacter::DepleteFocus, 0.25f, true);
+						}
+					}
+					else if (Stats->FocusPoints >= PushFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold) {
+						FHitResult Hit;
+						GetWorld()->LineTraceSingleByChannel(Hit, FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), 250000.0f), ECC_Camera);
 				
-				if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
-					ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
+						if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
+							ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
 
-					Interface->Execute_Push(TelekineticPropReference, Hit.HasValidHitObjectHandle() ? Hit.ImpactPoint : UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), PushForce);
-					TelekineticPropReference = nullptr;
+							Interface->Execute_Push(TelekineticPropReference, Hit.HasValidHitObjectHandle() ? Hit.ImpactPoint : UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), 250000.0f), PushForce);
+							TelekineticPropReference = nullptr;
 
-					// Stop Depleting Focus
-					Stats->FocusPoints -= PushFocusCost;
-					GetWorldTimerManager().ClearTimer(FocusDepletionTimer);
+							// Stop Depleting Focus
+							Stats->FocusPoints -= PushFocusCost;
+							GetWorldTimerManager().ClearTimer(FocusDepletionTimer);
+						}
+					}
 				}
 			}
 		}
@@ -533,7 +549,7 @@ void APlayerCharacter::LeftAttack() {
 }
 
 void APlayerCharacter::RightAttack() {
-	if (!bIsDodging && !bIsDead) {
+	if (!bIsDodging && !bIsDead && !GetCharacterMovement()->IsFalling()) {
 		if (!bIsAttacking && !bTelekinesis && RightEquippedWeapon && Stats->Stamina >= RightEquippedWeapon->GetStaminaCost() && !RightEquippedWeapon->GetAttackDelay()) {
 			if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
 			RightEquippedWeapon->Show();
@@ -584,10 +600,9 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 #pragma region Stat Manipulation
 
 void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) {
-	if ((!bInvincible || !bIsDodging)) {
+	if ((!bInvincible || !bIsDodging) && !bGodMode) {
 		ABaseEntity::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
-		Stats->Health -= Damage;
-
+		
 		if (!bIsDead && Stats->Health <= 0) {
 			if (LeftEquippedWeapon) LeftEquippedWeapon->Hide();
 			if (RightEquippedWeapon) RightEquippedWeapon->Hide();

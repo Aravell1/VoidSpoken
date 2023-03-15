@@ -44,6 +44,22 @@ void UStaggerComponent::AddToStaggerGauge(float Damage)
 	}
 }
 
+void UStaggerComponent::TriggerFullStagger()
+{
+	if (bCanGainStagger)
+	{
+		StaggerOwner();
+
+		StaggerGauge = 0;
+		bCanGainStagger = false;
+
+		GetWorld()->GetTimerManager().SetTimer(StaggerTimer,
+			this,
+			&UStaggerComponent::ResetStaggerCooldown,
+			StaggerCooldown);
+	}
+}
+
 void UStaggerComponent::StaggerOwner()
 {
 	StaggerTrigger.Broadcast();

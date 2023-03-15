@@ -85,6 +85,10 @@
 				"Mac",
 				"Linux"
 			]
+		},
+		{
+			"Name": "MultiUserClient",
+			"Enabled": true
 		}
 	]
 }

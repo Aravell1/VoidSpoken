@@ -14,7 +14,7 @@ ASpikeProjectile::ASpikeProjectile()
 	{
 		CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 		CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
-		CollisionComponent->OnComponentHit.AddDynamic(this, &ASpikeProjectile::OnHit);
+		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ASpikeProjectile::OnComponentBeginOverlap);
 		CollisionComponent->InitSphereRadius(15.0f);
 		RootComponent = CollisionComponent;
 	}
@@ -23,17 +23,11 @@ ASpikeProjectile::ASpikeProjectile()
 	{
 		ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 		ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent);
-		ProjectileMovementComponent->InitialSpeed = 1500;
+		ProjectileMovementComponent->InitialSpeed = 500;
 		ProjectileMovementComponent->MaxSpeed = 1500;
 		ProjectileMovementComponent->bRotationFollowsVelocity = true;
 		ProjectileMovementComponent->bShouldBounce = false;
 		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
-	}
-
-	if (!ProjectileMeshComponent)
-	{
-		ProjectileMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMeshComponent"));
-		ProjectileMeshComponent->SetupAttachment(CollisionComponent);
 	}
 }
 
@@ -41,7 +35,7 @@ void ASpikeProjectile::SetDamage(float NewDamage, bool Collision, float LifeTime
 {
 	Damage = NewDamage;
 	UseCollision = Collision;
-	SetLifeSpan(LifeTime);
+	GetWorldTimerManager().SetTimer(DeactivationTimer, this, &ASpikeProjectile::DeactivateParticleSystem, LifeTime);
 }
 
 void ASpikeProjectile::SetSpeed(float InitialSpeed)
@@ -72,8 +66,31 @@ void ASpikeProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAct
 		{
 			PlaySoundAtLocation(ProjectileHittingCue, GetActorLocation(), GetActorRotation());
 		}
+		DeactivateParticleSystem();
 
-		Destroy();
+		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void ASpikeProjectile::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor != GetOwner())
+	{
+		if (UseCollision)
+		{
+			if (OtherActor == Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+			{
+				UGameplayStatics::ApplyDamage(OtherActor, Damage, NULL, this, UDamageTypeStagger::StaticClass());
+			}
+
+		}
+		if (ProjectileHittingCue)
+		{
+			PlaySoundAtLocation(ProjectileHittingCue, GetActorLocation(), GetActorRotation());
+		}
+		DeactivateParticleSystem();
+
+		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 

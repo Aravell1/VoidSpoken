@@ -465,7 +465,6 @@ void AGatekeeper::AttackTrace(UAnimMontage* AnimTrigger)
 				Cast<ACharacter>(OutActors[i])->LaunchCharacter(ImpulseVector, true, false);
 				return;
 			}
-
 		}
 	}
 }
