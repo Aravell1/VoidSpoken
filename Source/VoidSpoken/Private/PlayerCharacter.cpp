@@ -7,6 +7,8 @@
 #include "StaminaPickup.h"
 #include "CombatDirector.h"
 #include "BaseWeapon.h"
+#include "Obelisk.h"
+#include "TelekineticProp.h"
 #include "Camera/PlayerCameraManager.h"
 
 #pragma region Constructor and Inheritied Functions
@@ -70,7 +72,7 @@ APlayerCharacter::APlayerCharacter() {
 
 	#pragma region Stats Initializing
 
-	Stats->SetBaseHealth(50.f);
+	Stats->SetBaseHealth(40.f);
 	Stats->GetBaseHealth();
 
 	Stats->SetBaseFocus(50.f);
@@ -499,33 +501,47 @@ void APlayerCharacter::LeftAttack() {
 		}
 		else if (bTelekinesis && (TelekineticPropReference || HighlightedReference))
 		{
-			if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
-				if (const ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference)) {
-					// Setting the Telekinesis Prop Reference and Pulling it
-					ETelekineticAttackState = ETelekinesisAttackState::ETA_Pull;
-					TelekineticPropReference = HighlightedReference;
+			AActor* Target;
+			if (TelekineticPropReference)
+				Target = TelekineticPropReference;
+			else
+				Target = HighlightedReference;
 
-					InterfaceFromProp->Execute_Pull(HighlightedReference, this);
+			if (Cast<AObelisk>(Target))
+				Cast<AObelisk>(Target)->BeginCharging();
+			else if (ATelekineticProp* PropTarget = Cast<ATelekineticProp>(Target))
+			{
+				if (PropTarget->bCanBeLifted)
+				{
+					if (Stats->FocusPoints >= PullFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_None) {
+						if (const ITelekinesisInterface* InterfaceFromProp = Cast<ITelekinesisInterface>(HighlightedReference)) {
+							// Setting the Telekinesis Prop Reference and Pulling it
+							ETelekineticAttackState = ETelekinesisAttackState::ETA_Pull;
+							TelekineticPropReference = HighlightedReference;
 
-					// Start Depleting Focus
-					Stats->FocusPoints -= PullFocusCost;
-					if (!GetWorldTimerManager().IsTimerActive(FocusDepletionTimer))
-						GetWorldTimerManager().SetTimer(FocusDepletionTimer, this, &APlayerCharacter::DepleteFocus, 0.25f, true);
-				}
-			}
-			else if (Stats->FocusPoints >= PushFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold) {
-				FHitResult Hit;
-				GetWorld()->LineTraceSingleByChannel(Hit, FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), ECC_Camera);
+							InterfaceFromProp->Execute_Pull(HighlightedReference, this);
+
+							// Start Depleting Focus
+							Stats->FocusPoints -= PullFocusCost;
+							if (!GetWorldTimerManager().IsTimerActive(FocusDepletionTimer))
+								GetWorldTimerManager().SetTimer(FocusDepletionTimer, this, &APlayerCharacter::DepleteFocus, 0.25f, true);
+						}
+					}
+					else if (Stats->FocusPoints >= PushFocusCost && ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold) {
+						FHitResult Hit;
+						GetWorld()->LineTraceSingleByChannel(Hit, FollowCamera->GetComponentLocation(), UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), ECC_Camera);
 				
-				if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
-					ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
+						if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {
+							ETelekineticAttackState = ETelekinesisAttackState::ETA_None;
 
-					Interface->Execute_Push(TelekineticPropReference, Hit.HasValidHitObjectHandle() ? Hit.ImpactPoint : UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), PushForce);
-					TelekineticPropReference = nullptr;
+							Interface->Execute_Push(TelekineticPropReference, Hit.HasValidHitObjectHandle() ? Hit.ImpactPoint : UKismetMathLibrary::Multiply_VectorFloat(FollowCamera->GetForwardVector(), TelekineticRange), PushForce);
+							TelekineticPropReference = nullptr;
 
-					// Stop Depleting Focus
-					Stats->FocusPoints -= PushFocusCost;
-					GetWorldTimerManager().ClearTimer(FocusDepletionTimer);
+							// Stop Depleting Focus
+							Stats->FocusPoints -= PushFocusCost;
+							GetWorldTimerManager().ClearTimer(FocusDepletionTimer);
+						}
+					}
 				}
 			}
 		}
@@ -584,10 +600,9 @@ void APlayerCharacter::OnWeaponAttackEnded() {
 #pragma region Stat Manipulation
 
 void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) {
-	if ((!bInvincible || !bIsDodging)) {
+	if ((!bInvincible || !bIsDodging) && !bGodMode) {
 		ABaseEntity::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
-		Stats->Health -= Damage;
-
+		
 		if (!bIsDead && Stats->Health <= 0) {
 			if (LeftEquippedWeapon) LeftEquippedWeapon->Hide();
 			if (RightEquippedWeapon) RightEquippedWeapon->Hide();

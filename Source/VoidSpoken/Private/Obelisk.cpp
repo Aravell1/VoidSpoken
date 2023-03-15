@@ -47,6 +47,20 @@ void AObelisk::SetObeliskState(EActivationState NewState)
 	}
 }
 
+void AObelisk::BeginCharging()
+{
+	if (GetObeliskState() == EActivationState::Inactive && bCanBeginCharging)
+	{
+		SetObeliskState(EActivationState::Charging);
+	}
+}
+
+void AObelisk::Highlight_Implementation(bool bHighlight)
+{
+	if (GetObeliskState() == EActivationState::Inactive || ObeliskMesh->bRenderCustomDepth)
+		ObeliskMesh->SetRenderCustomDepth(bHighlight);
+}
+
 void AObelisk::AddCharge(ABaseEnemy* EnemyTrigger)
 {
 	if (GetObeliskState() == EActivationState::Charging)
@@ -78,16 +92,7 @@ void AObelisk::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if (GetObeliskState() != EActivationState::Activated)
 	{
-		if (GetObeliskState() == EActivationState::Inactive && bCanBeginCharging)
-		{
-			if (OtherActor->GetOwner())
-				OtherActor = OtherActor->GetOwner();
-
-			if (Cast<APlayerCharacter>(OtherActor))
-			{
-				SetObeliskState(EActivationState::Charging);
-			}
-		}
+		
 
 		if (ABaseEnemy* OtherEnemy = Cast<ABaseEnemy>(OtherActor))
 		{
