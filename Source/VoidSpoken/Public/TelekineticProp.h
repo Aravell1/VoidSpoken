@@ -110,6 +110,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, DisplayName = "Enable Stupid Feature")
 		bool bEnableGravityDelay = false;
 
+	bool bCanBeLifted = true;
+
 	// Collision Events
 
 	UFUNCTION()

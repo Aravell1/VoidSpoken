@@ -66,6 +66,8 @@ public:
 	#pragma region Camera Functions
 	
 	protected:
+
+	bool bGodMode = false;
 	
 	float GamepadTurnRate = 50.0f;
 
@@ -206,7 +208,13 @@ public:
 	#pragma region Getter / Setter
 
 	public:
-	
+
+	UFUNCTION(BlueprintCallable)
+	void SetGodMode() { bGodMode = !bGodMode; }
+
+	UFUNCTION(BlueprintPure)
+	bool GetGodModeEnabled() { return bGodMode; }
+
 	UFUNCTION()
 	void SetTelekineticAttackState(const ETelekinesisAttackState State) { ETelekineticAttackState = State; };
 
@@ -242,7 +250,7 @@ public:
 
 	/// Determines the max distance the SphereTrace can travel
 	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities" , DisplayName = "Maximum Telekinetic Range")
-		float TelekineticRange = 250000.0f;
+		float TelekineticRange = 2500.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities", DisplayName = "Minimum Telekinetic Range")
 		float MinTelekineticRange = 250.0f;

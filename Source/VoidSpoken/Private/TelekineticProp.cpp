@@ -166,7 +166,11 @@ void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor*
 		State = ETelekinesisState::ETS_Default;
 		
 		if (OtherActor != PlayerCharacter)
+		{
 			UGameplayStatics::ApplyDamage(OtherActor, PropDamage, NULL, PlayerCharacter, NULL);
+			SetLifeSpan(3);
+			bCanBeLifted = false;
+		}
 		
 		if (!GetWorldTimerManager().IsTimerActive(SimulatePhysicsDelay))
 			GetWorldTimerManager().SetTimer(SimulatePhysicsDelay, this, &ATelekineticProp::ToggleSimulatePhysics, 2.0f, true);
