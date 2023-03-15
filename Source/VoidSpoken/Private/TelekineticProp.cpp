@@ -167,7 +167,7 @@ void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor*
 		
 		if (OtherActor != PlayerCharacter)
 		{
-			UGameplayStatics::ApplyDamage(OtherActor, PropDamage, NULL, PlayerCharacter, NULL);
+			UGameplayStatics::ApplyDamage(OtherActor, PropDamage, NULL, PlayerCharacter, UDamageTypeTelekinesis::StaticClass());
 			SetLifeSpan(3);
 			bCanBeLifted = false;
 		}

@@ -78,8 +78,8 @@ private:
 	bool bAttackOnSpawn = false;
 
 	int EnemySpawns = 0;
-	const int EnemyHardCap = 10;
-	int MaxEnemiesSpawned = 4;
+	const int EnemyHardCap = 6;
+	int MaxEnemiesSpawned = 3;
 	int EnemiesToSpawn = 2;
 	int SpawnTicks = 0;
 	const int InreaseSpawnsThreshold = 5;

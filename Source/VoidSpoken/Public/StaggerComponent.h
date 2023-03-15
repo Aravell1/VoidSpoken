@@ -28,6 +28,8 @@ public:
 
 	void AddToStaggerGauge(float Damage);
 
+	void TriggerFullStagger();
+
 	void StaggerOwner();
 
 	void StartDrainingStagger();

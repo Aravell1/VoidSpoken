@@ -8,6 +8,7 @@
 #include "Components/TimelineComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerCharacter.h"
+#include "DamageTypeTelekinesis.h"
 #include "TelekineticProp.generated.h"
 
 UCLASS(Blueprintable)

@@ -8,6 +8,7 @@
 #include "BaseWeapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "DamageTypeStagger.h"
+#include "DamageTypeTelekinesis.h"
 #include "StaggerComponent.h" 
 #include "BaseEntity.generated.h"
 
@@ -29,6 +30,9 @@ public:
 
 	UFUNCTION()
 		virtual void OnStaggered();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void OnTelekineticHit();
 
 protected:
 	// Called when the game starts or when spawned

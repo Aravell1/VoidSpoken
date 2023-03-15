@@ -87,9 +87,17 @@ void ABaseWeapon::Attack() {
 			EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
 
 			Clear();
-			for (AActor* HitActor :OverlappedActors)
+			TArray<AActor*> CheckOverlap;
+			WeaponCollisionBox->GetOverlappingActors(CheckOverlap);
+			for (AActor* HitActor :CheckOverlap)
 				if (HitActor && HitActor != this && HitActor != EquippedCharacter && !Cast<ABaseWeapon>(HitActor))
-					DealDamage(HitActor);
+				{
+					if (!OverlappedActors.Contains(HitActor))
+					{
+						DealDamage(HitActor);
+						OverlappedActors.AddUnique(HitActor);
+					}
+				}
 
 			//Check the current index to make sure we do not reference something unwanted
 			if (CurrentComboIndex >= GetComboLength()) Reset();
@@ -133,7 +141,6 @@ bool ABaseWeapon::CheckMovementMode() const {
 
 void ABaseWeapon::Clear() {
 	OverlappedActors.Empty();
-	WeaponCollisionBox->GetOverlappingActors(OverlappedActors);
 }
 
 void ABaseWeapon::Reset() {

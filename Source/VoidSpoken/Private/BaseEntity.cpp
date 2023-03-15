@@ -51,13 +51,25 @@ void ABaseEntity::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ABaseEntity::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	Damage = FMath::Floor(Damage * (25 / (25 + Stats->Defense)));
-	Stats->Health -= Damage;
-
 	if (Cast<UDamageTypeStagger>(DamageType) && StaggerComponent->bCanStagger)
 	{
 		StaggerComponent->AddToStaggerGauge(Damage);
 	}
+	else if (Cast<UDamageTypeTelekinesis>(DamageType))
+	{
+		if (StaggerComponent->bCanStagger)
+		{
+			StaggerComponent->TriggerFullStagger();
+		}
+
+		Damage *= 2;
+
+		OnTelekineticHit();
+	}
+
+	Damage = FMath::Floor(Damage * (25 / (25 + Stats->Defense)));
+	Stats->Health -= Damage;
+
 }
 
 
