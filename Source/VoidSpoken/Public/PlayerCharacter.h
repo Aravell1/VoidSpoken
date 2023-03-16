@@ -461,6 +461,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Dodge Stamina Cost")
 	float DodgeStaminaCost = 8.0f;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool IsTargeting = false;
+
 	void SetDodging() { bIsDodging = !bIsDodging; if (!bIsDodging) DodgingTimer.Stop(); };
 	void SetDodging(const bool State) { bIsDodging = State; };
 	

@@ -276,14 +276,24 @@ void APlayerCharacter::HandleTelekinesis() {
 void APlayerCharacter::TelekineticStart() {
 	bTelekinesis = true;
 	CameraArm->CameraLagSpeed = 10.0f;
-	GetCharacterMovement()->bOrientRotationToMovement = false;
+	if(!IsTargeting) GetCharacterMovement()->bOrientRotationToMovement = false;
+	else
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	}
 	ZoomTimeline.Play();
 }
 
 void APlayerCharacter::TelekineticEnd() {
 	bTelekinesis = false;
 	CameraArm->CameraLagSpeed = 5.0f;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	if(!IsTargeting) GetCharacterMovement()->bOrientRotationToMovement = true;
+	else
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	}
 	ZoomTimeline.Reverse();
 
 	if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(HighlightedReference)) {
@@ -434,8 +444,13 @@ void APlayerCharacter::DodgingStarted() {
 	bInvincible = true;
 	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
 
-	if (bTelekinesis)
+	if (bTelekinesis && !IsTargeting)
 		GetCharacterMovement()->bOrientRotationToMovement = true;
+	else
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	}
 
 	PlayerInput.Normalize();
 	FVector NewDirection = PlayerInput.X * FollowCamera->GetForwardVector() + PlayerInput.Y * FollowCamera->GetRightVector();
@@ -471,6 +486,13 @@ void APlayerCharacter::DodgingFinished() {
 
 	if (bTelekinesis) GetCharacterMovement()->bOrientRotationToMovement = false;
 	else GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	if(!IsTargeting) GetCharacterMovement()->bOrientRotationToMovement = true;
+	else
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	}
 
 	DodgingDirection = FVector::Zero();
 	DodgingTimer.Stop();
