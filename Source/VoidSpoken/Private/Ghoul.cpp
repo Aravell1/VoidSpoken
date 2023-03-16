@@ -691,6 +691,8 @@ void AGhoul::OnStaggered()
 	Super::OnStaggered();
 
 	SetState(EGhoulState::Staggered);
+
+	TriggerHitEvent();
 }
 
 bool AGhoul::CheckLineOfSight(AActor* OtherActor)
@@ -956,6 +958,8 @@ bool AGhoul::TestPathExists(FVector Target)
 
 void AGhoul::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	Damage *= GetDamageMultiplier();
+
 	Super::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
 
 	if (!AttackTarget)

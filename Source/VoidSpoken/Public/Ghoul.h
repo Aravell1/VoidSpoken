@@ -54,6 +54,8 @@ public:
 
 	void SetAttacking(UAnimMontage* Montage, bool Attacking);
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void TriggerHitEvent();
 	void TriggerAttack() override;
 	void BeginAttack();
 

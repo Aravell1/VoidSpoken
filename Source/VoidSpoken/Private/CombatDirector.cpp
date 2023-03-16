@@ -316,7 +316,7 @@ void ACombatDirector::TriggerEnemyAttack()
 
 void ACombatDirector::AddToMap(ABaseEnemy* Enemy, bool SpawnedEnemy)
 {
-	if (Obelisks.Num() <= 0 && !Cast<ABaseBoss>(Enemy))
+	if (Obelisks.Num() <= 0 && !Cast<ABaseBoss>(Enemy) && bKillEnemiesWhenNoObelisksLeft)
 	{
 		UGameplayStatics::ApplyDamage(Enemy, 10000, NULL, NULL, NULL);
 		return;
@@ -369,6 +369,7 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 		if (Obelisks[i] == Obelisk || Obelisks[i]->GetObeliskState() == EActivationState::Activated)
 		{
 			Obelisks.RemoveAt(i);
+			Player->StartFocusRegen();
 			i--;
 		}
 		else if (Obelisks[i]->GetObeliskState() == EActivationState::Inactive)
@@ -389,7 +390,10 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 	}
 
 	if (Obelisk->GetObeliskState() == EActivationState::Activated && Obelisks.Num() > 0)
-		GameMode->AddSubtractObeliskRequiredKills(2);
+	{
+		if (Obelisks.Num() % 2 == 0)
+			GameMode->AddSubtractObeliskRequiredKills(1);
+	}
 }
 
 void ACombatDirector::EnableObeliskMode(AObelisk* Obelisk)

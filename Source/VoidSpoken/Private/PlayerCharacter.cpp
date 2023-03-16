@@ -192,6 +192,8 @@ void APlayerCharacter::Tick(float DeltaTime) {
 
 		if (bInCombat) EquippedWeapon->Show();
 	}
+
+	RegenerateFocus(DeltaTime);
 	
 	ZoomTimeline.TickTimeline(DeltaTime);
 	if (bTelekinesis)
@@ -691,6 +693,25 @@ void APlayerCharacter::RegenerateStamina() {
 	if (Stats->Stamina > Stats->GetMaxStamina()) {
 		Stats->Stamina = Stats->GetMaxStamina();
 		GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
+	}
+}
+
+void APlayerCharacter::StartFocusRegen() {
+	bRegenerateFocus = true;
+	FocusToRegen = Stats->GetMaxFocus() - Stats->FocusPoints;
+}
+
+void APlayerCharacter::RegenerateFocus(float DeltaSeconds) {
+	if (bRegenerateFocus)
+	{
+		Stats->FocusPoints += FocusRegenRate * DeltaSeconds;
+		FocusToRegen -= FocusRegenRate * DeltaSeconds;
+
+		if (FocusToRegen <= 0)
+			bRegenerateFocus = false;
+
+		if (Stats->FocusPoints > Stats->GetMaxFocus())
+			Stats->FocusPoints = Stats->GetMaxFocus();
 	}
 }
 
