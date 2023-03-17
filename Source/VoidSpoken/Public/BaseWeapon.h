@@ -173,6 +173,9 @@ public:
 		WeaponMeshComponent->SetMaterial(0, DynWeaponMaterial);
 	}
 
+	UPROPERTY(BlueprintReadWrite)
+	bool IsTargeting = false;
+
 	#pragma endregion
 
 	protected:

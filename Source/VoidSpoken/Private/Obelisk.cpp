@@ -19,7 +19,7 @@ AObelisk::AObelisk()
 	{
 		ActivationSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Activation Sphere"));
 		ActivationSphere->SetupAttachment(RootComponent);
-		ActivationSphere->SetSphereRadius(PlayerDetectionRadius);
+		ActivationSphere->SetSphereRadius(EnemyDetectionRadius);
 		ActivationSphere->SetGenerateOverlapEvents(true);
 	}
 }
@@ -32,7 +32,6 @@ void AObelisk::SetObeliskState(EActivationState NewState)
 	{
 	case EActivationState::Charging:
 		EnableCharge.Broadcast(this);
-		ActivationSphere->SetSphereRadius(EnemyDetectionRadius);
 
 		SpawnDecal();
 		break;
@@ -92,8 +91,6 @@ void AObelisk::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if (GetObeliskState() != EActivationState::Activated)
 	{
-		
-
 		if (ABaseEnemy* OtherEnemy = Cast<ABaseEnemy>(OtherActor))
 		{
 			TArray<UObject*> BoundObjects = OtherEnemy->OnDeathTrigger.GetAllObjects();

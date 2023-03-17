@@ -253,7 +253,7 @@ public:
 		float TelekineticRange = 2500.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Telekinetic Abilities", DisplayName = "Minimum Telekinetic Range")
-		float MinTelekineticRange = 250.0f;
+		float MinTelekineticRange = 200.0f;
 
 	#pragma region Timelines and Curve Variables
 	
@@ -410,7 +410,7 @@ public:
 	
 	/// The Cost of the Telekinetic "Pull" Ability, Flat Rate
 	UPROPERTY(EditDefaultsOnly, Category = "Telekinetic Abilities|Costs and Consumptions", DisplayName = "Pull Focus Cost")
-	float PullFocusCost = 5.0f; // Flat Rate
+	float PullFocusCost = 2.0f; // Flat Rate
 
 	/// The Cost of the Telekinetic "Holding" Ability, Constant Rate (/s)
 	UPROPERTY(EditDefaultsOnly, Category = "Telekinetic Abilities|Costs and Consumptions", DisplayName = "Holding Focus Rate ( /s )")
@@ -418,18 +418,23 @@ public:
 
 	/// The Cost of the Telekinetic "Push" Ability, Flat Rate
 	UPROPERTY(EditDefaultsOnly, Category = "Telekinetic Abilities|Costs and Consumptions", DisplayName = "Push Focus Cost")
-	float PushFocusCost = 7.5f; // Flat Rate
+	float PushFocusCost = 4.0f; // Flat Rate
 
 	protected:
 
 	FTimerHandle FocusDepletionTimer;
 	void DepleteFocus();
+	void RegenerateFocus(float DeltaSeconds);
 
+	float FocusToRegen = 0;
+	float FocusRegenRate = 10;
+	bool bRegenerateFocus = false;
 	#pragma endregion
 
 	#pragma region Stamina Depletion / Regeneration
 	
 	public:
+	void StartFocusRegen();
 
 	/// A delay to start regenerating stamina
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Stamina Delay (s)")
@@ -455,6 +460,9 @@ public:
 	/// The amount of Stamina consumed when dodging, Flat Rate
 	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina", DisplayName = "Dodge Stamina Cost")
 	float DodgeStaminaCost = 8.0f;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool IsTargeting = false;
 
 	void SetDodging() { bIsDodging = !bIsDodging; if (!bIsDodging) DodgingTimer.Stop(); };
 	void SetDodging(const bool State) { bIsDodging = State; };

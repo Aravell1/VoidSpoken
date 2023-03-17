@@ -84,7 +84,13 @@ void ABaseWeapon::Attack() {
 			// On Attack Started
 			OnAttackStarted.ExecuteIfBound();
 			if (GetWorldTimerManager().IsTimerActive(MovementModeDelay)) GetWorldTimerManager().ClearTimer(MovementModeDelay);
-			EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
+
+			if (!IsTargeting) EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
+			else 
+			{
+				EquippedCharacter->GetCharacterMovement()->bUseControllerDesiredRotation = true;
+				EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+			}
 
 			Clear();
 			TArray<AActor*> CheckOverlap;
@@ -113,7 +119,13 @@ void ABaseWeapon::Attack() {
 void ABaseWeapon::NextAttack() {
 	// On Attack Ended
 	OnAttackEnded.ExecuteIfBound();
-	EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	if (!IsTargeting) EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+	else
+	{
+		EquippedCharacter->GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
 	CurrentComboIndex++;
 	bAttackDelay = false;
 	Clear();
@@ -146,7 +158,14 @@ void ABaseWeapon::Clear() {
 void ABaseWeapon::Reset() {
 	CurrentComboIndex = 0;
 	OverlappedActors.Empty();
-	EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	if(!IsTargeting) EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
+	else
+	{
+		EquippedCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+		EquippedCharacter->GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	}
+
 	if (GetWorldTimerManager().IsTimerActive(MovementModeDelay)) GetWorldTimerManager().ClearTimer(MovementModeDelay);
 
 	//Re-Enabling Actors movement just in case the attacks do not reset the characters movement

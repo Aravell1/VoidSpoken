@@ -53,6 +53,9 @@ public:
 	UFUNCTION()
 		void DisableObeliskMode(AObelisk* Obelisk);
 
+	UFUNCTION(BlueprintCallable)
+		void DisableKillEnemies() { bKillEnemiesWhenNoObelisksLeft = false; }
+
 	UPROPERTY(EditAnywhere)
 		bool bDebugMode = false;
 
@@ -76,11 +79,12 @@ private:
 	void SpawnObeliskEnemy();
 	bool bObeliskMode = false;
 	bool bAttackOnSpawn = false;
+	bool bKillEnemiesWhenNoObelisksLeft = true;
 
 	int EnemySpawns = 0;
-	const int EnemyHardCap = 6;
+	const int EnemyHardCap = 5;
 	int MaxEnemiesSpawned = 3;
-	int EnemiesToSpawn = 2;
+	int EnemiesToSpawn = 1;
 	int SpawnTicks = 0;
 	const int InreaseSpawnsThreshold = 5;
 	const float EnemySpawnDistance = 1500.0f;

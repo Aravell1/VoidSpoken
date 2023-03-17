@@ -94,7 +94,6 @@ private:
 		TSubclassOf<ADecalActor> ChargeZoneDecalClass;
 	ADecalActor* ChargeZoneDecal;
 
-	const float PlayerDetectionRadius = 1000.0f;
 	const float EnemyDetectionRadius = 3500.0f;
 
 	float ObeliskCharge = 0;
