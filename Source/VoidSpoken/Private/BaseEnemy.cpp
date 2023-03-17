@@ -6,6 +6,5 @@
 ABaseEnemy::ABaseEnemy()
 {
 	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Pawn Sensing"));
-	
 }
 

@@ -73,14 +73,7 @@ public:
 	void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance) override;
 
 	UFUNCTION(BlueprintImplementableEvent)
-		void PlaySoundAtLocation(USoundCue* SoundToPlay, FVector SoundLocation, FRotator SoundRotation);
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* GhoulHittingPlayerCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* ProjectileLaunchedCue;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* FlameBurstCue;
+		void PlaySoundAtLocation(int SoundIndex);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* IdleBreak01Montage = nullptr;

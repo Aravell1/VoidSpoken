@@ -262,8 +262,7 @@ void AGhoul::SpikeBurst()
 		}
 	}
 
-	if (FlameBurstCue)
-		PlaySoundAtLocation(FlameBurstCue, GetActorLocation(), GetActorRotation());
+	//PlaySoundAtLocation(FlameBurstCue, GetActorLocation(), GetActorRotation());
 
 	TArray<AActor*> ActorsToIgnore = { GetOwner() };
 	TArray<AActor*> OutActors;
@@ -303,8 +302,7 @@ void AGhoul::SpikeThrow()
 	Rotation.Pitch = InitAngle;
 
 	CreateSpike(Rotation, ThrowPoint->GetComponentLocation(), true, InitVel);
-	if (ProjectileLaunchedCue)
-		PlaySoundAtLocation(ProjectileLaunchedCue, ThrowPoint->GetComponentLocation(), Rotation);
+	//PlaySoundAtLocation(ProjectileLaunchedCue, ThrowPoint->GetComponentLocation(), Rotation);
 }
 
 void AGhoul::CreateSpike(FRotator Rotation, FVector Location, bool UseSpikeCollision, float InitVel)
@@ -494,8 +492,7 @@ void AGhoul::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 			AttackingLeft = false;
 			AttackingRight = false;
 
-			if (GhoulHittingPlayerCue)
-				PlaySoundAtLocation(GhoulHittingPlayerCue, OtherComponent->GetComponentLocation(), GetActorRotation());
+			//PlaySoundAtLocation(GhoulHittingPlayerCue, OtherComponent->GetComponentLocation(), GetActorRotation());
 		}
 	}
 }
@@ -824,12 +821,11 @@ void AGhoul::Death()
 	AIController->ClearFocus(EAIFocusPriority::Gameplay);
 
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
-	{
 		GetMesh()->GetAnimInstance()->StopAllMontages(false);
-	}
+
+	UpdateHealthBar.Broadcast();
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	SetLifeSpan(10);
 }

@@ -366,7 +366,7 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 	ActivatedObelisk = nullptr;
 	for (int i = 0; i < Obelisks.Num() && Obelisks.Num() > 0; i++)
 	{
-		if (Obelisks[i] == Obelisk || Obelisks[i]->GetObeliskState() == EActivationState::Activated)
+		if (Obelisks[i] == Obelisk && Obelisks[i]->GetObeliskState() == EActivationState::Activated)
 		{
 			Obelisks.RemoveAt(i);
 			Player->StartFocusRegen();
@@ -375,6 +375,24 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 		else if (Obelisks[i]->GetObeliskState() == EActivationState::Inactive)
 		{
 			Obelisks[i]->SetCanBeginCharging(true);
+		}
+	}
+
+	if (Obelisk->GetObeliskState() == EActivationState::Activated)
+	{
+		for (int i = 0; i < Enemies.Num(); i++)
+		{
+			if (Enemies[i].SpawnedEnemy)
+				UGameplayStatics::ApplyDamage(Enemies[i].Enemy, 10000, NULL, NULL, NULL);
+		}
+
+		for (int i = 0; i < EnemySpawnPoints.Num(); i++)
+		{
+			if (GetWorldTimerManager().IsTimerActive(EnemySpawnPoints[i]->DistanceCheckTimer))
+			{
+				GetWorldTimerManager().ClearTimer(EnemySpawnPoints[i]->DistanceCheckTimer);
+				EnemySpawnPoints[i]->bEnemySpawning = false;
+			}
 		}
 	}
 
