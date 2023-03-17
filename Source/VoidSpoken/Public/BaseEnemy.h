@@ -107,5 +107,5 @@ private:
 
 	float WalkSpeed = 0;
 	float RunSpeed = 0;
-	float DamageMultiplier = 0.5f;
+	float DamageMultiplier = 1.0f;
 };

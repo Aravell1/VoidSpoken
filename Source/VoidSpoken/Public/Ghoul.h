@@ -75,6 +75,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void PlaySoundAtLocation(int SoundIndex);
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void TriggerRagdoll();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* IdleBreak01Montage = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")

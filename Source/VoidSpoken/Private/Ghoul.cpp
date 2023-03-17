@@ -21,6 +21,7 @@ AGhoul::AGhoul()
 	SetWalkSpeed(GhoulWalkSpeed);
 	SetRunSpeed(GhoulRunSpeed);
 	GetCharacterMovement()->MaxWalkSpeed = GetWalkSpeed();
+	SetDamageMultiplier(0.25f);
 
 	if (PawnSensing)
 	{
@@ -827,6 +828,8 @@ void AGhoul::Death()
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	TriggerRagdoll();
+
 	SetLifeSpan(10);
 }
 
@@ -954,7 +957,8 @@ bool AGhoul::TestPathExists(FVector Target)
 
 void AGhoul::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	Damage *= GetDamageMultiplier();
+	if (!Cast<UDamageTypeTelekinesis>(DamageType))
+		Damage *= GetDamageMultiplier();
 
 	Super::TakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
 

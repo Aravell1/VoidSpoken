@@ -239,6 +239,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Telekinetic Abilities")
 	AActor* TelekineticPropReference = nullptr;
 
+	UFUNCTION(BlueprintCallable)
+	void DestroyHeldProp();
+
 	/// Determines how hard the "Push" Telekinetic ability can push a TelekineticProp object
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Telekinetic Abilities", DisplayName = "Push Force")
 	float PushForce = 250.0f;

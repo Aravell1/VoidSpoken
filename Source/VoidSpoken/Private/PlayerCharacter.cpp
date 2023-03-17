@@ -254,6 +254,15 @@ void APlayerCharacter::SetCameraOffset() const {
 	CameraArm->TargetOffset = UKismetMathLibrary::Add_VectorVector(RightVector, CameraOffset);
 }
 
+void APlayerCharacter::DestroyHeldProp()
+{
+	if (TelekineticPropReference)
+	{
+		TelekineticPropReference->Destroy();
+		TelekineticPropReference = nullptr;
+	}
+}
+
 void APlayerCharacter::ZoomUpdate(const float Alpha) const {
 	const FVector NewLocation = FMath::Lerp(FVector::ZeroVector, CameraOffset, Alpha);
 	CameraArm->SocketOffset = NewLocation;

@@ -56,6 +56,8 @@ void ATelekineticProp::Tick(float DeltaTime)
 
 	LiftTimeline.TickTimeline(DeltaTime);
 	if (State == ETelekinesisState::ETS_Pulled)	ReachCharacter();
+
+	LerpAngularVelocityToZero(DeltaTime);
 }
 
 #pragma region Highlights
@@ -149,11 +151,25 @@ void ATelekineticProp::LiftOff() {
 
 void ATelekineticProp::StopLift() {
 	LiftTimeline.Stop();
+	bLerpAngularVelocity = true;
+	StartVelocity = StaticMesh->GetPhysicsAngularVelocityInDegrees();
 }
 
 #pragma endregion
 
 #pragma region Collision Events
+
+void ATelekineticProp::LerpAngularVelocityToZero(float DeltaSeconds) {
+	if (bLerpAngularVelocity) {
+		LerpTimer += DeltaSeconds / LerpDuration;
+		StaticMesh->SetPhysicsAngularVelocityInDegrees(FMath::Lerp(StartVelocity, FVector::ZeroVector, LerpTimer));
+
+		if (LerpTimer >= LerpDuration) {
+			bLerpAngularVelocity = false;
+			LerpTimer = 0;
+		}
+	}
+}
 
 void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
 	if (State == ETelekinesisState::ETS_Pushed) {
@@ -164,10 +180,11 @@ void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor*
 		StaticMesh->SetAllPhysicsLinearVelocity(FVector());
 		StaticMesh->AddImpulse(UKismetMathLibrary::Multiply_VectorFloat(NormalImpulse, 0.2f));
 		State = ETelekinesisState::ETS_Default;
+		const TArray<AActor*> IgnoredActors{ PlayerCharacter };
 		
 		if (OtherActor != PlayerCharacter)
 		{
-			UGameplayStatics::ApplyDamage(OtherActor, PropDamage, NULL, PlayerCharacter, UDamageTypeTelekinesis::StaticClass());
+			UGameplayStatics::ApplyRadialDamage(OtherActor, PropDamage, Hit.ImpactPoint, 150, UDamageTypeTelekinesis::StaticClass(), IgnoredActors, PlayerCharacter, 0, true);
 			SetLifeSpan(3);
 			bCanBeLifted = false;
 		}
