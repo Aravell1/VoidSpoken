@@ -19,7 +19,7 @@ AObelisk::AObelisk()
 	{
 		ActivationSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Activation Sphere"));
 		ActivationSphere->SetupAttachment(RootComponent);
-		ActivationSphere->SetSphereRadius(PlayerDetectionRadius);
+		ActivationSphere->SetSphereRadius(EnemyDetectionRadius);
 		ActivationSphere->SetGenerateOverlapEvents(true);
 	}
 }
@@ -32,7 +32,6 @@ void AObelisk::SetObeliskState(EActivationState NewState)
 	{
 	case EActivationState::Charging:
 		EnableCharge.Broadcast(this);
-		ActivationSphere->SetSphereRadius(EnemyDetectionRadius);
 
 		SpawnDecal();
 		break;
@@ -45,6 +44,20 @@ void AObelisk::SetObeliskState(EActivationState NewState)
 			ChargeZoneDecal->GetDecal()->SetFadeOut(0, 1.0f, true);
 		break;
 	}
+}
+
+void AObelisk::BeginCharging()
+{
+	if (GetObeliskState() == EActivationState::Inactive && bCanBeginCharging)
+	{
+		SetObeliskState(EActivationState::Charging);
+	}
+}
+
+void AObelisk::Highlight_Implementation(bool bHighlight)
+{
+	if (GetObeliskState() == EActivationState::Inactive || ObeliskMesh->bRenderCustomDepth)
+		ObeliskMesh->SetRenderCustomDepth(bHighlight);
 }
 
 void AObelisk::AddCharge(ABaseEnemy* EnemyTrigger)
@@ -78,17 +91,6 @@ void AObelisk::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if (GetObeliskState() != EActivationState::Activated)
 	{
-		if (GetObeliskState() == EActivationState::Inactive && bCanBeginCharging)
-		{
-			if (OtherActor->GetOwner())
-				OtherActor = OtherActor->GetOwner();
-
-			if (Cast<APlayerCharacter>(OtherActor))
-			{
-				SetObeliskState(EActivationState::Charging);
-			}
-		}
-
 		if (ABaseEnemy* OtherEnemy = Cast<ABaseEnemy>(OtherActor))
 		{
 			TArray<UObject*> BoundObjects = OtherEnemy->OnDeathTrigger.GetAllObjects();

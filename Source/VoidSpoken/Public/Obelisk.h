@@ -24,7 +24,7 @@ UDELEGATE()
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActivationDelegate, AObelisk*, Obelisk);
 
 UCLASS()
-class VOIDSPOKEN_API AObelisk : public APawn
+class VOIDSPOKEN_API AObelisk : public APawn, public ITelekinesisInterface
 {
 	GENERATED_BODY()
 	
@@ -47,7 +47,11 @@ public:
 	UFUNCTION(BlueprintPure)
 		float GetObeliskCharge() { return ObeliskCharge; }
 
+	void BeginCharging();
+
 	void SetCanBeginCharging(bool CanCharge) { bCanBeginCharging = CanCharge; }
+
+	void Highlight_Implementation(bool bHighlight) override;
 
 	UFUNCTION()
 		void AddCharge(ABaseEnemy* EnemyTrigger);
@@ -90,7 +94,6 @@ private:
 		TSubclassOf<ADecalActor> ChargeZoneDecalClass;
 	ADecalActor* ChargeZoneDecal;
 
-	const float PlayerDetectionRadius = 1000.0f;
 	const float EnemyDetectionRadius = 3500.0f;
 
 	float ObeliskCharge = 0;

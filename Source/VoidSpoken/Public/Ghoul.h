@@ -54,6 +54,8 @@ public:
 
 	void SetAttacking(UAnimMontage* Montage, bool Attacking);
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void TriggerHitEvent();
 	void TriggerAttack() override;
 	void BeginAttack();
 
@@ -163,7 +165,7 @@ private:
 	float ReachTargetDistance = 0;
 	float CheckingDistance = 0;
 	float CircleTargetDistance = 0;
-	const float MeleeTargetDistance = 150.0f;
+	const float MeleeTargetDistance = 125.0f;
 	const float RangedTargetDistance = 1250.0f;
 
 	FTimerHandle PatrolTimerHandle;

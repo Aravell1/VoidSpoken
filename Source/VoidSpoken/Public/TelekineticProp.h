@@ -8,6 +8,7 @@
 #include "Components/TimelineComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerCharacter.h"
+#include "DamageTypeTelekinesis.h"
 #include "TelekineticProp.generated.h"
 
 UCLASS(Blueprintable)
@@ -109,6 +110,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, DisplayName = "Enable Stupid Feature")
 		bool bEnableGravityDelay = false;
+
+	bool bCanBeLifted = true;
 
 	// Collision Events
 

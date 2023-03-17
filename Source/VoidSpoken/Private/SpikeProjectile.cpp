@@ -66,8 +66,8 @@ void ASpikeProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAct
 		{
 			PlaySoundAtLocation(ProjectileHittingCue, GetActorLocation(), GetActorRotation());
 		}
+		DeactivateParticleSystem();
 
-		//SetLifeSpan(0.5f);
 		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
@@ -90,7 +90,6 @@ void ASpikeProjectile::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCo
 		}
 		DeactivateParticleSystem();
 
-		//SetLifeSpan(0.05f);
 		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
