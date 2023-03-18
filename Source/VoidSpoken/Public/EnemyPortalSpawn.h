@@ -38,6 +38,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	FTimerHandle DistanceCheckTimer;
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -48,7 +49,6 @@ private:
 
 	void SpawnEnemy();
 
-	FTimerHandle DistanceCheckTimer;
 
 	const float PlayerDistanceToSpawn = 5000;
 	const float DelayPortalToEnemy = 2.5f;

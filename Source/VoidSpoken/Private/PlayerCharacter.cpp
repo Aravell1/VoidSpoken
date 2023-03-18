@@ -254,9 +254,18 @@ void APlayerCharacter::SetCameraOffset() const {
 	CameraArm->TargetOffset = UKismetMathLibrary::Add_VectorVector(RightVector, CameraOffset);
 }
 
+void APlayerCharacter::DestroyHeldProp()
+{
+	if (TelekineticPropReference)
+	{
+		TelekineticPropReference->Destroy();
+		TelekineticPropReference = nullptr;
+	}
+}
+
 void APlayerCharacter::ZoomUpdate(const float Alpha) const {
 	const FVector NewLocation = FMath::Lerp(FVector::ZeroVector, CameraOffset, Alpha);
-	FollowCamera->SetRelativeLocation(NewLocation);
+	CameraArm->SocketOffset = NewLocation;
 	
 	const int32 NewArmLength = FMath::Lerp(300, 125, Alpha);
 	CameraArm->TargetArmLength = NewArmLength;
@@ -329,7 +338,7 @@ void APlayerCharacter::DetectTelekineticObject() {
 
 		FHitResult Hit;
 
-		const bool DidFindObject = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), StartTrace, EndTrace, DetectionRadius, ObjectTypes, false, { this, LeftEquippedWeapon, RightEquippedWeapon }, EDrawDebugTrace::ForOneFrame, Hit, true);
+		const bool DidFindObject = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), StartTrace, EndTrace, DetectionRadius, ObjectTypes, false, { this, LeftEquippedWeapon, RightEquippedWeapon }, EDrawDebugTrace::None, Hit, true);
 
 		if (!HighlightedReference && DidFindObject) {
 			// Find if the hit object has the desired interface
@@ -649,11 +658,16 @@ void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const U
 }
 
 void APlayerCharacter::OnStaggered() {
+	bIsAttacking = false;
 	if (LeftEquippedWeapon) LeftEquippedWeapon->Reset();
 	if (RightEquippedWeapon) RightEquippedWeapon->Reset();
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
 	GetMesh()->GetAnimInstance()->Montage_Play(HitMontage);
+	
 	GetWorld()->GetTimerManager().SetTimer(InvincibilityTimer, this, &APlayerCharacter::ResetInvincibility, 0.75f, false);
+	
+	GetWorldTimerManager().ClearTimer(StaminaRegenerationTimer);
+	GetWorldTimerManager().SetTimer(StaminaRegenerationTimer, this, &APlayerCharacter::RegenerateStamina, 0.1f, true, StaminaDelay);
 
 	if (bTelekinesis && TelekineticPropReference && (ETelekineticAttackState == ETelekinesisAttackState::ETA_Pull || ETelekineticAttackState == ETelekinesisAttackState::ETA_Hold)) {
 		if (const ITelekinesisInterface* Interface = Cast<ITelekinesisInterface>(TelekineticPropReference)) {

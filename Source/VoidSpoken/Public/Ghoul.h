@@ -46,7 +46,7 @@ public:
 		UEnvQuery* FindLocationWithLOSEQS;
 
 	UFUNCTION(BlueprintPure)
-		enum EGhoulState GetState();
+		enum EGhoulState GetState() { return GhState; }
 
 	void SetState(EGhoulState state);
 
@@ -56,6 +56,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void TriggerHitEvent();
+
 	void TriggerAttack() override;
 	void BeginAttack();
 
@@ -73,14 +74,19 @@ public:
 	void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance) override;
 
 	UFUNCTION(BlueprintImplementableEvent)
-		void PlaySoundAtLocation(USoundCue* SoundToPlay, FVector SoundLocation, FRotator SoundRotation);
+		void PlaySoundAtLocation(USoundCue* SoundToPlay);
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void TriggerRagdoll();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* GhoulHittingPlayerCue;
+		USoundCue* DeathSound;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* ProjectileLaunchedCue;
+		USoundCue* HurtSound;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
-		USoundCue* FlameBurstCue;
+		USoundCue* GruntSound;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound Cues")
+		USoundCue* ScreamSound;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation Montages")
 		UAnimMontage* IdleBreak01Montage = nullptr;
