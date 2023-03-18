@@ -32,11 +32,6 @@ AGhoul::AGhoul()
 	}
 }
 
-EGhoulState AGhoul::GetState()
-{
-	return GhState;
-}
-
 void AGhoul::SetState(EGhoulState state)
 {
 	if (state != GetState())
@@ -206,6 +201,8 @@ void AGhoul::BeginAttack()
 
 			TimeOfLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld());
 		}
+
+		PlaySoundAtLocation(GruntSound);
 	}
 	else if (!AIController->LineOfSightTo(AttackTarget))
 	{
@@ -378,6 +375,8 @@ void AGhoul::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult&
 
 					TimeOfLastAttack = UGameplayStatics::GetTimeSeconds(GetWorld());
 				}
+
+				PlaySoundAtLocation(GruntSound);
 			}
 			break;
 
@@ -485,16 +484,34 @@ void AGhoul::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
 
 void AGhoul::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if ((OverlappedComponent == HitBoxRight && AttackingRight) || (OverlappedComponent == HitBoxLeft && AttackingLeft))
-	{
-		if (OtherActor == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
-		{
-			UGameplayStatics::ApplyDamage(OtherActor, GetAttack(), NULL, this, UDamageTypeStagger::StaticClass());
-			AttackingLeft = false;
-			AttackingRight = false;
+	UBoxComponent* HitBox;
+	if (OverlappedComponent == HitBoxRight && AttackingRight)
+		HitBox = HitBoxRight;
+	else if (OverlappedComponent == HitBoxLeft && AttackingLeft)
+		HitBox = HitBoxLeft;
+	else return;
 
-			//PlaySoundAtLocation(GhoulHittingPlayerCue, OtherComponent->GetComponentLocation(), GetActorRotation());
+	if (OtherActor == UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+	{
+		UGameplayStatics::ApplyDamage(OtherActor, GetAttack(), NULL, this, UDamageTypeStagger::StaticClass());
+		AttackingLeft = false;
+		AttackingRight = false;
+
+		TArray<FHitResult> OutHits;
+		FComponentQueryParams Params;
+		Params.AddIgnoredActor(this);
+		GetWorld()->ComponentSweepMulti(OutHits, HitBox, HitBox->GetComponentLocation() + FVector(-.1f), HitBox->GetComponentLocation() + FVector(0.1f), HitBox->GetComponentRotation(), Params);
+
+		FVector Position = GetActorLocation();
+		for (const FHitResult& Result : OutHits)
+		{
+			if (Result.GetActor() && Result.GetActor() == AttackTarget && Result.GetActor() == OtherActor)
+			{
+				ActivateParticlesOnHit(Result.ImpactPoint, Result.ImpactNormal);
+			}
 		}
+
+		//PlaySoundAtLocation(GhoulHittingPlayerCue, OtherComponent->GetComponentLocation(), GetActorRotation());
 	}
 }
 
@@ -967,6 +984,12 @@ void AGhoul::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType
 
 	UpdateHealthBar.Broadcast();
 
+
 	if (Stats->Health <= 0)
+	{
+		PlaySoundAtLocation(DeathSound);
 		Death();
+	}
+	else
+		PlaySoundAtLocation(HurtSound);
 }

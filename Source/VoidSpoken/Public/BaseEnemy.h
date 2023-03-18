@@ -67,6 +67,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetDamageMultiplier(float DMult) { DamageMultiplier = DMult; }
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void ActivateParticlesOnHit(FVector ImpactPoint, FVector ImpactNormal);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PawnSensing)
 		class UPawnSensingComponent* PawnSensing;
 

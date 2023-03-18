@@ -173,6 +173,9 @@ public:
 		WeaponMeshComponent->SetMaterial(0, DynWeaponMaterial);
 	}
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void ActivateBloodSplatterEffect(FVector ImpactPoint, FVector HitNormal);
+
 	UPROPERTY(BlueprintReadWrite)
 	bool IsTargeting = false;
 
