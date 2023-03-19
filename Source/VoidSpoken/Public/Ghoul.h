@@ -149,6 +149,8 @@ private:
 	void PlayRandomIdle();
 	void AttackLOSCheck();
 
+	void CheckEQS();
+
 	void CheckPatrolReset();
 	void PatrolReset();
 
@@ -182,6 +184,9 @@ private:
 
 	const float LOSCheckDuration = 0.5f;
 	FTimerHandle LOSCheckTimer;
+
+	FTimerHandle EQSTimer;
+	const float EQSTimerDuration = 0.5f;
 
 	const float BackUpSpeed = 100.0f;
 	const float BackOffRange = 500.0f;

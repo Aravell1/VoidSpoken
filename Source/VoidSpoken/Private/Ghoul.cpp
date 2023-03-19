@@ -206,8 +206,7 @@ void AGhoul::BeginAttack()
 	}
 	else if (!AIController->LineOfSightTo(AttackTarget))
 	{
-		if (FindLocationWithLOSEQS)
-			AIController->FindLocationWithLOS(FindLocationWithLOSEQS);
+		CheckEQS();
 	}
 	else
 	{
@@ -602,8 +601,7 @@ void AGhoul::CombatIdle()
 			if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) > MeleeSpreadRange)
 			{
 				if (TestPathExists(AttackTarget))
-					if (FindLocationWithLOSEQS)
-						AIController->FindLocationWithLOS(FindLocationWithLOSEQS);
+					CheckEQS();
 			}
 			else if (!AIController->IsFollowingAPath())
 			{
@@ -631,8 +629,7 @@ void AGhoul::CombatIdle()
 			}*/
 			if (!AIController->LineOfSightTo(AttackTarget))
 			{
-				if (FindLocationWithLOSEQS)
-					AIController->FindLocationWithLOS(FindLocationWithLOSEQS);
+				CheckEQS();
 			}
 			else if (FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) < BackOffRange)
 			{
@@ -681,6 +678,17 @@ void AGhoul::AttackLOSCheck()
 		{
 			BeginAttack();
 		}
+	}
+}
+
+void AGhoul::CheckEQS()
+{
+	if (!AIController->LineOfSightTo(AttackTarget) && FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) > ReachTargetDistance)
+	{
+		if (FindLocationWithLOSEQS)
+			AIController->FindLocationWithLOS(FindLocationWithLOSEQS);
+
+		GetWorldTimerManager().SetTimer(EQSTimer, this, &AGhoul::CheckEQS, EQSTimerDuration);
 	}
 }
 
