@@ -9,6 +9,7 @@
 * Email:		Jan.Frank.Skucinski@gmail.com
 */
 
+#include "BaseEnemy.h"
 #include "BaseWeapon.h"
 
 // Sets default values
@@ -93,17 +94,25 @@ void ABaseWeapon::Attack() {
 			}
 
 			Clear();
-			TArray<AActor*> CheckOverlap;
-			WeaponCollisionBox->GetOverlappingActors(CheckOverlap);
-			for (AActor* HitActor :CheckOverlap)
-				if (HitActor && HitActor != this && HitActor != EquippedCharacter && !Cast<ABaseWeapon>(HitActor))
+
+			TArray<FHitResult> OutHits;
+			FComponentQueryParams Params;
+			Params.AddIgnoredActor(this);
+			GetWorld()->ComponentSweepMulti(OutHits, WeaponCollisionBox, WeaponCollisionBox->GetComponentLocation() + FVector(-.1f), WeaponCollisionBox->GetComponentLocation() + FVector(0.1f), WeaponCollisionBox->GetComponentRotation(), Params);
+
+			FVector Position = GetActorLocation();
+			for (const FHitResult& Result : OutHits)
+			{
+				if (Result.GetActor() && Cast<ABaseEnemy>(Result.GetActor()))
 				{
-					if (!OverlappedActors.Contains(HitActor))
+					if (!OverlappedActors.Contains(Result.GetActor()))
 					{
-						DealDamage(HitActor);
-						OverlappedActors.AddUnique(HitActor);
+						DealDamage(Result.GetActor());
+						OverlappedActors.AddUnique(Result.GetActor());
+						ActivateBloodSplatterEffect(Result.ImpactPoint, Result.ImpactNormal);
 					}
 				}
+			}
 
 			//Check the current index to make sure we do not reference something unwanted
 			if (CurrentComboIndex >= GetComboLength()) Reset();
@@ -180,6 +189,20 @@ void ABaseWeapon::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedC
 		if (!OverlappedActors.Contains(OtherActor)) {
 			DealDamage(OtherActor);
 			OverlappedActors.AddUnique(OtherActor);
+
+			TArray<FHitResult> OutHits;
+			FComponentQueryParams Params;
+			Params.AddIgnoredActor(this);
+			GetWorld()->ComponentSweepMulti(OutHits, WeaponCollisionBox, WeaponCollisionBox->GetComponentLocation() + FVector(-.1f), WeaponCollisionBox->GetComponentLocation() + FVector(0.1f), WeaponCollisionBox->GetComponentRotation(), Params);
+
+			FVector Position = GetActorLocation();
+			for (const FHitResult& Result : OutHits)
+			{
+				if (Result.GetActor() && Cast<ABaseEnemy>(Result.GetActor()) && Result.GetActor() == OtherActor)
+				{
+					ActivateBloodSplatterEffect(Result.ImpactPoint, Result.ImpactNormal);
+				}
+			}
 		}
 	}
 }

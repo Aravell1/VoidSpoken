@@ -60,7 +60,17 @@ void AObelisk::Highlight_Implementation(bool bHighlight)
 		ObeliskMesh->SetRenderCustomDepth(bHighlight);
 }
 
-void AObelisk::AddCharge(ABaseEnemy* EnemyTrigger)
+void AObelisk::SpawnEnemyParticleEffect(ABaseEnemy* EnemyTrigger)
+{
+	FVector SpawnLocation = EnemyTrigger->GetActorLocation();
+	FRotator SpawnRotation = EnemyTrigger->GetActorRotation();
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.Owner = this;
+
+	GetWorld()->SpawnActor<AActor>(EnemyParticleType, SpawnLocation, SpawnRotation, SpawnInfo);
+}
+
+void AObelisk::AddCharge()
 {
 	if (GetObeliskState() == EActivationState::Charging)
 	{
@@ -95,7 +105,7 @@ void AObelisk::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		{
 			TArray<UObject*> BoundObjects = OtherEnemy->OnDeathTrigger.GetAllObjects();
 			if (!BoundObjects.Contains(this))
-				OtherEnemy->OnDeathTrigger.AddDynamic(this, &AObelisk::AddCharge);
+				OtherEnemy->OnDeathTrigger.AddDynamic(this, &AObelisk::SpawnEnemyParticleEffect);
 		}
 	}
 }
@@ -106,7 +116,7 @@ void AObelisk::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 	{
 		if (ABaseEnemy* OtherEnemy = Cast<ABaseEnemy>(OtherActor))
 		{
-			OtherEnemy->OnDeathTrigger.RemoveDynamic(this, &AObelisk::AddCharge);
+			OtherEnemy->OnDeathTrigger.RemoveDynamic(this, &AObelisk::SpawnEnemyParticleEffect);
 		}
 	}
 }
@@ -124,6 +134,5 @@ void AObelisk::SpawnDecal()
 	{
 		FActorSpawnParameters SpawnInfo;
 		ChargeZoneDecal = GetWorld()->SpawnActor<ADecalActor>(ChargeZoneDecalClass, GetActorLocation(), GetActorRotation(), SpawnInfo);
-		ChargeZoneDecal->GetDecal()->DecalSize = FVector(10, EnemyDetectionRadius / 2, EnemyDetectionRadius / 2);
 	}
 }

@@ -113,6 +113,12 @@ public:
 
 	bool bCanBeLifted = true;
 
+	void LerpAngularVelocityToZero(float DeltaSeconds);
+	bool bLerpAngularVelocity = false;
+	const float LerpDuration = 0.5f;
+	float LerpTimer = 0;
+	FVector StartVelocity = FVector::ZeroVector;
+
 	// Collision Events
 
 	UFUNCTION()

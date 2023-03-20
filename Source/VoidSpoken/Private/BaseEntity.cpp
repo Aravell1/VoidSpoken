@@ -62,7 +62,7 @@ void ABaseEntity::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamag
 			StaggerComponent->TriggerFullStagger();
 		}
 
-		Damage *= 2;
+		Damage *= 1.5f;
 
 		OnTelekineticHit();
 	}
