@@ -194,7 +194,7 @@ void UVoidSpokenGameInstance::SavePlayerSaveGame()
 				PlayerSaveGame->PlayerRotation = PlayerRotation;
 
 				// Save the save game object
-				UGameplayStatics::SaveGameToSlot(PlayerSaveGame, PlayerSlotName, 0);
+				//UGameplayStatics::SaveGameToSlot(PlayerSaveGame, PlayerSlotName, 0);
 			}
 		}
 	}

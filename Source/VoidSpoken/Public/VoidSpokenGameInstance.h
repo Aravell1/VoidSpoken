@@ -9,11 +9,15 @@
 #include "Engine/World.h"
 #include "BaseEntity.h"
 #include "Obelisk.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "VoidSpokenGameInstance.generated.h"
 
 /**
  * 
  */
+
 UCLASS()
 class VOIDSPOKEN_API UVoidSpokenGameInstance : public UGameInstance
 {
@@ -53,6 +57,34 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ResetSaveGameData();
 
+	#pragma region Level Loading Functions
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> LoadingScreenWidget;
+
+	FTimerHandle LoadingScreenDelay;
+	FString LevelName;
+
+	UFUNCTION(BlueprintCallable)
+	void LoadLevel(const FString& MapToLoad) {
+		LevelName = MapToLoad;
+		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
+		UUserWidget* LoadingScreen = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), LoadingScreenWidget);
+		LoadingScreen->AddToViewport();
+		LoadPackageAsync("/Game/Maps/Maps/" + LevelName,
+			FLoadPackageAsyncDelegate::CreateLambda([=](const FName& PackageName, UPackage* LoadedPackage, EAsyncLoadingResult::Type Result) {
+				if (Result == EAsyncLoadingResult::Succeeded) AsyncLevelLoadedFinished();
+			}
+			), 0, PKG_ContainsMap);
+	}
+
+	void AsyncLevelLoadedFinished() {
+		UGameplayStatics::OpenLevel(this, FName(*LevelName));
+		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
+	}
+
+	#pragma endregion 
+	
 private:
 
 	FString CurrentObeliskName = "DefaultObeliskName";
