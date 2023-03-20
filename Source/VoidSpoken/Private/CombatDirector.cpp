@@ -369,6 +369,7 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 		if (Obelisks[i] == Obelisk && Obelisks[i]->GetObeliskState() == EActivationState::Activated)
 		{
 			Obelisks.RemoveAt(i);
+			Player->StartFocusRegen();
 			i--;
 		}
 		else if (Obelisks[i]->GetObeliskState() == EActivationState::Inactive)

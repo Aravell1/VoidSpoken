@@ -437,8 +437,6 @@ public:
 	#pragma region Stamina Depletion / Regeneration
 	
 	public:
-
-	UFUNCTION(BlueprintCallable)
 	void StartFocusRegen();
 
 	/// A delay to start regenerating stamina

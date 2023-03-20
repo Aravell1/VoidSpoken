@@ -54,10 +54,7 @@ public:
 	void Highlight_Implementation(bool bHighlight) override;
 
 	UFUNCTION()
-		void SpawnEnemyParticleEffect(ABaseEnemy* EnemyTrigger);
-
-	UFUNCTION(BlueprintCallable)
-		void AddCharge();
+		void AddCharge(ABaseEnemy* EnemyTrigger);
 
 	UPROPERTY(EditAnywhere)
 		TArray<AEnemyPortalSpawn*> NearbySpawnPoints;
@@ -75,9 +72,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Obelisk State")
 		FActivationDelegate DisableCharge;
-
-	UPROPERTY(EditDefaultsOnly)
-		TSubclassOf<AActor> EnemyParticleType;
 
 protected:
 	// Called when the game starts or when spawned

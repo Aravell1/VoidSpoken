@@ -62,9 +62,6 @@ public:
 	UPROPERTY(EditAnywhere)
 		float AttackCheckInterval = 1.0f;
 
-	UPROPERTY(BlueprintReadOnly)
-		AObelisk* ActivatedObelisk;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -77,6 +74,7 @@ private:
 
 	TArray<AEnemyPortalSpawn*> EnemySpawnPoints;
 	TArray<AObelisk*> Obelisks;
+	AObelisk* ActivatedObelisk;
 	void SpawnEnemy();
 	void SpawnObeliskEnemy();
 	bool bObeliskMode = false;
