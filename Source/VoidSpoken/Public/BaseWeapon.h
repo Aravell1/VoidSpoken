@@ -116,6 +116,18 @@ public:
 	#pragma endregion
 
 	#pragma region Weapon Functions
+	
+	//
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Location Offset", meta = (NoGetter))
+	FVector LocalWeaponLocationOffset = FVector(0, 0, 0);
+
+	//
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Rotation Offset", meta = (NoGetter))
+	FRotator LocalWeaponRotationOffset = FRotator(0, 0, 0);
+
+	//
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Scale", meta = (NoGetter))
+	FVector LocalWeaponScale = FVector(1, 1, 1);
 
 	/// Function: Equip(ACharacter* EquippingCharacter) 
 	///		-This functions sets the variable EquippedCharacter
@@ -275,14 +287,6 @@ public:
 	#pragma region Combo States and Booleans
 
 	public:
-
-	//
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Location Offset", meta = (NoGetter))
-	FVector LocalWeaponLocationOffset = FVector(0, 0, 0);
-
-	//
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, DisplayName = "Local Weapon Rotation Offset", meta = (NoGetter))
-	FRotator LocalWeaponRotationOffset = FRotator(0, 0, 0);
 	
 	/// Will dictate in which side of the HUD will this be equipped to and bound to a button 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, DisplayName = "Equipped Slot", meta = (NoGetter))

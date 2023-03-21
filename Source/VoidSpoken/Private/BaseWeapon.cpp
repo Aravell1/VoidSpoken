@@ -77,6 +77,7 @@ void ABaseWeapon::Equip_Implementation(ACharacter* EquippingCharacter, FName Equ
 
 	WeaponMeshComponent->AddLocalOffset(LocalWeaponLocationOffset);
 	WeaponMeshComponent->AddLocalRotation(LocalWeaponRotationOffset);
+	WeaponMeshComponent->SetWorldScale3D(LocalWeaponScale);
 }
 
 void ABaseWeapon::Attack() {
