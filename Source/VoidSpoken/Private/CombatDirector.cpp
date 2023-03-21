@@ -404,6 +404,17 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 				UGameplayStatics::ApplyDamage(Enemies[j].Enemy, 10000, NULL, NULL, NULL);
 			}
 		}
+
+		for (int i = 0; i < EnemySpawnPoints.Num(); i++)
+		{
+			if (GetWorldTimerManager().IsTimerActive(EnemySpawnPoints[i]->DistanceCheckTimer))
+			{
+				GetWorldTimerManager().ClearTimer(EnemySpawnPoints[i]->DistanceCheckTimer);
+				EnemySpawnPoints[i]->bEnemySpawning = false;
+			}
+		}
+
+		GetWorldTimerManager().ClearTimer(SpawnEnemiesTimer);
 	}
 
 	if (Obelisk->GetObeliskState() == EActivationState::Activated && Obelisks.Num() > 0)

@@ -30,21 +30,29 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> LoadingScreenWidget;
 
+	const FString MapDirectory = "/Game/Maps/Maps/";
+
+	UUserWidget* LoadingScreen;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void CreateLoadingScreen();
+
 	UFUNCTION(BlueprintCallable)
 	void LoadLevel(const FString& MapToLoad) {
 		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-		UUserWidget* LoadingScreen = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), LoadingScreenWidget);
-		LoadingScreen->AddToViewport();
-		LoadPackageAsync("/Game/Maps/Maps/" + MapToLoad,
+		LoadingScreen = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), LoadingScreenWidget);
+		if (LoadingScreen)
+			LoadingScreen->AddToViewport();
+		LoadPackageAsync(MapDirectory + MapToLoad,
 			FLoadPackageAsyncDelegate::CreateLambda([=](const FName& PackageName, UPackage* LoadedPackage, EAsyncLoadingResult::Type Result) {
-				if (Result == EAsyncLoadingResult::Succeeded) AsyncLevelLoadedFinished("/Game/Maps/Maps/" + MapToLoad);
+				if (Result == EAsyncLoadingResult::Succeeded) AsyncLevelLoadedFinished(MapToLoad);
 			}
 			), 0, PKG_ContainsMap);
 	}
 
-	void AsyncLevelLoadedFinished(const FString& LevelName) const {
-		UGameplayStatics::OpenLevel(this, FName(*LevelName));
-		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
+	void AsyncLevelLoadedFinished(const FString& LevelName) {
+		UGameplayStatics::OpenLevel(UGameplayStatics::GetPlayerController(GetWorld(), 0), FName(*LevelName));
+		//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 	}
 
 };

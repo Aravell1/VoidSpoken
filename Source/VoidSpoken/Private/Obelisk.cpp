@@ -62,12 +62,15 @@ void AObelisk::Highlight_Implementation(bool bHighlight)
 
 void AObelisk::SpawnEnemyParticleEffect(ABaseEnemy* EnemyTrigger)
 {
-	FVector SpawnLocation = EnemyTrigger->GetActorLocation();
-	FRotator SpawnRotation = EnemyTrigger->GetActorRotation();
-	FActorSpawnParameters SpawnInfo;
-	SpawnInfo.Owner = this;
+	if (GetObeliskState() == EActivationState::Charging)
+	{
+		FVector SpawnLocation = EnemyTrigger->GetActorLocation();
+		FRotator SpawnRotation = EnemyTrigger->GetActorRotation();
+		FActorSpawnParameters SpawnInfo;
+		SpawnInfo.Owner = this;
 
-	GetWorld()->SpawnActor<AActor>(EnemyParticleType, SpawnLocation, SpawnRotation, SpawnInfo);
+		GetWorld()->SpawnActor<AActor>(EnemyParticleType, SpawnLocation, SpawnRotation, SpawnInfo);
+	}
 }
 
 void AObelisk::AddCharge()
