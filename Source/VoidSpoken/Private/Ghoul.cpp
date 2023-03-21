@@ -627,7 +627,7 @@ void AGhoul::CombatIdle()
 
 				AIController->MoveToLocation(BackUpTargetPos, 0);
 			}*/
-			if (!AIController->LineOfSightTo(AttackTarget))
+			if (!AIController->LineOfSightTo(AttackTarget) || FVector::Distance(GetActorLocation(), AttackTarget->GetActorLocation()) > RangedTargetDistance)
 			{
 				CheckEQS();
 			}
