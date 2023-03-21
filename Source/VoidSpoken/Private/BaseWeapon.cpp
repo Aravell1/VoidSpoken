@@ -9,8 +9,8 @@
 * Email:		Jan.Frank.Skucinski@gmail.com
 */
 
-#include "BaseEnemy.h"
 #include "BaseWeapon.h"
+#include "BaseEnemy.h"
 
 // Sets default values
 ABaseWeapon::ABaseWeapon() {
