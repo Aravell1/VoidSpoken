@@ -34,9 +34,6 @@ public:
 
 	UUserWidget* LoadingScreen;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void CreateLoadingScreen();
-
 	UFUNCTION(BlueprintCallable)
 	void LoadLevel(const FString& MapToLoad) {
 		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
