@@ -23,6 +23,7 @@ struct FEnemyData
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatDirectorDelegate, bool, bInCombatChange);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FObelisksClearedDelegate);
 
 UCLASS()
 class VOIDSPOKEN_API ACombatDirector : public AActor
@@ -35,6 +36,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 		FCombatDirectorDelegate OnInCombatChanged;
+
+	UPROPERTY(BlueprintAssignable)
+		FObelisksClearedDelegate OnObelisksCleared;
 
 	UFUNCTION()
 		void AddToMap(ABaseEnemy* Enemy, bool ObeliskSpawn);
@@ -88,7 +92,7 @@ private:
 	int MaxEnemiesSpawned = 3;
 	int EnemiesToSpawn = 1;
 	int SpawnTicks = 0;
-	const int InreaseSpawnsThreshold = 5;
+	const int InreaseSpawnsThreshold = 2;
 	const float EnemySpawnDistance = 1500.0f;
 	const float AdditionalSpawnDistance = 500.0f;
 	FTimerHandle SpawnEnemiesTimer;

@@ -184,7 +184,7 @@ void ATelekineticProp::OnComponentHit(UPrimitiveComponent* HitComponent, AActor*
 		
 		if (OtherActor != PlayerCharacter)
 		{
-			UGameplayStatics::ApplyRadialDamage(OtherActor, PropDamage, Hit.ImpactPoint, 150, UDamageTypeTelekinesis::StaticClass(), IgnoredActors, PlayerCharacter, 0, true);
+			UGameplayStatics::ApplyRadialDamage(OtherActor, PropDamage, Hit.ImpactPoint, 250, UDamageTypeTelekinesis::StaticClass(), IgnoredActors, PlayerCharacter, 0, true);
 			SetLifeSpan(3);
 			bCanBeLifted = false;
 		}

@@ -644,6 +644,8 @@ void APlayerCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const U
 			Death();
 		}
 		else if (bIsDead) return;
+
+		PlayHitSoundEffect();
 		
 		bInvincible = true;
 		GetWorldTimerManager().ClearTimer(InvincibilityTimer);

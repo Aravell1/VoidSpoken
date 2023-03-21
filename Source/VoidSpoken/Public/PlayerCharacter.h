@@ -63,6 +63,13 @@ class VOIDSPOKEN_API APlayerCharacter : public ABaseEntity {
 public:
 	APlayerCharacter();
 
+	#pragma region Sound Effects
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayHitSoundEffect();
+
+	#pragma endregion
+
 	#pragma region Camera Functions
 	
 	protected:

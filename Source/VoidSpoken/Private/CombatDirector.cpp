@@ -397,11 +397,16 @@ void ACombatDirector::DisableObeliskMode(AObelisk* Obelisk)
 
 	if (Obelisks.Num() <= 0)
 	{
-		for (int j = 0; j < Enemies.Num(); j++)
+		OnObelisksCleared.Broadcast();
+
+		TArray<AActor*> AllEnemies;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseEnemy::StaticClass(), AllEnemies);
+
+		for (int j = 0; j < AllEnemies.Num(); j++)
 		{
-			if (!Cast<ABaseBoss>(Enemies[j].Enemy))
+			if (!Cast<ABaseBoss>(AllEnemies[j]))
 			{
-				UGameplayStatics::ApplyDamage(Enemies[j].Enemy, 10000, NULL, NULL, NULL);
+				UGameplayStatics::ApplyDamage(AllEnemies[j], 10000, NULL, NULL, NULL);
 			}
 		}
 

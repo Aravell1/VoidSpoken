@@ -34,7 +34,7 @@ AGhoul::AGhoul()
 
 void AGhoul::SetState(EGhoulState state)
 {
-	if (state != GetState())
+	if (state != GetState() || state == EGhoulState::Idle)
 	{
 		if (!LockState || (state == EGhoulState::Dead && GhState != EGhoulState::Dead))
 		{
@@ -705,8 +705,13 @@ void AGhoul::OnSeePawn(APawn* OtherPawn)
 	PawnSensing->SetSensingUpdatesEnabled(false);
 	UpdateHealthBar.Broadcast();
 
+	if (AIController->IsFollowingAPath())
+		AIController->StopMovement();
+
 	GetMesh()->GetAnimInstance()->Montage_Play(ScreechMontage);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(MontageEndDelegate, ScreechMontage);
+
+	SetState(EGhoulState::CombatIdle);
 }
 
 void AGhoul::OnStaggered()
