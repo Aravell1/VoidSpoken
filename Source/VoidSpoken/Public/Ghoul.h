@@ -54,9 +54,6 @@ public:
 
 	void SetAttacking(UAnimMontage* Montage, bool Attacking);
 
-	UFUNCTION(BlueprintImplementableEvent)
-		void TriggerHitEvent();
-
 	void TriggerAttack() override;
 	void BeginAttack();
 
@@ -72,6 +69,9 @@ public:
 	bool CheckLineOfSight(AActor* OtherActor) override;
 	void SetCombatIdle() override;
 	void SetCirclePlayer(bool RandomizeDirection, float AdditionalDistance) override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void TriggerHitEvent();
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void PlaySoundAtLocation(USoundCue* SoundToPlay);
@@ -182,8 +182,8 @@ private:
 	const float PatrolResetTime = 15.0f;
 	float PResetTimer = 0;
 
-	const float LOSCheckDuration = 0.5f;
 	FTimerHandle LOSCheckTimer;
+	const float LOSCheckDuration = 0.5f;
 
 	FTimerHandle EQSTimer;
 	const float EQSTimerDuration = 0.5f;
